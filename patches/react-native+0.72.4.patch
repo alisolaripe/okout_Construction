@@ -1,0 +1,92 @@
+diff --git a/node_modules/react-native/Libraries/BatchedBridge/MessageQueue.js b/node_modules/react-native/Libraries/BatchedBridge/MessageQueue.js
+index 932d309..e0a2d40 100644
+--- a/node_modules/react-native/Libraries/BatchedBridge/MessageQueue.js
++++ b/node_modules/react-native/Libraries/BatchedBridge/MessageQueue.js
+@@ -164,25 +164,16 @@ class MessageQueue {
+     return getValue ? getValue() : null;
+   }
+ 
+-  callNativeSyncHook(
+-    moduleID: number,
+-    methodID: number,
+-    params: mixed[],
+-    onFail: ?(...mixed[]) => void,
+-    onSucc: ?(...mixed[]) => void,
+-  ): mixed {
+-    if (__DEV__) {
+-      invariant(
+-        global.nativeCallSyncHook,
+-        'Calling synchronous methods on native ' +
+-          'modules is not supported in Chrome.\n\n Consider providing alternative ' +
+-          'methods to expose this method in debug mode, e.g. by exposing constants ' +
+-          'ahead-of-time.',
+-      );
+-    }
+-    this.processCallbacks(moduleID, methodID, params, onFail, onSucc);
+-    return global.nativeCallSyncHook(moduleID, methodID, params);
+-  }
++callNativeSyncHook(
++  moduleID: number,
++  methodID: number,
++  params: mixed[],
++  onFail: ?(...mixed[]) => void,
++  onSucc: ?(...mixed[]) => void,
++): mixed {
++  this.processCallbacks(moduleID, methodID, params, onFail, onSucc);
++  if (global.nativeCallSyncHook) return global.nativeCallSyncHook(moduleID, methodID, params);
++}
+ 
+   processCallbacks(
+     moduleID: number,
+diff --git a/node_modules/react-native/index.js b/node_modules/react-native/index.js
+index 7149c64..721fce4 100644
+--- a/node_modules/react-native/index.js
++++ b/node_modules/react-native/index.js
+@@ -380,43 +380,19 @@ module.exports = {
+   },
+   // Deprecated Prop Types
+   get ColorPropType(): $FlowFixMe {
+-    console.error(
+-      'ColorPropType will be removed from React Native, along with all ' +
+-        'other PropTypes. We recommend that you migrate away from PropTypes ' +
+-        'and switch to a type system like TypeScript. If you need to ' +
+-        'continue using ColorPropType, migrate to the ' +
+-        "'deprecated-react-native-prop-types' package.",
+-    );
++
+     return require('deprecated-react-native-prop-types').ColorPropType;
+   },
+   get EdgeInsetsPropType(): $FlowFixMe {
+-    console.error(
+-      'EdgeInsetsPropType will be removed from React Native, along with all ' +
+-        'other PropTypes. We recommend that you migrate away from PropTypes ' +
+-        'and switch to a type system like TypeScript. If you need to ' +
+-        'continue using EdgeInsetsPropType, migrate to the ' +
+-        "'deprecated-react-native-prop-types' package.",
+-    );
++
+     return require('deprecated-react-native-prop-types').EdgeInsetsPropType;
+   },
+   get PointPropType(): $FlowFixMe {
+-    console.error(
+-      'PointPropType will be removed from React Native, along with all ' +
+-        'other PropTypes. We recommend that you migrate away from PropTypes ' +
+-        'and switch to a type system like TypeScript. If you need to ' +
+-        'continue using PointPropType, migrate to the ' +
+-        "'deprecated-react-native-prop-types' package.",
+-    );
++
+     return require('deprecated-react-native-prop-types').PointPropType;
+   },
+   get ViewPropTypes(): $FlowFixMe {
+-    console.error(
+-      'ViewPropTypes will be removed from React Native, along with all ' +
+-        'other PropTypes. We recommend that you migrate away from PropTypes ' +
+-        'and switch to a type system like TypeScript. If you need to ' +
+-        'continue using ViewPropTypes, migrate to the ' +
+-        "'deprecated-react-native-prop-types' package.",
+-    );
++
+     return require('deprecated-react-native-prop-types').ViewPropTypes;
+   },
+ };
