@@ -24,7 +24,7 @@ function Task_management_Item({value,Navigate_Url,modules,index,ShowMessage,Mess
     }
   }
   return (
-    <View  index={index} style={Styles.With100}>
+    <View   style={Styles.With100}>
       <View style={Styles.FlexRow}>
         <View style={{width:'8%',alignItems:'center',justifyContent:"center"}}>
         <View style={[Styles.With80,value.Status==='done'?
@@ -36,7 +36,6 @@ function Task_management_Item({value,Navigate_Url,modules,index,ShowMessage,Mess
             null
         }
         </View>
-
           <View style={[modules- 1 !== index?Styles.BorderDash:
             { height:normalize(60),}]}>
           </View>

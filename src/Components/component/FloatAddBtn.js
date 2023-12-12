@@ -4,9 +4,9 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import LinearGradient from "react-native-linear-gradient";
 import React from "react";
 
-function FloatAddBtn ({onPress}){
+function FloatAddBtn ({onPress,colors}){
 return(
-  <LinearGradient colors={['#ffadad','#f67070','#FF0000']} style={[Styles.FloatBtn]}>
+  <LinearGradient colors={colors} style={[Styles.FloatBtn]}>
     <TouchableOpacity transparent onPress={()=> {
       onPress();
 

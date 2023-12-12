@@ -1184,7 +1184,7 @@ flex:1,
     marginVertical:'2%',
     paddingVertical: normalize(3),
     color: '#fff',alignItems:'center'},
-  TaskBox:{marginTop:normalize(50),justifyContent:'space-between', width: '94%',alignItems:'center'
+  TaskBox:{marginTop:normalize(15),justifyContent:'space-between', width: '94%',alignItems:'center'
   },
   With100:{width:'100%'
     ,alignItems:"center",flex:1},

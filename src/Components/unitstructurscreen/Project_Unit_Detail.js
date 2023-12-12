@@ -892,7 +892,7 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
           </View>
         </View>
         : null}
-        <View style={Styles.container}>
+        <View style={Styles.containerList}>
           <View style={Styles.Center_margin_Bottom2}>
 
               {ImageSourceviewarray && (

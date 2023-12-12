@@ -428,6 +428,15 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     });
 
   }
+
+  const Add_Task_Offline = () => {
+    let List_Item = [];
+    let A = [];
+    List_Item =
+    A = [...List_Item];
+
+    Save_Details(List_Item);
+  };
   const selectPhoto=()=> {
     onClose()
     ImagePicker.openCamera({

@@ -1,7 +1,7 @@
 module.exports = {
-   getModulesInfoMin:`api/ApiModules/getModulesInfoMin?roleId=1&moduleType=const`,
-   getAllProjectInfo:`api/ApiConstruction/getAllProjectInfo?userId=1`,
-   getAllProjectInfo_dyb:`api/ApiConstruction/getAllProjectInfo?userId=1&dyb=y`,
+   getModulesInfoMin:`api/ApiModules/getModulesInfoMin?moduleType=const`,
+   getAllProjectInfo:`api/ApiConstruction/getAllProjectInfo?`,
+   getAllProjectInfo_dyb:`api/ApiConstruction/getAllProjectInfo?`,
    getProjects:`api/ApiConstruction/getProjects?userId=1`,
    getSites:`api/ApiConstruction/getSites?userId=1`,
    getUnits:`api/ApiConstruction/getUnits?userId=1`,
@@ -11,6 +11,7 @@ module.exports = {
    getCountry:`api/ApiGetCommonInfo/getCountry`,
    getCity:`api/ApiGetCommonInfo/getCity`,
    Task_category:`api/ApiTask/getTaskCategory?userId=1`,
+   Task_List:`api/ApiTask/getTaskComboList?userId=1`,
    Task_priority:`api/ApiTask/getTaskPriority?userId=1`,
    Task_status:`api/ApiTask/getTaskStatusCombo?userId=1`,
    Task_Users:`api/ApiGetCommonInfo/getUsers?userId=1`,

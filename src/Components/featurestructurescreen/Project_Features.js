@@ -592,7 +592,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           }
         </View>
       </Content>
-      <FloatAddBtn onPress={onOpen}/>
+      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
 
           <AddModal  ShowMessage={ShowMessage} Message={Message}
                     numberValue={15}  ChangeChecked={ChangeChecked}

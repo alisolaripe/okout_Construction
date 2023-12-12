@@ -64,6 +64,49 @@ export async function syncLocalStorageToServer()
                   }
                 }
               }
+              else if(obj.Url === Api.AddTask){
+                obj2 = obj?.formdata._parts;
+                id = obj?.id;
+                if(obj?.ImageSourceviewarrayUpload){
+                  var formdata = new FormData();
+                  if(obj3?.[0]!=='attachment')
+                  {
+                      formdata.append(obj3?.[0], obj3?.[1]);
+                    }
+                  for (let i = 0; i < obj?.ImageSourceviewarrayUpload?.length; i++) {
+                    let idsArray = obj?.ImageSourceviewarrayUpload[i];
+                    formdata.append("attachment", {
+                      uri:idsArray.uri,
+                      type:idsArray.type,
+                      name:idsArray.fileName,
+                    });
+                    let returnData = await writePostApi(obj.type, obj.Url, formdata)
+                    if(returnData != undefined)
+                    {
+                      if(returnData.status === true)
+                      {
+                        removeItemValue(id);
+                      }
+                    }
+                  }
+                }
+                else {
+                  var formdata = new FormData();
+                  for (let j = 0; j < obj2?.length; j++) {
+                    obj3 = obj2[j];
+                    formdata.append(obj3?.[0], obj3?.[1]);
+                  }
+                  let returnData = await writePostApi(obj.type, obj.Url, formdata);
+                  if(returnData != undefined)
+                  {
+                    if(returnData.status === true)
+                    {
+                      removeItemValue(id);
+                      getAllProjectInfo()
+                    }
+                  }
+                }
+              }
               else {
                 var formdata = new FormData();
                 for (let j = 0; j < obj2?.length; j++) {
@@ -80,7 +123,6 @@ export async function syncLocalStorageToServer()
                   }
                 }
               }
-
             }
             else {
               obj2 = obj?.formdata._parts;

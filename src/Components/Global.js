@@ -51,6 +51,7 @@ module.exports = {
   All_Country:'@MySuperStore:All_Country',
   All_City:'@MySuperStore:All_City',
   AllProjectInfo_dyb:'@MySuperStore:AllProjectInfo_dyb',
+  All_Task:'@MySuperStore:All_Task',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",

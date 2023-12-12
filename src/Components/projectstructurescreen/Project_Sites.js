@@ -528,7 +528,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         }
       </View>
       </Content>
-      <FloatAddBtn onPress={onOpen}/>
+      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
       <AddModal
         numberValue={2}
         GeoAddressCity={GeoAddressCity}

@@ -71,11 +71,11 @@ function LogIn({ navigation }) {
   const handleBackButtonClick=()=>{
     BackHandler.exitApp()
   }
-  const Usermodules = async () => {
+  const Usermodules = async (json) => {
     let Icon = "";
     let IconColor = "";
     let A = [];
-      readOnlineApi(Api.getModulesInfoMin).then(json => {
+      readOnlineApi(Api.getModulesInfoMin+`&roleId=${json?.roleId}`).then(json => {
         json?.modules?.forEach((obj) => {
           if (obj.constModule_Id === 1 || obj.constModule_Id === "1") {
             Icon = require("../../Picture/png/ProjectStructure.png");
@@ -126,7 +126,6 @@ function LogIn({ navigation }) {
               return resp.json();
             })
             .then(json => {
-
               setVerification(json.status);
               if (json.status === true)
               {
@@ -140,7 +139,6 @@ function LogIn({ navigation }) {
                 readOnlineApi(Api.getCity).then(json => {
                   writeDataStorage(GLOBAL.All_City,json)
                 });
-                Usermodules()
               }
               else {
                 setErrorMs("invalid Organization App Key !");
@@ -173,6 +171,7 @@ function LogIn({ navigation }) {
         })
           .then(json => {
             if (json?.status===true) {
+              Usermodules(json)
               GLOBAL.UserInformation=json;
               setBtn(true)
               navigate("Home");

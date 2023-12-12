@@ -301,7 +301,7 @@ function Project_structure({ navigation, navigation: { goBack } }) {
           }
         </View>
       </Content>
-      <FloatAddBtn onPress={onOpen}/>
+      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
       <AddModal ShowMessage={ShowMessage} Message={Message}
                 numberValue={1} ChangeChecked={ChangeChecked} tittlebtn={"Add Project"}
                 setvisibleAddModal={setvisibleAddModal} visibleAddModal={visibleAddModal}
