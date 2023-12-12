@@ -104,7 +104,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   const getFeatureDetail = async () => {
     if(GLOBAL.isConnected===true)
     {
-      readOnlineApi(Api.getBuildNotes+`&relatedId=${GLOBAL.UpdateFeatureID}&relatedName=feature`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateFeatureID}&relatedName=feature`).then(json => {
         let A=[];
         let B='';
         let attachements=[];

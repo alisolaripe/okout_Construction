@@ -102,7 +102,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
   };
   const getSitesDetail = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getBuildNotes+`&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
         let A = [];
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements.forEach((obj2) => {
@@ -166,7 +166,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
   };
   const getUnitDetail = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getBuildNotes+`&relatedId=${GLOBAL.UpdateSiteID}&relatedName=unit`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=unit`).then(json => {
         let A = [];
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements?.forEach((obj2) => {

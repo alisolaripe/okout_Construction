@@ -246,7 +246,7 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
   }
   const getUnitDetail = async () => {
     if(GLOBAL.isConnected===true) {
-      readOnlineApi(Api.getBuildNotes+ `&relatedId=${GLOBAL.UpdateUnitID}&relatedName=unit`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateUnitID}&relatedName=unit`).then(json => {
         let A = [];
         let Country='';
         let Address='';

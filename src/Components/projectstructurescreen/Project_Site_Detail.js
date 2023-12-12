@@ -177,7 +177,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   };
   const getSitesDetail = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getBuildNotes + `&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
+      readOnlineApi(Api.getBuildNotes + `userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
         let A = [];
         let Country = "";
         let Address = "";

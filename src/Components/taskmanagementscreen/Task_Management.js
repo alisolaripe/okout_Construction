@@ -31,7 +31,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
 
   const Task_List =async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_List).then(json => {
+      readOnlineApi(Api.Task_List+`userId=${GLOBAL.UserInformation?.roleId}`).then(json => {
         let A = [];
         for (let item in json?.taskList) {
           let obj = json?.taskList?.[item];

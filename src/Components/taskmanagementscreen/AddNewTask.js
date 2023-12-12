@@ -69,7 +69,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_category = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_category, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_category+`userId=${GLOBAL.UserInformation?.roleId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -96,7 +96,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_priority = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_priority, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_priority+`userId=${GLOBAL.UserInformation?.roleId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -126,7 +126,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_status = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_status, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_status+`userId=${GLOBAL.UserInformation?.roleId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -156,7 +156,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_Users = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Users, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Users+`userId=${GLOBAL.UserInformation?.roleId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -186,7 +186,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_RelatedList = (Id) => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value+Api.Task_Project+`&categoryId=${Id}`, {
+        fetch(GLOBAL.OrgAppLink_value+Api.Task_Project+`userId=${GLOBAL.UserInformation?.roleId}&categoryId=${Id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
