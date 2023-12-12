@@ -75,7 +75,7 @@ function LogIn({ navigation }) {
     let Icon = "";
     let IconColor = "";
     let A = [];
-      readOnlineApi(Api.getModulesInfoMin+`&roleId=${json?.roleId}`).then(json => {
+      readOnlineApi(Api.getModulesInfoMin+`&roleId=1`).then(json => {
         json?.modules?.forEach((obj) => {
           if (obj.constModule_Id === 1 || obj.constModule_Id === "1") {
             Icon = require("../../Picture/png/ProjectStructure.png");
@@ -132,6 +132,7 @@ function LogIn({ navigation }) {
               seticoncheck('user-check')
                 GLOBAL.BASE_URL_User = json;
                 GLOBAL.OrgAppLink_value=json.OrgAppLink;
+                Usermodules(json)
                 writeDataStorage(GLOBAL.OrgAppLink,json?.OrgAppLink)
                 readOnlineApi(Api.getCountry).then(json => {
                   writeDataStorage(GLOBAL.All_Country,json)
@@ -171,7 +172,7 @@ function LogIn({ navigation }) {
         })
           .then(json => {
             if (json?.status===true) {
-              Usermodules(json)
+
               GLOBAL.UserInformation=json;
               setBtn(true)
               navigate("Home");
