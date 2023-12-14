@@ -55,7 +55,7 @@ function LogIn({ navigation }) {
     const Second=date.getSeconds()
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
     setShowDate(Full)
-    setVersionCheck(VersionCheck?.getCurrentVersion()+'.'+5)
+    setVersionCheck(VersionCheck?.getCurrentVersion()+'.'+6)
   }, []);
   const writeDataStorage=async (key,obj)=>{
     try {
@@ -71,11 +71,11 @@ function LogIn({ navigation }) {
   const handleBackButtonClick=()=>{
     BackHandler.exitApp()
   }
-  const Usermodules = async (json) => {
+  const Usermodules = async () => {
     let Icon = "";
     let IconColor = "";
     let A = [];
-      readOnlineApi(Api.getModulesInfoMin+`&roleId=1`).then(json => {
+      readOnlineApi(Api.getModulesInfoMin).then(json => {
         json?.modules?.forEach((obj) => {
           if (obj.constModule_Id === 1 || obj.constModule_Id === "1") {
             Icon = require("../../Picture/png/ProjectStructure.png");
@@ -132,7 +132,7 @@ function LogIn({ navigation }) {
               seticoncheck('user-check')
                 GLOBAL.BASE_URL_User = json;
                 GLOBAL.OrgAppLink_value=json.OrgAppLink;
-                Usermodules(json)
+                Usermodules()
                 writeDataStorage(GLOBAL.OrgAppLink,json?.OrgAppLink)
                 readOnlineApi(Api.getCountry).then(json => {
                   writeDataStorage(GLOBAL.All_Country,json)
@@ -171,8 +171,8 @@ function LogIn({ navigation }) {
           return resp.json();
         })
           .then(json => {
+            console.log(json,'jsonjsonjson')
             if (json?.status===true) {
-
               GLOBAL.UserInformation=json;
               setBtn(true)
               navigate("Home");

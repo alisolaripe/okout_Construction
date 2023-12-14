@@ -19,21 +19,20 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect(() => {
-    //GLOBAL.UserInformation?.roleId
+    console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
     getAllProjectInfo();
     getAllProjectInfo_dyb();
   }, []);
-
   const getAllProjectInfo = async () => {
     if (GLOBAL.isConnected === true){
-      readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.roleId}`).then(json => {
+      readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         writeDataStorage(GLOBAL.All_Lists, json?.projects);
       });
     }
   };
   const getAllProjectInfo_dyb = async () => {
     if (GLOBAL.isConnected === true){
-      readOnlineApi(Api.getAllProjectInfo_dyb+`userId=${GLOBAL.UserInformation?.roleId}&dyb=y`).then(json => {
+      readOnlineApi(Api.getAllProjectInfo_dyb+`userId=${GLOBAL.UserInformation?.userId}&dyb=y`).then(json => {
         writeDataStorage(GLOBAL.AllProjectInfo_dyb, json?.projects);
       });
     }

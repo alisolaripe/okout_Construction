@@ -497,11 +497,21 @@ const Styles = StyleSheet.create({
     justifyContent: "center",
     width: normalize(58),
     position: "absolute",
-    bottom: normalize(55),
+    bottom: normalize(62),
     right: normalize(16),
     height: normalize(58),
     backgroundColor: GLOBAL.OFFICIAL_Buttondark,
     borderRadius: 100,
+    marginTop:normalize(20)
+  },
+  FloatBtn_action: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: normalize(58),
+    position: "absolute",
+    bottom: normalize(55),
+    right: normalize(16),
+    height: normalize(58),
     marginTop:normalize(20)
   },
   scrollBtn: {
@@ -876,6 +886,13 @@ paddingHorizontal:7,
       marginRight: normalize(7),
 
     },
+  btnListTask:
+    {
+      width: "22%", paddingVertical: normalize(5),
+      borderRadius: normalize(6),
+      marginRight: normalize(7),
+
+    },
   btnList1:
     {
       backgroundColor: "#4B75FCFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(5),
@@ -1184,8 +1201,10 @@ flex:1,
     marginVertical:'2%',
     paddingVertical: normalize(3),
     color: '#fff',alignItems:'center'},
-  TaskBox:{marginTop:normalize(15),justifyContent:'space-between', width: '94%',alignItems:'center'
+  TaskBox:{marginTop:normalize(15),justifyContent:'space-between', width: '94%',alignItems:'center',
+
   },
+  SectionFooter:{width:'100%',height:normalize(60)},
   With100:{width:'100%'
     ,alignItems:"center",flex:1},
   With100NoFlex:{width:'100%'
@@ -1237,10 +1256,9 @@ flex:1,
     justifyContent: "center",
     flexDirection: "row",
   },
-  FlexRow:{width:'100%',flexDirection:'row'},
+  FlexRow:{width:'100%',flexDirection:'row',borderBottomWidth:1,borderColor:"rgb(42,48,82)",paddingVertical:normalize(10)},
   With80:{width:'80%',alignItems:'center',borderRadius:150/2, margin: 5,},
-  DoneTask:{backgroundColor:'#786b6b',borderWidth:1,
-    paddingVertical:normalize(5),borderColor:'#382e2e'},
+  DoneTask:{width:'15%',alignItems:'center',borderRadius:normalize(35), margin: normalize(5),},
   NotDoneTask: {borderWidth:1,borderColor:'#656464',paddingVertical:normalize(12),},
   Task_satus:{
     paddingVertical:normalize(5),width:'20%',alignItems:'center',borderRadius:150/2, margin: 5,},
@@ -1465,6 +1483,13 @@ flex:1,
     paddingVertical:normalize(8)
 
   },
+  Text_actionbtn:{
+    color:'#fff',
+    fontSize:normalize(14),
+    fontWeight:'bold',
+    paddingVertical:normalize(4)
+
+  },
   paginationContainer: {
     paddingTop: normalize(10),
     alignItems:'center',
@@ -1679,6 +1704,30 @@ flex:1,
    width:'100%',
     paddingVertical:normalize(10),
     alignItems:'center',justifyContent:'center'
+  },
+  formContainer2: {
+    width:'100%'
+  },
+  Horizental_Menu:{
+    width:'100%',marginBottom:normalize(20),
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection:'row',flexWrap:"wrap"
+
+  },
+  Horizental_Menu_Item:{
+    width:'40%',paddingVertical:normalize(2),
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius:normalize(6),
+
+  },
+  Horizental_Menu_Item_text:{
+    fontSize: normalize(14),
+    textAlign: "center",
+    color:'#fff',
+    fontWeight:'bold',
+    paddingVertical:normalize(8)
   }
 });
 export { Styles };

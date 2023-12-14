@@ -102,7 +102,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
   };
   const getSitesDetail = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.userId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
         let A = [];
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements.forEach((obj2) => {
@@ -132,7 +132,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
             }
           });
         });
-        if(A?.length>1) {
+        if(A?.length!==0) {
           A?.sort(dateComparison_data)
           setImageSourceviewarray(A);
           setMudolList(A);
@@ -166,7 +166,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
   };
   const getUnitDetail = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.roleId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=unit`).then(json => {
+      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.userId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=unit`).then(json => {
         let A = [];
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements?.forEach((obj2) => {
@@ -196,7 +196,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
             }
           });
         });
-        if(A?.length>1) {
+        if(A?.length!==0) {
           A?.sort(dateComparison_data)
           setImageSourceviewarray(A);
           setMudolList(A);

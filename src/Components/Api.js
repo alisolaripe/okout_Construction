@@ -1,10 +1,12 @@
 module.exports = {
-   getModulesInfoMin:`api/ApiModules/getModulesInfoMin?moduleType=const`,
+   getModulesInfoMin:`api/ApiModules/getModulesInfoMin?roleId=1&moduleType=const`,
    getAllProjectInfo:`api/ApiConstruction/getAllProjectInfo?`,
    getAllProjectInfo_dyb:`api/ApiConstruction/getAllProjectInfo?`,
    getBuildNotes:`api/ApiConstruction/getBuildNotes?`,
    Task_category:`api/ApiTask/getTaskCategory?`,
    Task_List:`api/ApiTask/getTaskComboList?`,
+   My_TaskList:`api/ApiTask/getMyTask?`,
+   Assigned_TaskList:`api/ApiTask/getassignedTask?`,
    Task_priority:`api/ApiTask/getTaskPriority?`,
    Task_status:`api/ApiTask/getTaskStatusCombo?`,
    Task_Users:`api/ApiGetCommonInfo/getUsers?`,

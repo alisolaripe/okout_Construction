@@ -5,7 +5,7 @@ import {
   View,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,Linking,Platform
+  TouchableOpacity, Linking, Platform, ImageBackground,
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -20,6 +20,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from "@react-navigation/native";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Dropdown,MultiSelect } from "react-native-element-dropdown";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 let numOfLinesCompany = 0;
 function TextInputI({ GeoAddressCity,
                       GeoAddressCountry,
@@ -32,12 +33,12 @@ function TextInputI({ GeoAddressCity,
                       Name,
                       tittlebtn,
                       ChangeChecked,
-                      Cheked,
+                      Cheked,onOpen,
                       Pinrecovery,
-                      emailOnpress,
+                      emailOnpress,DeleteImage,
                       featureName,Boolean,Btn,iconcheck,checkOrgCode,
                       setGeoAddressCity,setGeoAddressCountry,
-                       setvisible,
+                       setvisible,ImageSourceviewarray,
                       setcountryId,setcityId,getCity,geoLat,geoLong,setShowMessage,
                       setSelectedcategory,selectedcategory,Taskcategory,value,Taskassigned,setSelectedassigned,selectedassigned,
                       Taskpriority,selectedpriority,setSelectedpriority,setOpen,setdateType
@@ -2389,7 +2390,162 @@ function TextInputI({ GeoAddressCity,
       </View>
     );
   }
+  if (numberValue === 24) {
+    return (
 
+        <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+          <Formik
+            initialValues={{
+              Title:'',
+              TaskNote: "",
+            }}
+            onSubmit={values => {
+              onChangeText(values);
+            }}
+            validationSchema={validationSchema5}
+          >
+            {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+              <View style={[Styles.formContainer2,]}>
+
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
+                <TextInput
+                  value={values.Title}
+                  style={[Styles.inputStyleTask]}
+                  onChangeText={handleChange("Title")}
+                  onFocus={() => setFieldTouched("Title")}
+                  multiline={true}
+                  placeholderTextColor={"#fff"} />
+                {touched.Title && errors.Title &&
+                <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
+                }
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Category</Text>
+                <Dropdown
+                  style={[Styles.dropdowntask]}
+                  placeholderStyle={Styles.placeholderStyle}
+                  selectedTextStyle={Styles.selectedTextStyle}
+                  inputSearchStyle={Styles.inputSearchStyle}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={Taskcategory}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? 'Select category' : '...'}
+                  searchPlaceholder="Search..."
+                  value={selectedcategory}
+                  containerStyle={Styles.containerStyle}
+                  renderItem={renderItem}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item=> {
+                    setSelectedcategory(item);
+                    setCategoryId(item.value);
+                    Task_RelatedList(item.value)
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+
+                {error==='selectedcategory' && selectedcategory==='' ?
+                  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null
+                }
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>related</Text>
+                <Dropdown
+                  style={[Styles.dropdowntask]}
+                  placeholderStyle={Styles.placeholderStyle}
+                  selectedTextStyle={Styles.selectedTextStyle}
+                  inputSearchStyle={Styles.inputSearchStyle}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={TaskRelated}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocusrelated ? 'Select related' : '...'}
+                  searchPlaceholder="Search..."
+                  value={selectedrelated}
+                  containerStyle={Styles.containerStyle}
+                  renderItem={renderItem}
+                  onFocus={() => setIsFocusrelated(true)}
+                  onBlur={() => setIsFocusrelated(false)}
+                  onChange={item=> {
+                    setSelectedrelated(item);
+                    setRelatedId(item.value)
+                  }}
+                />
+                {error==='selectedrelated' && selectedrelated==='' ?
+                  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select related! Please?</Text>:null
+                }
+                <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
+                <TextInput
+                  value={values.TaskNote}
+                  style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
+                  onContentSizeChange={(e) => {
+                    numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                  }}
+                  onChangeText={handleChange("TaskNote")}
+                  onFocus={() => setFieldTouched("TaskNote")}
+                  multiline={true}
+                  placeholderTextColor={'#fff'} />
+                {touched.TaskNote && errors.TaskNote &&
+                <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
+                }
+                <View style={Styles.FlexWrap}>
+                  {
+                    ImageSourceviewarray.map((value,key) => {
+                      return (
+                        <View key={key} style={Styles.UnitDetailImageBoxFeatureStyle2}>
+                          <ImageBackground source={{uri:value.uri}}
+                                           imageStyle={{borderRadius:normalize(6)}}
+                                           style={Styles.UnitDetailImagestyle}
+                                           resizeMode="stretch">
+                            <TouchableOpacity onPress={()=>DeleteImage(value.uri)} style={Styles.UnitDetailAddTextBox}>
+                              <MaterialCommunityIcons name={"delete"} size={17} color={'#fff'} />
+                            </TouchableOpacity>
+                          </ImageBackground>
+                        </View>
+                      )
+                    })
+                  }
+                  <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
+                    <Text style={Styles.UploadImageText}>
+                      Add Photos
+                    </Text>
+                    <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                  </TouchableOpacity>
+                </View>
+                <View style={[Styles.ViewItems_center]}>
+                  <ButtonI style={[Styles.btn, {
+                    //margin: normalize(15),
+                    flexDirection: "row",
+                    width: '100%',
+                    paddingVertical: 2,
+                    marginTop: normalize(30),
+                  }]}//handleSubmit
+                           onpress={handleSubmit}
+                           categoriIcon={""}
+                           title={'Add Task'}
+                           colorsArray={['#a39898','#786b6b','#382e2e']}
+                           styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                </View>
+              </View>
+
+            )}
+          </Formik>
+
+        </View>
+
+
+    );
+  }
   ///////////////////Task////////////////
 
   if (numberValue === 20) {

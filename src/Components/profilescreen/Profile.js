@@ -21,14 +21,13 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [Version,setVersionCheck] = useState('');
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect( () => {
-    let A=VersionCheck.getCurrentVersion()+'.'+5
+    let A=VersionCheck.getCurrentVersion()+'.'+6
     setVersionCheck(A)
 
   }, []);
 
   const deleteAsync = async () => {
     try {
-
       await AsyncStorage.removeItem(GLOBAL.OrgAppLink);
       await AsyncStorage.removeItem(GLOBAL.PASSWORD_KEY);
       await AsyncStorage.removeItem(GLOBAL.VersionCheck);

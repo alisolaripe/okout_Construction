@@ -4,7 +4,7 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Modal, ImageBackground,
+  Modal, ImageBackground, TextInput,
 } from "react-native";
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
@@ -25,51 +25,41 @@ import Moment from "moment";
 import DatePicker from "react-native-date-picker";
 import { writePostApi } from "../writePostApi";
 import ImagePicker from "react-native-image-crop-picker";
+import { Formik } from "formik";
+import { Dropdown } from "react-native-element-dropdown";
+import { ButtonI } from "../component/ButtonI";
+import * as Yup from "yup";
 const Api = require("../Api");
 let A=[]
+let numOfLinesCompany = 0;
 function AddNewTask({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [value, setValue] = useState(null);
   const [selectedcategory, setSelectedcategory] = useState('');
-  const [selectedassigned, setSelectedassigned] = useState([]);
-  const [selectedpriority, setSelectedpriority] = useState('');
-  const [selectedstatus, setSelectedstatus] = useState('');
-  const [selecteduser,setSelecteduser] = useState('');
   const [selectedrelated,setSelectedrelated] = useState('');
   const [Cheked,setCheked] = useState(false);
   const [Taskcategory, setTaskcategory] = useState([]);
-  const [Taskassigned, setassigned] = useState([{ label: 'Item 1', value: '1' },{ label: 'Item 2', value: '2' }]);
-  const [Taskpriority, setTaskpriority] = useState([]);
-  const [Taskstatus, setTaskstatus] = useState([]);
-  const [Taskuser, setTaskuser] = useState([]);
-  const [TaskRelated, setTaskRelated] = useState([]);
   const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false);
   const [dateType, setdateType] = useState(false);
-  const [DateFormatplanstart,setDateFormatplanstart]=useState('');
-  const [DateFormatplanend,setDateFormatplanend]=useState('');
-  const [userId, setUserId] = useState(0);
   const [categoryId, setCategoryId] = useState(0);
   const [relatedId, setRelatedId] = useState(0);
-  const [parentTaskId, setParentTaskId] = useState(null);
-  const [priorityId, setPriorityId] = useState(0);
-  const [taskStatusId, setTaskStatusId] = useState(0);
   const modalizeRef =  React.createRef();
-  const [ImageSource,setImageSource] = useState('');
   const [ImageSourceviewarray, setImageSourceviewarray] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
-  const [errors, setErrors] = useState("");
+  const [error, setErrors] = useState("");
+  const [TaskRelated, setTaskRelated] = useState([]);
   useEffect(()=>{
     Task_category();
-    Task_priority();
-    Task_status();
-    Task_Users()
+    // Task_priority();
+    // Task_status();
+    // Task_Users()
   }, []);
   const Task_category = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_category+`userId=${GLOBAL.UserInformation?.roleId}`, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -96,7 +86,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_priority = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_priority+`userId=${GLOBAL.UserInformation?.roleId}`, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_priority+`userId=${GLOBAL.UserInformation?.userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -126,7 +116,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_status = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_status+`userId=${GLOBAL.UserInformation?.roleId}`, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_status+`userId=${GLOBAL.UserInformation?.userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -156,7 +146,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_Users = () => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Users+`userId=${GLOBAL.UserInformation?.roleId}`, {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Users+`userId=${GLOBAL.UserInformation?.userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -186,7 +176,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Task_RelatedList = (Id) => {
     isNetworkConnected().then(status => {
       if (status) {
-        fetch(GLOBAL.OrgAppLink_value+Api.Task_Project+`userId=${GLOBAL.UserInformation?.roleId}&categoryId=${Id}`, {
+        fetch(GLOBAL.OrgAppLink_value+Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -269,21 +259,8 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const logout_Url= () => {
     setshowModalDelete(true)
   };
-  const onConfirm=(date)=>{
-    setOpen(false);
 
-    if(dateType==='PlanStartDate') {
-      setDate(date);
-      setDateFormatplanstart(Moment(date)?.format("YYYY-MM-DD"));
-    }
-    else   if(dateType==='PlanEndDate') {
-      setDate(date);
-      setDateFormatplanend(Moment(date)?.format("YYYY-MM-DD"));
-    }
-
-  }
   const AddTask = (value) => {
-    console.log(categoryId,'errors')
     let idsArray=''
     const date=new Date() ;
     const Year=date.getFullYear();
@@ -292,44 +269,27 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     const TodayDate = `${Year}-${Month}-${Day}`;
     const formData = new FormData();
     console.log(categoryId,'errors')
-    if(userId===0){
-      setErrors ('selecteduser')
-    }
-    else if(categoryId===0){
+    if(categoryId===0){
       setErrors ('selectedcategory')
-      console.log(errors,'errors')
     }
     else if(relatedId===0){
       setErrors ('selectedrelated')
-    }
-      else if(priorityId===0){
-      setErrors ('selectedpriority')
-    }
-      else if(DateFormatplanstart===''){
-      setErrors ('PlanStartDate')
-    }
-      else if(DateFormatplanend===''){
-      setErrors ('PlanEndDate')
-    }
-      else if(taskStatusId===0){
-      setErrors ('selectedstatus')
     }
       else {
       formData.append("userId",'1');
       formData.append("categoryId",categoryId);
       formData.append("relatedId",relatedId);
       formData.append("requestDate",TodayDate);
-      formData.append("priorityId", priorityId);
-      formData.append("planStartDate",DateFormatplanstart);
-      formData.append("planEndDate",DateFormatplanend);
-      formData.append("taskStatusId", taskStatusId);
+      formData.append("priorityId", '1');
+      formData.append("planStartDate",null);
+      formData.append("planEndDate",null);
+      formData.append("taskStatusId", '1');
       formData.append("title", value.Title);
       formData.append("description", value.TaskNote);
-      formData.append("requestedBy", userId);
-      formData.append("requestBy", userId);
+      formData.append("requestedBy",GLOBAL.UserInformation?.userId);
+      formData.append("requestBy", GLOBAL.UserInformation?.userId);
       formData.append("parentTaskId",null);
-      formData.append("assignedTo", '2');
-
+      formData.append("assignedTo", null);
       console.log(formData,'formData')
       if (ImageSourceviewarray.length !== 0) {
         for (let i = 0; i < ImageSourceviewarray.length; i++) {
@@ -391,14 +351,12 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   };
   const onClose = () => {
     modalizeRef.current?.close();
-
   };
   const selectPhotoFromGallery=()=> {
     onClose()
     ImagePicker.openPicker({
       width: 300,
       height: 400,
-      cropping: true,
       multiple: true
     }).then(response => {
       console.log(response,'response')
@@ -410,25 +368,26 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
 
         alert(response.customButton);
       } else {
+        if(ImageSourceviewarray)
+          A = [...ImageSourceviewarray];
         for (let item in response) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
           var imgName = getFilename[getFilename.length - 1];
-          console.log(obj,'obj')
+
           A.push({
             uri: obj.path,
             type: obj.mime,
             fileName: imgName,
           });
+
         }
         setImageSourceviewarray(A);
-
         A = [...A];
       }
     });
 
   }
-
   const Add_Task_Offline = () => {
     let List_Item = [];
     let A = [];
@@ -442,22 +401,18 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
-      cropping: true,
     }).then(response => {
-
-
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
-      setImageSource(response.path )
-
-      let C=A
+      if(ImageSourceviewarray)
+        A = [...ImageSourceviewarray];
       A.push({
         uri: response.path,
         type: response.mime,
         fileName: imgName,
       });
-      A = [...A];
       setImageSourceviewarray(A);
+      A = [...A];
     });
   }
   const  renderContent= () => (
@@ -474,11 +429,9 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
         <Text style={[Styles.TextUploadBtn]}>
           Use Camera
         </Text>
-
       </TouchableOpacity>
       <TouchableOpacity onPress={() => {
         selectPhotoFromGallery()
-
       }} style={Styles.UploadBtn}>
         <AntDesign name={"picture"} size={17} color={'#fff'} />
         <Text style={[Styles.TextUploadBtn]}>
@@ -488,14 +441,14 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       </TouchableOpacity>
     </View>
   )
-  const DeleteImage=(fileName)=>{
-    let A=[...ImageSourceviewarray]
-    const index= A.findIndex((p)=>p.fileName===fileName)
-    const x = A.splice(index, 1);
-    console.log(x,A)
-    setImageSourceviewarray(A)
+  const DeleteImage=(uri)=>{
+    let List_Item = ImageSourceviewarray;
+    const index= List_Item.findIndex((p)=>p.uri===uri)
+    let markers=[...List_Item]
+    markers?.splice(index, 1);
+    console.log(markers,'markers')
+    setImageSourceviewarray(markers)
   }
-
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={['#a39898','#786b6b','#382e2e']} StatusColor={'#a39897'} onPress={goBack} Title={'Add New Task'}/>
@@ -523,57 +476,17 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                 }
               </View>
             }
-            <DatePicker  modal
-                         open={open}
-                         date={date}
-                         theme={'light'}
-                         onConfirm={(date)=>{
-                         onConfirm(date)
-                         }}
-                         textColor={GLOBAL.OFFICIAL_background}
-                         onCancel={()=>{
-                         setOpen(false);
-                         }}/>
             <View style={[Styles.With100NoFlex]}>
-              <View style={Styles.FlexWrap}>
-                {
-                  ImageSourceviewarray.map((value,key) => {
-                    return (
-                      <View key={key} style={Styles.UnitDetailImageBoxFeatureStyle2}>
-                        <ImageBackground source={{uri:value.uri}}
-                                         imageStyle={{borderRadius:normalize(6)}}
-                                         style={Styles.UnitDetailImagestyle}
-                                         resizeMode="stretch">
-                          <TouchableOpacity onPress={()=>DeleteImage(value.fileName)} style={Styles.UnitDetailAddTextBox}>
-                            <MaterialCommunityIcons name={"delete"} size={17} color={'#fff'} />
-                          </TouchableOpacity>
-                        </ImageBackground>
-                      </View>
-                    )
-                  })
-                }
-                <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-                  <Text style={Styles.UploadImageText}>
-                    Add Photos
-                  </Text>
-                  <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
-                </TouchableOpacity>
-              </View>
-              <TextInputI onChangeText={(value)=> {
-                AddTask(value)
-              }}  numberValue={17} setSelectedcategory={setSelectedcategory} selectedcategory={selectedcategory}
-                          ChangeChecked={(value)=>ChangeChecked(value)} Cheked={Cheked} Taskcategory={Taskcategory} value={value} setOpen={setOpen}
-                          tittlebtn={'Add Task'} selectedassigned={selectedassigned} setSelectedassigned={setSelectedassigned} Taskassigned={Taskassigned}
-                          selectedpriority={selectedpriority} setSelectedpriority={setSelectedpriority} Taskpriority={Taskpriority} setdateType={setdateType}
-                          DateFormatplanstart={DateFormatplanstart} DateFormatplanend={DateFormatplanend}
-                          Taskstatus={Taskstatus} selectedstatus={selectedstatus} setSelectedstatus={setSelectedstatus} Taskuser={Taskuser}
-                          selecteduser={selecteduser} setSelecteduser={setSelecteduser} setUserId={setUserId} setCategoryId={setCategoryId}
-                          setRelatedId={setRelatedId} setParentTaskId={setParentTaskId} setPriorityId={setPriorityId} setTaskStatusId={setTaskStatusId}
-                          Task_RelatedList={Task_RelatedList} TaskRelated={TaskRelated} error={errors}
-                          selectedrelated={selectedrelated} setSelectedrelated={setSelectedrelated}
+              <TextInputI onChangeText={(value)=>{AddTask(value)}}  numberValue={24}
+                   ChangeChecked={(value)=>ChangeChecked(value)} Cheked={Cheked}
+                   tittlebtn={'Add Task'} onOpen={onOpen} DeleteImage={DeleteImage}
+                   value={value} ImageSourceviewarray={ImageSourceviewarray}
+                   setSelectedcategory={setSelectedcategory} selectedcategory={selectedcategory}
+                   selectedrelated={selectedrelated} setSelectedrelated={setSelectedrelated} setRelatedId={setRelatedId}
+                   setdateType={setdateType} Taskcategory={Taskcategory}  setCategoryId={setCategoryId}
+                   Task_RelatedList={Task_RelatedList} TaskRelated={TaskRelated} error={error}
               />
             </View>
-
           </View>
         </View>
       </Content>
