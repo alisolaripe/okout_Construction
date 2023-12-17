@@ -14,7 +14,7 @@ import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
 import Geocoder from "react-native-geocoder";
-import Category_List_Detail_Images_Item from "../component/Category_List_Detail_Images_Item";
+import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
@@ -24,7 +24,6 @@ import { Footer1 } from "../component/Footer";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
 import {readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 const GLOBAL = require("../Global");
 let A = [];
 let C = [];
@@ -194,47 +193,43 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
     let endDate = "";
     let Exist=''
     A?.forEach((obj) => {
-      today = new Date(obj?.Date);
-      tomorrow = new Date(today);
-      if (obj?.WeekDay === "Sunday") {
-        tomorrow?.setDate(today?.getDate() + 1);
-        endDate = tomorrow?.toLocaleDateString();
-      }
-      else if (obj?.WeekDay === "Monday") {
-        tomorrow?.setDate(today.getDate() + 7);
-        endDate = tomorrow?.toLocaleDateString();
-      }
-      else if (obj?.WeekDay === "Tuesday") {
-        tomorrow?.setDate(today?.getDate() + 6);
-        endDate = tomorrow?.toLocaleDateString();
+      if(obj?.Date!=='') {
+        today = new Date(obj?.Date);
+        tomorrow = new Date(today);
+        if (obj?.WeekDay === "Sunday") {
+          tomorrow?.setDate(today?.getDate() + 1);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Monday") {
+          tomorrow?.setDate(today.getDate() + 7);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Tuesday") {
+          tomorrow?.setDate(today?.getDate() + 6);
+          endDate = tomorrow?.toLocaleDateString();
 
-      }
-      else if (obj?.WeekDay === "Wednesday") {
-        tomorrow?.setDate(today?.getDate() + 5);
-        endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Wednesday") {
+          tomorrow?.setDate(today?.getDate() + 5);
+          endDate = tomorrow?.toLocaleDateString();
 
-      }
-      else if (obj?.WeekDay === "Thursday") {
-        tomorrow?.setDate(today?.getDate() + 4);
-        endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Thursday") {
+          tomorrow?.setDate(today?.getDate() + 4);
+          endDate = tomorrow?.toLocaleDateString();
 
-      }
-      else if (obj?.WeekDay === "Friday") {
-        tomorrow?.setDate(today?.getDate() + 3);
-        endDate = tomorrow?.toLocaleDateString();
-      }
-      else if (obj?.WeekDay === "Saturday") {
-        tomorrow?.setDate(today?.getDate() + 2);
-        endDate = tomorrow?.toLocaleDateString();
-      }
-      let newString = endDate.split('/')
-      endDate_Format=newString?.[2]+'-'+newString?.[1]+'-'+newString?.[0]
-      Exist = B?.findIndex((p) => p.endDate === endDate_Format);
-      if(Exist===-1) {
-        B.push({
-          startDate: obj?.Date?.split(" ")?.[0],
-          endDate: endDate_Format,
-        });
+        } else if (obj?.WeekDay === "Friday") {
+          tomorrow?.setDate(today?.getDate() + 3);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Saturday") {
+          tomorrow?.setDate(today?.getDate() + 2);
+          endDate = tomorrow?.toLocaleDateString();
+        }
+        let newString = endDate.split('/')
+        endDate_Format = newString?.[2] + '-' + newString?.[1] + '-' + newString?.[0]
+        Exist = B?.findIndex((p) => p.endDate === endDate_Format);
+        if (Exist === -1) {
+          B.push({
+            startDate: obj?.Date?.split(" ")?.[0],
+            endDate: endDate_Format,
+          });
+        }
       }
     });
     setDateRangeList(B)
@@ -269,7 +264,6 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
         };
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements?.forEach((obj2) => {
-
             const Day = obj2?.postDate?.split('-')
             const W = Day?.[2]?.split(' ');
             if(obj2?.geoAddress!== "false") {
@@ -282,7 +276,6 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
 
             if(obj2?.imageUrl!==null) {
               let WeekDay=getDayOfWeek( obj2?.postDate);
-
               A.push({
                 uri: GLOBAL?.OrgAppLink_value + "/" + obj2?.imageUrl,
                 type: obj2?.imageName.split(".")?.[1],
@@ -311,6 +304,10 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
           setMudolList(A);
           Make_Week_Filter_List(A)
           Save_Details_Online(A)
+        }
+        else {
+          A=[mark2];
+          setImageSourceviewarray(A);
         }
       });
     }
@@ -800,8 +797,8 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
     }
   }
   const renderItem = ({ item }) => (
-    <Category_List_Detail_Images_Item value={item}  Change_Gallry_Date={Change_Gallry_Date}
-                                      DeleteImage={DeleteImageFromApi} Type={'Feature'} onOpen={onOpen} />
+    <List_Item_Detail_Images value={item} Change_Gallry_Date={Change_Gallry_Date}
+                             DeleteImage={DeleteImageFromApi} Type={'Feature'} onOpen={onOpen} />
   )
   const renderSectionHeader=()=>(
     <>
@@ -835,10 +832,7 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
         <Filter  FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} setShowFilter={setShowFilter}/>
         :null
       }
-      {
-        showModalCalender &&
-        _showModalCalender()
-      }
+
       {ShowDateRange===true?
         <TouchableOpacity onPress={()=>setshowModalCalender( true)} style={Styles.WeekFilterBox}>
           <Text style={Styles.Filter_txt}>
@@ -894,7 +888,10 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
         : null}
         <View style={Styles.containerList}>
           <View style={Styles.Center_margin_Bottom2}>
-
+            {
+              showModalCalender &&
+              _showModalCalender()
+            }
               {ImageSourceviewarray && (
                 <FlatList
                   showsVerticalScrollIndicator={false}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Text,
-  View,Modal,Image,TouchableOpacity
+  View, Modal, Image, TouchableOpacity, FlatList,
 } from "react-native";
 import { Styles } from "../Styles";
 import { Container, Content } from "native-base";
@@ -10,7 +10,7 @@ import { writePostApi } from "../writePostApi";
 import { Header } from '../component/Header';
 import {Footer1} from '../component/Footer';
 import {AddModal} from '../component/AddModal'
-import  Category_items_list  from "../component/Category_items_list";
+import  List_Items  from "../component/list_Items";
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import Geolocation from "react-native-geolocation-service";
@@ -521,58 +521,76 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const logout_Url= () => {
     setshowModalDelete(true)
   };
+  const renderItem=({ item ,index})=>(
+    <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} getCity={getCity} CityList={CityList} CountryList={CountryList}
+                Navigate_Url={Navigate_Url} Message={Message} onPress={UpdateUnits} data={data} cityId={cityId} setcityId={setcityId}
+                countryId={countryId} setcountryId={setcountryId} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
+                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Unit'} numberValue={12} onPressDelete={DeleteUnits}
+    />
+  )
+  const renderSectionHeader=()=>(
+    <>
+      {
+        showModalDelete &&
+        <View>
+          {
+            _showModalDelete()
+          }
+        </View>
+      }
+      {ShowMessageDelete === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+      {ShowMessage === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+    </>
+  )
+  const renderSectionFooter=()=>(
+    <View style={Styles.SectionFooter}/>
+  )
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Plots / Units'}/>
-      <Content>
+
         <View style={Styles.containerList}>
-          {
-            showModalDelete &&
-            <View>
-              {
-                _showModalDelete()
-              }
-            </View>
-          }
-          {ShowMessageDelete === true ?
-            <View style={Styles.flashMessageSuccsess}>
-              <View style={{ width: "10%" }} />
-              <View style={{ width: "80%" }}>
-                <Text style={Styles.AlertTxt}>
-                  {Message}
-                </Text>
-              </View>
-              <View style={{ width: "10%" }} />
-            </View>
-            :
-            null
-          }
-          {ShowMessage === true ?
-            <View style={Styles.flashMessageSuccsess}>
-              <View style={{ width: "10%" }} />
-              <View style={{ width: "80%" }}>
-                <Text style={Styles.AlertTxt}>
-                  {Message}
-                </Text>
-              </View>
-              <View style={{ width: "10%" }} />
-            </View>
-            :
-            null
-          }
+
           {
             modules!=='' ?
-              <View style={[Styles.ItemsBox2]}>
-            {modules && (
-              modules?.map((item,index) =>{
-                return (
-                  <Category_items_list key={index} setShowMessage={setShowMessageUpdate} value={item} getCity={getCity} CityList={CityList} CountryList={CountryList}
-                 Navigate_Url={Navigate_Url}  Message={Message} onPress={UpdateUnits} data={data}  cityId={cityId} setcityId={setcityId}
-                  countryId={countryId} setcountryId={setcountryId}  ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                                       ShowMessage={ShowMessageUpdate} tittlebtn={'Update unit'} numberValue={12} onPressDelete={DeleteUnits}
+              <View style={[Styles.Center_margin_Bottom3]}>
+                {modules&&(
+                  <FlatList
+                    showsVerticalScrollIndicator={false}
+                    data={modules}
+                    style={{width:'100%',flexGrow:0}}
+                    renderItem={renderItem}
+                    ListHeaderComponent={renderSectionHeader}
+                    ListFooterComponent={renderSectionFooter}
+                    keyExtractor={(item,index)=>{
+                      return index.toString();
+                    }}
                   />
-                )})
-            )}
+                )}
           </View>:
               <View style={Styles.With90CenterVertical}>
                 <Text style={Styles.EmptyText}>
@@ -584,7 +602,6 @@ function Project_Units({ navigation, navigation: { goBack } }) {
               </View>
           }
         </View>
-      </Content>
       <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
       <AddModal
         numberValue={11}
@@ -604,7 +621,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
         validatemsg={validatemsg}
         getCity={getCity} touch={touch} setvisibleAddModal={setvisibleAddModal}
         visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
-        onPressAdd={AddUnits} tittlebtn={'Add unit'}/>
+        onPressAdd={AddUnits} tittlebtn={'Add Unit'}/>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}/>
     </Container>
   );

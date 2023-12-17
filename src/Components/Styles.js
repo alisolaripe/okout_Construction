@@ -33,6 +33,11 @@ const Styles = StyleSheet.create({
     width:'100%',flexDirection:'row',
     alignItems:'center'
   },
+  ViewItems_center_transparent_row_task:{
+    width:'100%',flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between'
+  },
   txt: {
     color: "#fff",
     fontSize: normalize(15),
@@ -57,6 +62,13 @@ const Styles = StyleSheet.create({
     marginVertical: 5,
     textAlign: "left",
     fontWeight:'bold'
+  },
+  txt_left_task:{
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(14),
+    textAlign: "left",
+    fontWeight:'bold',
+    paddingLeft:normalize(10)
   },
   txt_Left_padding_horizontal: {
     color: GLOBAL.OFFICIAL_WITE_COLOR,
@@ -158,6 +170,17 @@ const Styles = StyleSheet.create({
     fontSize: normalize(14),
     margin: 7,
     fontWeight:'bold'
+  },
+  txtLightColortask: {
+    margin: 2,
+    fontWeight:'bold',
+    fontSize:normalize(13),color:'#fff',
+    marginTop:normalize(30)
+  },
+  txtLightColortask_Items: {
+    marginLeft: normalize(10),
+    fontWeight:'bold',
+    fontSize:normalize(13),color:'#fff',
   },
   txtLightColor_Left: {
     color: "#fff",
@@ -331,6 +354,9 @@ const Styles = StyleSheet.create({
   HeaderBackColor: {
     backgroundColor: GLOBAL.OFFICIAL_background,
   },
+ taskBackColor: {
+    backgroundColor: GLOBAL.OFFICIAL_backgroundItem,
+  },
   Backcolor: {
     backgroundColor: GLOBAL.OFFICIAL_background,
   },
@@ -440,6 +466,17 @@ const Styles = StyleSheet.create({
     alignSelf:'center',
     flexDirection:'row',
   },
+  flashMessageWarning3: {
+    backgroundColor: 'rgba(250,186,46,0.7)',
+    width:'87%',
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderRadius: normalize(6),
+    zIndex: 10, marginVertical: normalize(15),
+    alignSelf:'center',
+    flexDirection:'row',
+  },
   flashMessageAdded: {
     width:'90%',
     justifyContent: "center",
@@ -465,10 +502,15 @@ const Styles = StyleSheet.create({
     alignItems: "center",
 
   },
+  container_task: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+
+  },
   container2: {
     flex: 1,
     justifyContent: "center",
-
 
   },
   containerList: {
@@ -491,15 +533,14 @@ const Styles = StyleSheet.create({
     marginRight: "4%",
   },
   FloatBtn: {
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.2)",
+
     alignItems: "center",
     justifyContent: "center",
-    width: normalize(58),
+    width: normalize(57),
     position: "absolute",
     bottom: normalize(62),
     right: normalize(16),
-    height: normalize(58),
+    height: normalize(57),
     backgroundColor: GLOBAL.OFFICIAL_Buttondark,
     borderRadius: 100,
     marginTop:normalize(20)
@@ -888,8 +929,16 @@ paddingHorizontal:7,
     },
   btnListTask:
     {
-      width: "22%", paddingVertical: normalize(5),
+      width: "20%", paddingVertical: normalize(5),
       borderRadius: normalize(6),
+      marginRight: normalize(7),
+
+    },
+  btnListTask2:
+    {
+      width: "100%", paddingVertical: normalize(7),
+      borderTopRightRadius: normalize(15),
+      borderBottomRightRadius: normalize(15),
       marginRight: normalize(7),
 
     },
@@ -1080,6 +1129,7 @@ paddingHorizontal:7,
   With90Center:{width:'90%',alignItems:'center'},
   With90Center_Margin:{width:'90%',alignItems:'center',marginBottom:normalize(20)},
   With90CenterVertical:{width:'90%',alignItems:'center',justifyContent:'center',marginTop:normalize(90)},
+  With100CenterVertical:{width:'100%',alignItems:'center',justifyContent:'center',marginTop:normalize(90)},
   Items:{width:'100%',flexDirection:'row',alignItems:'center',marginTop:4},
   DropDownFull:{backgroundColor:GLOBAL.OFFICIAL_background,width:'100%',borderBottomWidth:1,borderRadius:normalize(6),borderColor:GLOBAL.OFFICIAL_BLUE_COLOR},
   DropDown:{backgroundColor:GLOBAL.OFFICIAL_background,borderBottomWidth:1,borderRadius:normalize(6),borderColor:GLOBAL.OFFICIAL_BLUE_COLOR},
@@ -1164,6 +1214,9 @@ flex:1,
   Center_margin_Bottom2:{margin:normalize(10),justifyContent:'space-between', width: '93%',alignItems:'center',
     marginBottom: normalize(20),
   },
+  Center_margin_Bottom3:{margin:normalize(10),justifyContent:'space-between', width: '93%',alignItems:'center',
+    marginBottom: normalize(5),
+  },
   Center_margin_Bottom_details:{margin:normalize(10),justifyContent:'space-between', width: '93%',alignItems:'center',
     marginBottom: normalize(38),
   },
@@ -1201,11 +1254,13 @@ flex:1,
     marginVertical:'2%',
     paddingVertical: normalize(3),
     color: '#fff',alignItems:'center'},
-  TaskBox:{marginTop:normalize(15),justifyContent:'space-between', width: '94%',alignItems:'center',
+  TaskBox:{marginTop:normalize(15),justifyContent:'space-between', width: '100%',alignItems:'center',
 
   },
   SectionFooter:{width:'100%',height:normalize(60)},
   With100:{width:'100%'
+    ,alignItems:"center",flex:1},
+  With94:{width:'94%'
     ,alignItems:"center",flex:1},
   With100NoFlex:{width:'100%'
     ,alignItems:"center"},
@@ -1256,18 +1311,22 @@ flex:1,
     justifyContent: "center",
     flexDirection: "row",
   },
-  FlexRow:{width:'100%',flexDirection:'row',borderBottomWidth:1,borderColor:"rgb(42,48,82)",paddingVertical:normalize(10)},
+  FlexRow:{width:'94%',flexDirection:'row'},
   With80:{width:'80%',alignItems:'center',borderRadius:150/2, margin: 5,},
-  DoneTask:{width:'15%',alignItems:'center',borderRadius:normalize(35), margin: normalize(5),},
-  NotDoneTask: {borderWidth:1,borderColor:'#656464',paddingVertical:normalize(12),},
+  DoneTask:{width:'90%',paddingVertical:normalize(10),alignItems:'center',borderRadius:normalize(550), marginTop: normalize(6),backgroundColor:'#786b6b'},
+  NotDoneTask: {borderWidth:1,borderColor:'#656464',width:'90%',paddingVertical:normalize(9),alignItems:'center',borderRadius:normalize(550), marginTop: normalize(6)},
   Task_satus:{
     paddingVertical:normalize(5),width:'20%',alignItems:'center',borderRadius:150/2, margin: 5,},
   BorderDash:{
-    height:normalize(60),
-    borderRightWidth:2,
+    height:normalize(45),
+    borderRightWidth:1.5,
     borderStyle: 'dashed',
-    borderRightColor:'#656464',
+    borderRightColor:'rgba(144,144,144,0.56)',
   },
+  DoneTaskDetaisl:{width:'5%',
+    borderTopRightRadius:normalize(550),
+    borderBottomRightRadius:normalize(550)
+    ,marginTop: normalize(9),height:normalize(16)},
   FilterBox:{
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_35,marginVertical:normalize(4)
   },
@@ -1303,6 +1362,27 @@ flex:1,
     backgroundColor:GLOBAL.OFFICIAL_background,top:68,
     paddingVertical:20,
     borderTopRightRadius:20,borderTopLeftRadius:20
+  },
+  ViewAbsolute_header:{
+    width:'100%',
+    position:'absolute',
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,top:68,
+    paddingVertical:20,
+    borderTopRightRadius:20,borderTopLeftRadius:20
+  },
+  View_Task:{
+    width:'100%',
+    backgroundColor:GLOBAL.OFFICIAL_background,
+    borderBottomRightRadius:22,
+    borderBottomLeftRadius:22,
+    height:250,
+  },
+  Circle:{
+    width:'10%',
+    position:'absolute',
+    backgroundColor:'red',bottom:0,left: 0,
+    height:70,
+    borderRadius:200,
   },
   ImageBtn:{
     width:'20%',
@@ -1371,6 +1451,7 @@ flex:1,
     zIndex:1000,
     borderRadius: normalize(6),
     alignItems:'center',
+    maxHeight:normalize(250)
   },
   CalenderBox:{backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
     paddingVertical:'4%',
@@ -1557,6 +1638,12 @@ flex:1,
     justifyContent:'center',
 
   },
+  InputeRowItemstask:{
+    width:'95%',
+    alignItems:'center',
+    justifyContent:'center',
+
+  },
   formContainer: {
     padding: 10,
     width:'95%'
@@ -1571,6 +1658,16 @@ flex:1,
     width:'100%',
     color:"#fff",
     marginVertical: normalize(8),
+    paddingVertical: 4,
+
+  },
+  inputStyletask : {
+    borderRadius:normalize(6),
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    marginVertical: normalize(15),
     paddingVertical: 4,
 
   },
@@ -1709,18 +1806,36 @@ flex:1,
     width:'100%'
   },
   Horizental_Menu:{
-    width:'100%',marginBottom:normalize(20),
+    width:'100%',
+    marginBottom:normalize(20),
     alignItems: "center",
-    justifyContent: "space-between",
-    flexDirection:'row',flexWrap:"wrap"
+    justifyContent: "center",
+    backgroundColor:GLOBAL.OFFICIAL_background,
+    borderBottomRightRadius:22,
+
 
   },
+  Horizental_Menu_Box:{
+    width:'94%',
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection:'row',flexWrap:"wrap",
+    paddingBottom:normalize(20),
+  },
   Horizental_Menu_Item:{
-    width:'40%',paddingVertical:normalize(2),
+    width:'35%',paddingVertical:normalize(2),
     alignItems: "center",
     justifyContent: "center",
     borderRadius:normalize(6),
 
+  },
+  Horizental_Menu_Item_notselect:{
+    width:'35%',paddingVertical:normalize(2),
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius:normalize(6),
+    borderWidth:2,
+    borderColor:'#27405c'
   },
   Horizental_Menu_Item_text:{
     fontSize: normalize(14),
@@ -1728,6 +1843,13 @@ flex:1,
     color:'#fff',
     fontWeight:'bold',
     paddingVertical:normalize(8)
+  },
+  RowTask:{
+    flexDirection:'row'
+  },
+  RowTask_Items:{
+    flexDirection:'row',
+    width:'50%',marginTop:25,
   }
 });
 export { Styles };

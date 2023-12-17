@@ -51,6 +51,7 @@ module.exports = {
   All_Country:'@MySuperStore:All_Country',
   All_City:'@MySuperStore:All_City',
   AllProjectInfo_dyb:'@MySuperStore:AllProjectInfo_dyb',
+  Assigned_TaskList:'@MySuperStore:Assigned_TaskList',
   All_Task:'@MySuperStore:All_Task',
   PASSWORD_value:"",
   OrgAppLink_value:"",
@@ -68,6 +69,7 @@ module.exports = {
   UpdateUnitID:0,
   UpdateSectionID:0,
   UpdateFeatureID:0,
+  TaskId:0,
   DYB:'',
   SectionName:'',
   MenuName:'',
@@ -87,5 +89,6 @@ module.exports = {
   Country:[],
   City:[],
   AllProjectInfo:[],
+  Task_detail:''
 
 };

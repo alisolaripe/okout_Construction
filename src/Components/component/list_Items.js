@@ -13,7 +13,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 const GLOBAL = require("../Global");
-function Category_items_list({index,value,ShowMessage,Message,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
+function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
                                cityId, setcityId,edit, setedit,ShowWarningMessage,setShowWarningMessage,
                                countryId, setcountryId                          }){
   const [visible,setvisible] = useState(false);
@@ -581,4 +581,4 @@ function Category_items_list({index,value,ShowMessage,Message,ChangeChecked,setS
     </View>
   );
 }
-export default Category_items_list
+export default List_Items

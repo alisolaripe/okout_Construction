@@ -2,20 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
-  SafeAreaView, TouchableOpacity, ScrollView, Modal, Image, FlatList,
+  SafeAreaView, TouchableOpacity, Modal, Image, FlatList, BackHandler,
 } from "react-native";
-import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
-import Category_List_Detail_Images_Item from "../component/Category_List_Detail_Images_Item";
+import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
 import { Header } from "../component/Header";
@@ -23,18 +21,16 @@ import { Footer1 } from "../component/Footer";
 import { Filter } from "../component/Filter";
 import { readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
-import DYB_List_Item from "../DYBscreen/DYB_List_Item";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
 let A = [];
 let C = [];
 let Full = "";
 let TodayDate = "";
 let Day = "";
 let Month = "";
+
 const Api = require("../Api");
 const GLOBAL = require("../Global");
-
 function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const modalizeRef = React.createRef();
   const scrollViewRef = useRef();
@@ -115,41 +111,43 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     let endDate = "";
     let Exist = "";
     A?.forEach((obj) => {
-      today = new Date(obj?.Date);
-      tomorrow = new Date(today);
-      if (obj?.WeekDay === "Sunday") {
-        tomorrow?.setDate(today?.getDate() + 1);
-        endDate = tomorrow?.toLocaleDateString();
-      } else if (obj?.WeekDay === "Monday") {
-        tomorrow?.setDate(today.getDate() + 7);
-        endDate = tomorrow?.toLocaleDateString();
-      } else if (obj?.WeekDay === "Tuesday") {
-        tomorrow?.setDate(today?.getDate() + 6);
-        endDate = tomorrow?.toLocaleDateString();
+      if(obj?.Date!=='') {
+        today = new Date(obj?.Date);
+        tomorrow = new Date(today);
+        if (obj?.WeekDay === "Sunday") {
+          tomorrow?.setDate(today?.getDate() + 1);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Monday") {
+          tomorrow?.setDate(today.getDate() + 7);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Tuesday") {
+          tomorrow?.setDate(today?.getDate() + 6);
+          endDate = tomorrow?.toLocaleDateString();
 
-      } else if (obj?.WeekDay === "Wednesday") {
-        tomorrow?.setDate(today?.getDate() + 5);
-        endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Wednesday") {
+          tomorrow?.setDate(today?.getDate() + 5);
+          endDate = tomorrow?.toLocaleDateString();
 
-      } else if (obj?.WeekDay === "Thursday") {
-        tomorrow?.setDate(today?.getDate() + 4);
-        endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Thursday") {
+          tomorrow?.setDate(today?.getDate() + 4);
+          endDate = tomorrow?.toLocaleDateString();
 
-      } else if (obj?.WeekDay === "Friday") {
-        tomorrow?.setDate(today?.getDate() + 3);
-        endDate = tomorrow?.toLocaleDateString();
-      } else if (obj?.WeekDay === "Saturday") {
-        tomorrow?.setDate(today?.getDate() + 2);
-        endDate = tomorrow?.toLocaleDateString();
-      }
-      let newString = endDate.split("/");
-      endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
-      Exist = B?.findIndex((p) => p.endDate === endDate_Format);
-      if (Exist === -1) {
-        B.push({
-          startDate: obj?.Date?.split(" ")?.[0],
-          endDate: endDate_Format,
-        });
+        } else if (obj?.WeekDay === "Friday") {
+          tomorrow?.setDate(today?.getDate() + 3);
+          endDate = tomorrow?.toLocaleDateString();
+        } else if (obj?.WeekDay === "Saturday") {
+          tomorrow?.setDate(today?.getDate() + 2);
+          endDate = tomorrow?.toLocaleDateString();
+        }
+        let newString = endDate.split("/");
+        endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
+        Exist = B?.findIndex((p) => p.endDate === endDate_Format);
+        if (Exist === -1) {
+          B.push({
+            startDate: obj?.Date?.split(" ")?.[0],
+            endDate: endDate_Format,
+          });
+        }
       }
     });
     //C=[...B]
@@ -182,20 +180,20 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         let Country = "";
         let Address = "";
         let mark2 = {
-          uri: "",
+          uri:"",
           type:'',
-          fileName: '',
+          fileName:'',
           buildId:'',
-          Type: "",
+          Type:"",
           Day:'',
           Date:'',
           Month:'',
           WeekDay:'',
           relatedId:'',
-          buildIdAttachmentId: '',
+          buildIdAttachmentId:'',
           geoLat:'',
-          geoLong: '',
-          geoAddress: '',
+          geoLong:'',
+          geoAddress:'',
           Country:'',
         };
         json?.buildNotes?.forEach((obj) => {
@@ -209,31 +207,31 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
               Country = "";
             }
             if (obj2?.imageUrl !== null) {
-
               A.push({
                 uri: GLOBAL.OrgAppLink_value + "/" + obj2?.imageUrl,
-                type: obj2?.imageName?.split(".")?.[1],
-                fileName: obj2?.imageName,
-                buildId: obj2.buildId,
-                Type: "",
-                Day: W?.[0],
-                Date: obj2?.postDate,
-                Month: Day?.[1],
+                type:obj2?.imageName?.split(".")?.[1],
+                fileName:obj2?.imageName,
+                buildId:obj2.buildId,
+                Type:"",
+                Day:W?.[0],
+                Date:obj2?.postDate,
+                Month:Day?.[1],
                 WeekDay:getDayOfWeek(obj2?.postDate),
-                relatedId: obj.buildIdRelatedId,
+                relatedId:obj.buildIdRelatedId,
                 buildIdAttachmentId: obj2.buildIdAttachmentId,
-                geoLat: obj2?.geoLat,
-                geoLong: obj2?.geoLong,
-                geoAddress: obj2?.geoAddress,
-                Country: Country,
+                geoLat:obj2?.geoLat,
+                geoLong:obj2?.geoLong,
+                geoAddress:obj2?.geoAddress,
+                Country:Country,
               })}})});
-        if (A?.length!==0){
-          A=[mark2,...A];
-          A?.sort(dateComparison_data);
+console.log(A,'AA')
+        if(A?.length!==0) {
+          A = [mark2,...A];
+          A?.sort(dateComparison_data)
           setImageSourceviewarray(A);
           setMudolList(A);
-          Make_Week_Filter_List(A);
-          Save_Details_Online(A);
+          Make_Week_Filter_List(A)
+          Save_Details_Online(A)
         }
         else {
           A=[mark2];
@@ -318,7 +316,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           </Text>
 
           <Text style={Styles.WeekFilterTextMiddel}>
-            Week ending
+            Week endingsssss
           </Text>
         </View>
         <View style={Styles.Calender}>
@@ -795,7 +793,6 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const logout_Url = () => {
     setshowModalDelete(true);
   };
-
   const Back_navigate=()=>{
     if (ShowBackBtn===false) {
       setShowWarningMessage(true);
@@ -807,7 +804,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     }
   };
   const renderItem = ({ item })=> (
-    <Category_List_Detail_Images_Item value={item}  Change_Gallry_Date={Change_Gallry_Date}
+    <List_Item_Detail_Images value={item}  Change_Gallry_Date={Change_Gallry_Date}
      DeleteImage={DeleteImageFromApi} Type={'Feature'} onOpen={onOpen} />
   );
   const renderSectionHeader=()=>(
@@ -856,10 +853,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
                 setShowFilter={setShowFilter} />
         : null
       }
-      {
-        showModalCalender &&
-        _showModalCalender()
-      }
+
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
           <Text style={Styles.txtFilter}>
@@ -900,6 +894,10 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={Back_navigate}
               Title={"Sites / Buildings Detail"} />
         <View style={Styles.containerList}>
+          {
+            showModalCalender &&
+            _showModalCalender()
+          }
           <View style={Styles.Center_margin_Bottom2}>
             {ImageSourceviewarray&&(
               <FlatList

@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from "react";
 import {
   Text,
-  View,Modal,Image,TouchableOpacity
+  View, Modal, Image, TouchableOpacity, FlatList,
 } from "react-native";
 import { Styles } from "../Styles";
 import { Container, Content } from "native-base";
@@ -12,7 +12,7 @@ import { writePostApi } from "../writePostApi";
 import { Header } from '../component/Header';
 import {Footer1} from '../component/Footer';
 import {AddModal} from '../component/AddModal'
-import  Category_items_list  from "../component/Category_items_list";
+import  List_Items  from "../component/list_Items";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import {writeDataStorage,removeDataStorage} from "../Get_Location";
 import {  readOnlineApi } from "../ReadPostApi";
@@ -526,58 +526,72 @@ function Project_Features({ navigation, navigation: { goBack } }) {
     setshowModalDelete(true)
 
   };
-
+  const renderItem=({ item ,index})=>(
+    <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} Navigate_Url={Navigate_Url} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
+                Message={Message} onPress={UpdateFeature} data={data} UpdateFeature_DYB={UpdateFeature_DYB}
+                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Feature'} numberValue={16} onPressDelete={DeleteFeature}
+    />
+  )
+  const renderSectionHeader=()=>(
+    <>
+      {
+        showModalDelete &&
+        <View>
+          {
+            _showModalDelete()
+          }
+        </View>
+      }
+      {ShowMessageDelete === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+      {ShowMessage === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+    </>
+  )
+  const renderSectionFooter=()=>(
+    <View style={Styles.SectionFooter}/>
+  )
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Features'}/>
-      <Content>
-
         <View style={Styles.containerList}>
           {
-            showModalDelete &&
-            <View>
-              {
-                _showModalDelete()
-              }
-            </View>
-          }
-          {ShowMessageDelete === true ?
-            <View style={Styles.flashMessageSuccsess}>
-              <View style={{ width: "10%" }} />
-              <View style={{ width: "80%" }}>
-                <Text style={Styles.AlertTxt}>
-                  {Message}
-                </Text>
-              </View>
-              <View style={{ width: "10%" }} />
-            </View>
-            :
-            null
-          }
-          {ShowMessage === true ?
-            <View style={Styles.flashMessageSuccsess}>
-              <View style={{ width: "10%" }} />
-              <View style={{ width: "80%" }}>
-                <Text style={Styles.AlertTxt}>
-                  {Message}
-                </Text>
-              </View>
-              <View style={{ width: "10%" }} />
-            </View>
-            :
-            null
-          }
-          {
-            modules!=='' ?
-          <View style={[Styles.ItemsBox2]}>
-            {modules && (
-              modules?.map((item,index) =>{
-                return (
-                  <Category_items_list key={index} setShowMessage={setShowMessageUpdate} value={item} Navigate_Url={Navigate_Url} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                                       Message={Message} onPress={UpdateFeature} data={data} UpdateFeature_DYB={UpdateFeature_DYB}
-                                       ShowMessage={ShowMessageUpdate} tittlebtn={'Update Feature'} numberValue={16} onPressDelete={DeleteFeature}
-                  />
-                )})
+          modules!=='' ?
+          <View style={[Styles.Center_margin_Bottom3]}>
+            {modules&&(
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                data={modules}
+                style={{width:'100%',flexGrow:0}}
+                renderItem={renderItem}
+                ListHeaderComponent={renderSectionHeader}
+                ListFooterComponent={renderSectionFooter}
+                keyExtractor={(item,index)=>{
+                  return index.toString();
+                }}
+              />
             )}
           </View>:
 
@@ -591,7 +605,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
               </View>
           }
         </View>
-      </Content>
+
       <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
 
           <AddModal  ShowMessage={ShowMessage} Message={Message}

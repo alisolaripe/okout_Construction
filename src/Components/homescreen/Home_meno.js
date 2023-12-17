@@ -19,9 +19,10 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect(() => {
-    console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
     getAllProjectInfo();
     getAllProjectInfo_dyb();
+    Assigned_TaskList();
+    My_TaskList()
   }, []);
   const getAllProjectInfo = async () => {
     if (GLOBAL.isConnected === true){
@@ -34,6 +35,20 @@ function Home_meno({ navigation }) {
     if (GLOBAL.isConnected === true){
       readOnlineApi(Api.getAllProjectInfo_dyb+`userId=${GLOBAL.UserInformation?.userId}&dyb=y`).then(json => {
         writeDataStorage(GLOBAL.AllProjectInfo_dyb, json?.projects);
+      });
+    }
+  };
+  const Assigned_TaskList =async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Assigned_TaskList+`userId=1`).then(json => {
+        writeDataStorage(GLOBAL.Assigned_TaskList, json?.tasks);
+      });
+    }
+  };
+  const My_TaskList =async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        writeDataStorage(GLOBAL.All_Task,json?.tasks)
       });
     }
   };

@@ -21,7 +21,7 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [Version,setVersionCheck] = useState('');
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect( () => {
-    let A=VersionCheck.getCurrentVersion()+'.'+6
+    let A=VersionCheck.getCurrentVersion()+'.'+7
     setVersionCheck(A)
 
   }, []);

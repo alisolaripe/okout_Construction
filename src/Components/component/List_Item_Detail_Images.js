@@ -3,7 +3,7 @@ import React, { useEffect, useState} from "react";
 import {
   Text,
   View,
-  TouchableOpacity,Modal,Image,ActivityIndicator
+  TouchableOpacity,Modal,Image,ActivityIndicator,ImageBackground
 } from "react-native";
 import Moment from 'moment';
 import DatePicker from 'react-native-date-picker'
@@ -19,7 +19,7 @@ import { Content } from "native-base";
 const GLOBAL = require("../Global");
 import FastImage from 'react-native-fast-image'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-function Category_List_Detail_Images_Item({index,value,DeleteImage,Type,Change_Gallry_Date,onOpen}) {
+function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Date,onOpen}) {
   const [FullImage,setFullImage] = useState(false);
   const [visible,setvisible] = useState(false);
   const [isFocus,setIsFocus] = useState(false);
@@ -92,10 +92,11 @@ function Category_List_Detail_Images_Item({index,value,DeleteImage,Type,Change_G
     <>
       {value.uri!==''?
         <View index={index} style={Styles.UnitDetailImageBoxFeatureStyle2}>
-          <FastImage
-            onLoadEnd={onLoadEnd}
-            onLoadStart={onLoadStart}
-            source={{uri:value.uri, priority: FastImage.priority.high,}}
+          <ImageBackground
+            // onLoadEnd={onLoadEnd}
+            // onLoadStart={onLoadStart}
+            source={{uri:value.uri,
+            }}
                      style={[Styles.UnitDetailImagestyle]}
                      resizeMode="stretch">
             {Type === 'DYB' ?
@@ -162,10 +163,10 @@ function Category_List_Detail_Images_Item({index,value,DeleteImage,Type,Change_G
                          onCancel={() => {
                            setOpen(false)
                          }} />
-          </FastImage>
-          {isLoading && (
-            <ActivityIndicator style={Styles.loaderStyle} size={'large'} />
-          )}
+          </ImageBackground>
+          {/*{isLoading && (*/}
+          {/*  <ActivityIndicator style={Styles.loaderStyle} size={'large'} />*/}
+          {/*)}*/}
           {
             showModalDelete &&
             <View>
@@ -273,7 +274,7 @@ function Category_List_Detail_Images_Item({index,value,DeleteImage,Type,Change_G
         :
         <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
         <Text style={Styles.UploadImageText}>
-        Add photos
+        Add Photos
         </Text>
         <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"} />
         </TouchableOpacity>
@@ -281,4 +282,4 @@ function Category_List_Detail_Images_Item({index,value,DeleteImage,Type,Change_G
         </>
   );
 }
-export default Category_List_Detail_Images_Item;
+export default List_Item_Detail_Images;

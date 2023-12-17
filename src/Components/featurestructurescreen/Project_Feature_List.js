@@ -108,6 +108,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
         let A=[];
         let B='';
         let attachements=[];
+
         json?.buildNotes?.forEach((obj) => {
           if(obj?.attachements?.length!==0) {
             const Day = obj?.attachements?.[0]?.postDate?.split(' ')?.[0]?.split('-')?.[2];
@@ -430,10 +431,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
         <Filter  FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} setShowFilter={setShowFilter}/>
         :null
       }
-      {
-        showModalCalender &&
-        _showModalCalender()
-      }
+
       {ShowDateRange===true?
         <TouchableOpacity onPress={()=>setshowModalCalender( true)} style={Styles.WeekFilterBox}>
           <Text style={Styles.Filter_txt}>
@@ -478,7 +476,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
                 GLOBAL.Feature="Image";
                 navigation.navigate('Project_Feature_Detail')
               }}>
-                <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Image</Text>
+                <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Photos</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>:
@@ -491,7 +489,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
 
                 navigation.navigate('Project_Feature_Detail')
               }}>
-                <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Image</Text>
+                <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Photos</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -503,7 +501,10 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
       <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Photos / Notes List'}/>
         <View style={Styles.containerList}>
           <View style={[Styles.With90Center_Margin]}>
-
+            {
+              showModalCalender &&
+              _showModalCalender()
+            }
             {
             modules!==''?
             <View style={Styles.FlexWrapDyb}>

@@ -15,7 +15,7 @@ import { writePostApi } from "../writePostApi";
 import { Footer1 } from "../component/Footer";
 import { Header } from "../component/Header";
 import DYB_List_Details_Image_Item from '../component/DYB_List_Details_Image_Item'
-import Project_feature_Notes_Item from "./Project_feature_Notes_Item";
+import Notes_Item from "../component/Feature_DYB_List_Detail_Notes_Item";
 import { Colors } from "../Colors";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
@@ -637,8 +637,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
                   <TouchableOpacity onPress={()=>{
                     setShowWarningMessage(false);
                     setShowBackBtn(true)
-
-                  }} style={Styles.flashMessageWarning2}>
+                  }} style={Styles.flashMessageWarning3}>
                     <View style={{ width: "15%",alignItems:'center' }}>
                       <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
                     </View>
@@ -707,7 +706,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
                       {FeatureSelectDetail && (
                         FeatureSelectDetail?.map((value, index) => {
                           return (
-                            <Project_feature_Notes_Item value={value} key={index} UpdateBuildNote={UpdateBuildNote}
+                            <Notes_Item value={value} key={index} UpdateBuildNote={UpdateBuildNote}
                                                         ShowEditBtn={ShowEditBtn}
                             />
 

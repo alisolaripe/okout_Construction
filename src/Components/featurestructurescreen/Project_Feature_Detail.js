@@ -18,7 +18,7 @@ import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
 const Api = require("../Api");
 const GLOBAL = require("../Global");
-import Project_Feature_Image_Item from "./Project_Feature_Image_Item";
+import Feature_DYB_detail_Image_Item from "../component/Feature_DYB_detail_Image_Item";
 import DYB_List_Detail_NoteItem from "../component/DYB_List_Detail_NoteItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
@@ -829,7 +829,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                   {
                     ImageSourceviewarray.map((value, index) => {
                       return (
-                        <Project_Feature_Image_Item value={value} key={index} ImageTitle={ImageTitle} ImagebtnColor={['#ffadad','#fd5858','#FF0000']}
+                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle} ImagebtnColor={['#ffadad','#fd5858','#FF0000']}
                                                     DeleteImage={DeleteImage} ChangeChecked={ChangeChecked2} IconColor={'#F67070FF'} />
                       );
                     })}

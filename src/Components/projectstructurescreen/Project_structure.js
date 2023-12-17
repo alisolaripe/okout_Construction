@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text,Image,Modal,TouchableOpacity } from "react-native";
+import { View, Text, Image, Modal, TouchableOpacity, FlatList } from "react-native";
 import { Styles } from "../Styles";
-import { Container, Content } from "native-base";
+import { Container} from "native-base";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { AddModal } from "../component/AddModal";
 import { readOnlineApi } from "../ReadPostApi";
-import Category_items_list from "../component/Category_items_list";
+import List_Items from "../component/list_Items";
 import {removeDataStorage,writeDataStorage} from "../Get_Location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
@@ -136,7 +136,6 @@ function Project_structure({ navigation, navigation: { goBack } }) {
     });
   };
   const AddProject = async (value) => {
-
     var formdata = new FormData();
     formdata.append("projectName", value.Projectname);
     formdata.append("userId", "1");
@@ -201,8 +200,7 @@ function Project_structure({ navigation, navigation: { goBack } }) {
           isVisible={showModalDelete}
           avoKeyboard={true}
           onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
+          transparent={true}>
           {renderModalContent()}
         </Modal>
       </View>
@@ -211,7 +209,6 @@ function Project_structure({ navigation, navigation: { goBack } }) {
   const renderModalContent = () => (
     <View style={Styles.DeleteModalTotalStyle}>
     <View style={Styles.DeleteModalStyle2}>
-
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                source={require("../../Picture/png/AlertImage.png")}
@@ -222,7 +219,6 @@ function Project_structure({ navigation, navigation: { goBack } }) {
           </Text>
         </View>
       </View>
-
       <View style={Styles.With100Row}>
         <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
           <TouchableOpacity onPress={() => setshowModalDelete( false)} >
@@ -244,50 +240,64 @@ function Project_structure({ navigation, navigation: { goBack } }) {
   );
   const logout_Url= () => {
     setshowModalDelete(true)
-
   };
-
+  const renderSectionHeader=()=>(
+    <>
+      {ShowMessage === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+      {
+        showModalDelete &&
+        <View>
+          {
+            _showModalDelete()
+          }
+        </View>
+      }
+      </>
+  )
+  const renderItem=({ item ,index})=>(
+    <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item}
+                Message={Message} onPress={UpdateProject} data={data} edit={edit} setedit={setedit}
+                ShowMessage={ShowMessageUpdate} tittlebtn={"Update Project"} numberValue={3} ShowWarningMessage={ShowWarningMessage}
+                setShowWarningMessage={setShowWarningMessage}
+                Navigate_Url={Navigate_Url}/>
+  )
+  const renderSectionFooter=()=>(
+    <View style={Styles.SectionFooter}/>
+  )
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={goBack}
               Title={"Construction Projects"} />
-      <Content>
         <View style={[Styles.containerList]}>
-          {ShowMessage === true ?
-            <View style={Styles.flashMessageSuccsess}>
-              <View style={{ width: "10%" }} />
-              <View style={{ width: "80%" }}>
-                <Text style={Styles.AlertTxt}>
-                  {Message}
-                </Text>
-              </View>
-              <View style={{ width: "10%" }} />
-            </View>
-            :
-            null
-          }
-          {
-            showModalDelete &&
-            <View>
-              {
-                _showModalDelete()
-              }
-            </View>
-          }
+
           {modules!=='' ?
               <View style={Styles.With100NoFlex}>
-                <View style={[Styles.ItemsBox2]}>
-                  {modules&&
-                  modules?.map((item, index) => {
-                    return (
-                      <Category_items_list key={index} setShowMessage={setShowMessageUpdate} value={item}
-                                           Message={Message} onPress={UpdateProject} data={data} edit={edit} setedit={setedit}
-                                           ShowMessage={ShowMessageUpdate} tittlebtn={"Update Project"} numberValue={3} ShowWarningMessage={ShowWarningMessage}
-                                           setShowWarningMessage={setShowWarningMessage}
-                                           Navigate_Url={Navigate_Url}/>
-                    );
-                  })
-                  }
+                <View style={[Styles.Center_margin_Bottom3]}>
+                  {modules&&(
+                    <FlatList
+                      showsVerticalScrollIndicator={false}
+                      data={modules}
+                      style={{width:'100%',flexGrow:0}}
+                      renderItem={renderItem}
+                      ListHeaderComponent={renderSectionHeader}
+                      ListFooterComponent={renderSectionFooter}
+                      keyExtractor={(item,index)=>{
+                        return index.toString();
+                      }}
+                    />
+                  )}
                 </View>
               </View>:
           <View style={Styles.With90CenterVertical}>
@@ -300,7 +310,6 @@ function Project_structure({ navigation, navigation: { goBack } }) {
               </View>
           }
         </View>
-      </Content>
       <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
       <AddModal ShowMessage={ShowMessage} Message={Message}
                 numberValue={1} ChangeChecked={ChangeChecked} tittlebtn={"Add Project"}

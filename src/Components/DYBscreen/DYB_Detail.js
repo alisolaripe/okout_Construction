@@ -19,7 +19,7 @@ import LinearGradient from "react-native-linear-gradient";
 
 const Api = require("../Api");
 const GLOBAL = require("../Global");
-import Project_Feature_Image_Item from "../featurestructurescreen/Project_Feature_Image_Item";
+import Feature_DYB_detail_Image_Item from "../component/Feature_DYB_detail_Image_Item";
 import DYB_List_Detail_NoteItem from "../component/DYB_List_Detail_NoteItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
@@ -623,7 +623,7 @@ function DYB_Detail({ navigation, navigation: { goBack } }) {
                   {
                     ImageSourceviewarray?.map((value, index) => {
                       return (
-                        <Project_Feature_Image_Item value={value} key={index} ImageTitle={ImageTitle}
+                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle}
                                                     ImagebtnColor={['#ffc2b5','#fca795','#d1583b']}
                                                     DeleteImage={DeleteImage} ChangeChecked={ChangeChecked2} IconColor={'#F67070FF'} />
                       );

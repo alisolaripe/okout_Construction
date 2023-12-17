@@ -390,7 +390,7 @@ function TextInputI({ GeoAddressCity,
                 }} style={Styles.CancelBtnLeftAlign2}>
                   <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
                 </TouchableOpacity>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Project New Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Project Name</Text>
               <TextInput
                 value={values.Projectname}
                 style={[inputStyle,{paddingVertical:6}]}
@@ -403,7 +403,7 @@ function TextInputI({ GeoAddressCity,
               {touched.Projectname&&errors.Projectname &&
               <Text style={{fontSize:12,color:"#FF0D10"}}>{errors.Projectname}</Text>
               }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Display note</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Notes</Text>
               <TextInput
                 value={values.ProjectNote}
                 style={[inputStyle,{paddingVertical:'4%'}]}
@@ -457,7 +457,7 @@ function TextInputI({ GeoAddressCity,
           validationSchema={validationSchema4}>
           {({ values,handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Sites Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Site Name</Text>
               <TextInput
                 value={values.sitename}
                 style={[inputStyle ]}
@@ -658,7 +658,7 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
-              <Text style={[Styles.txt,{marginTop: normalize(18),}]}>Sites New Name</Text>
+              <Text style={[Styles.txt,{marginTop: normalize(18),}]}>Site Name</Text>
               <TextInput
                 value={values.sitename}
                 style={[inputStyle,   { marginTop: normalize(10) }]}
@@ -862,7 +862,7 @@ function TextInputI({ GeoAddressCity,
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>unit Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Unit Name</Text>
               <TextInput
                 value={values.Unitname}
                 style={[inputStyle, { paddingVertical: 6 }]}
@@ -1068,7 +1068,7 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>unit New Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Unit Name</Text>
               <TextInput
                 value={values.Unitname}
                 style={[inputStyle, { paddingVertical: 6 }]}
@@ -1332,7 +1332,7 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Section New Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Section Name</Text>
               <TextInput
                 value={values.SectionName}
                 style={[inputStyle, { paddingVertical: 6 }]}
@@ -1496,7 +1496,7 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Feature New Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Feature Name</Text>
               <TextInput
                 value={values.FeatureName}
                 style={[inputStyle, { paddingVertical: 6 }]}
@@ -2627,7 +2627,7 @@ function TextInputI({ GeoAddressCity,
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>DYB New Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>DYB Name</Text>
               <TextInput
                 value={values.DYBName}
                 style={[inputStyle, { paddingVertical: 6 }]}

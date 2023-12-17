@@ -136,7 +136,7 @@ function UnitList({ navigation, navigation: { goBack } }) {
   );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffc2b5','#fca795','#d1583b']} StatusColor={'#ffc6bb'} onPress={BackNavigation} Title={'Plots / Unites'}/>
+      <Header colors={['#ffc2b5','#fca795','#d1583b']} StatusColor={'#ffc6bb'} onPress={BackNavigation} Title={'Plots / Units'}/>
         <View style={Styles.containerList}>
           {
             showModalDelete &&

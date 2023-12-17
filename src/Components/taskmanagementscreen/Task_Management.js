@@ -14,15 +14,10 @@ import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { removeDataStorage,writeDataStorage } from "../Get_Location";
 import { FloatAddBtn } from "../component/FloatAddBtn";
-import { readOnlineApi } from "../ReadPostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
 const Api = require("../Api");
 const taskmenu=[ { Name: "my Task ",Id:1, },
   {Id:2,Name: "Assigned to me",},
- ]
-const ActionButton_list=[ { title: "Completed",Id:2,Color:'#a0b6f6'},
-  {Id:1,title: "Over due",Color:'#173cbd'},{Id:1,title: "Task type",Color:'#173cbd'},
  ]
 function Task_Management({ navigation, navigation: { goBack } }) {
   const [modules, setmodules] = useState([]);
@@ -31,19 +26,20 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [angle, setAngle] = useState(165);
   const [selectItem, setSelectItem] = useState(1);
-  const [active, setactive] = useState(false);
   useEffect(() => {
-    My_TaskList();
     Assigned_TaskList()
+    const unsubscribe = navigation.addListener('focus', () => {
+      My_TaskList();
+    });
+    return unsubscribe;
   }, []);
-
   //${GLOBAL.UserInformation?.userId}
   const My_TaskList =async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
         let A = [];
-        for (let item in json?.tasks) {
-          let obj = json?.tasks?.[item];
+        for (let item in json) {
+          let obj = json?.[item];
+          const Year = obj.taskCreatedOn.split(" ");
           A.push({
             taskId: obj.taskId,
             taskTitle: obj.taskTitle,
@@ -55,43 +51,30 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPlanDueDate:obj.taskPlanDueDate,
             taskStatusColor:obj.taskStatusColor,
             taskCreatedOn:obj.taskCreatedOn,
-            taskStatusName:obj.taskStatusName
+            taskStatusName:obj.taskStatusName,
+            Year:Year?.[0],
+
           });
         }
-        console.log(A,'AAAAA')
+
         if (A?.length!==0){
           setmodules(A);
-          writeDataStorage(GLOBAL.All_Task,A)
-        }
-        else {
-
-          setmodules('');
-        }
-      });
-    }
-    else {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
-      if (json!==null) {
-        if (json?.length!==0){
-          setmodules(json);
         }
         else {
           setmodules('');
         }
-      }
-    }
   };
   const Assigned_TaskList =async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Assigned_TaskList+`userId=1`).then(json => {
-        console.log(json,'json')
+      let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.Assigned_TaskList))
         let A = [];
-        for (let item in json?.tasks) {
-          let obj = json?.tasks?.[item];
+        for (let item in json) {
+          let obj = json?.[item];
+          const Year = obj.taskCreatedOn.split(" ");
+          console.log(obj.taskCreatedOn.split(" "),'obj.taskCreatedOn')
           A.push({
-            taskId: obj.taskId,
-            taskTitle: obj.taskTitle,
-            taskCategoryName: obj.taskCategoryName,
+            taskId:obj.taskId,
+            taskTitle:obj.taskTitle,
+            taskCategoryName:obj.taskCategoryName,
             taskPriorityName:obj.taskPriorityName,
             taskDescription:obj.taskDescription,
             taskParentTaskId:obj.taskParentTaskId,
@@ -99,35 +82,16 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPlanDueDate:obj.taskPlanDueDate,
             taskStatusColor:obj.taskStatusColor,
             taskCreatedOn:obj.taskCreatedOn,
-            taskStatusName:obj.taskStatusName
+            taskStatusName:obj.taskStatusName,
+            Year:Year?.[0]
           });
         }
-        console.log(A,'AAAAA')
         if (A?.length!==0){
           setAssigned(A);
-          writeDataStorage(GLOBAL.All_Task,A)
-        }
-        else {
-
-          setAssigned('');
-        }
-      });
-    }
-    else {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
-      if (json!==null) {
-        if (json?.length!==0){
-          setAssigned(json);
         }
         else {
           setAssigned('');
         }
-      }
-    }
-  };
-  const SeeDetail = (projectId) => {
-    GLOBAL.ProjectId = projectId;
-    navigation.navigate("Project_Sites");
   };
   const handleSubmit = () => {
     navigation.navigate("AddNewTask");
@@ -189,8 +153,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     </View>
   );
   const renderItem = ({ item,index }) => (
-    <Task_management_Item  index={index}   value={item} Navigate_Url={Navigate_Url}
-                          modules={modules.length}  ShowMessage={ShowMessage} />
+    <Task_management_Item index={index} modules={modules.length}   value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} />
+  )
+  const renderItem_assigned = ({ item,index }) => (
+    <Task_management_Item index={index} modules={Assigned.length}   value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} />
   )
   const renderSectionHeader=()=>(
     <>
@@ -203,20 +169,33 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         </View>
       }
       <View style={Styles.Horizental_Menu}>
-
+        <View style={Styles.Horizental_Menu_Box}>
           {taskmenu.map((item, index) => {
             return (
-              <LinearGradient  angle={angle}
-                               colors={["#382e2e", "#786b6b"]} key={index}   useAngle={true}
-                               style={[Styles.Horizental_Menu_Item,selectItem===item.Id?{borderWidth:2,borderColor:'#a39898'}:null]}>
-              <TouchableOpacity onPress={()=>setSelectItem(item.Id)}>
-                <Text style={Styles.Horizental_Menu_Item_text}>
-                  {item.Name}
-                </Text>
-              </TouchableOpacity>
-              </LinearGradient>
+              <>
+                {
+                  selectItem===item.Id?
+                    <LinearGradient key={index}  angle={angle}
+                                     colors={["#6dabec", "#27405c"]}    useAngle={true}
+                                     style={Styles.Horizental_Menu_Item}>
+                      <TouchableOpacity  key={index}  onPress={()=>setSelectItem(item.Id)}>
+                        <Text style={Styles.Horizental_Menu_Item_text}>
+                          {item.Name}
+                        </Text>
+                      </TouchableOpacity>
+                    </LinearGradient>:
+
+                    <TouchableOpacity key={index} onPress={()=>setSelectItem(item.Id)}  style={Styles.Horizental_Menu_Item_notselect}>
+                      <Text style={Styles.Horizental_Menu_Item_text}>
+                        {item.Name}
+                      </Text>
+                    </TouchableOpacity>
+                }
+              </>
+
             );
           })}
+      </View>
       </View>
       </>
     )
@@ -226,59 +205,68 @@ const renderSectionFooter=()=>(
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={['#a39898','#786b6b','#382e2e']} StatusColor={'#a39897'} onPress={goBack} Title={'Task Management'}/>
+      {selectItem === 1 ?
+        <View style={[Styles.containerList]}>
+
+        {
+          modules === '' ?
+            <View style={Styles.With100CenterVertical}>
+              <Text style={Styles.EmptyText}>
+                " No Task defined
+              </Text>
+              <Text style={Styles.EmptyText}>
+                Add by pressing button below "
+              </Text>
+            </View>:
+            <View style={Styles.TaskBox}>
+              <FlatList
+                showsh={false}
+                showsVerticalScrollIndicator={false}
+                ListHeaderComponent={renderSectionHeader}
+                ListFooterComponent={renderSectionFooter}
+                data={modules}
+                style={{ width: '100%',flexGrow: 0 }}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => {
+                  return index.toString();
+                }}
+              />
+            </View>
+
+        }
+      </View>:
+
 
         <View style={[Styles.containerList]}>
 
           {
-            modules === '' ?
-              <View style={Styles.With90CenterVertical}>
+            Assigned === '' ?
+              <View style={Styles.With100CenterVertical}>
                 <Text style={Styles.EmptyText}>
                   " No Task defined
                 </Text>
-                <Text style={Styles.EmptyText}>
-                  Add by pressing button below "
-                </Text>
               </View>:
               <View style={Styles.TaskBox}>
-                  <FlatList
-                    showsh={false}
-                    showsVerticalScrollIndicator={false}
-                    ListHeaderComponent={renderSectionHeader}
-                    ListFooterComponent={renderSectionFooter}
-                    data={selectItem===1?modules:Assigned}
-                    style={{ width: '100%',flexGrow: 0 }}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => {
-                      return index.toString();
-                    }}
-                  />
+                <FlatList
+                  showsh={false}
+                  showsVerticalScrollIndicator={false}
+                  ListHeaderComponent={renderSectionHeader}
+                  ListFooterComponent={renderSectionFooter}
+                  data={Assigned}
+                  style={{ width: '100%',flexGrow: 0 }}
+                  renderItem={renderItem_assigned}
+                  keyExtractor={(item, index) => {
+                    return index.toString();
+                  }}
+                />
               </View>
 
           }
         </View>
+      }
       {selectItem===1?
         <FloatAddBtn onPress={handleSubmit} colors={['#a39898','#786b6b','#382e2e']}/>:
 null
-        // <View style={[Styles.FloatBtn_action]}>
-        //   <Fab
-        //     active={active}
-        //     direction="up"
-        //     containerStyle={{ }}
-        //     style={{ backgroundColor: '#5067FF' }}
-        //     position="bottomRight"
-        //     onPress={() => setactive(!active)}>
-        //     <AntDesign name="filter" size={25} color="#fff" />
-        //      {ActionButton_list.map((item, index) => {
-        //          return (
-        //            <Button style={{ backgroundColor: '#34A34F',flexDirection:'column',width:70,height:70,marginVertical:15}}>
-        //              <Text style={Styles.Text_actionbtn}>
-        //                {item.title}
-        //              </Text>
-        //            </Button>
-        //
-        //            )})}
-        //   </Fab>
-        // </View>
       }
 
       <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>

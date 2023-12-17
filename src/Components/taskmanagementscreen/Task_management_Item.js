@@ -14,7 +14,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Button } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 const GLOBAL = require("../Global");
-function Task_management_Item({value,Navigate_Url,modules,index,ShowMessage,Message,ChangeChecked,}) {
+function Task_management_Item({value,Navigate_Url,ShowMessage,Message,ChangeChecked,index,modules}) {
   const [visible,setvisible] = useState(false);
   const width = Dimensions.get("window").width;
   const ClickManagement =(id)=>{
@@ -27,39 +27,28 @@ function Task_management_Item({value,Navigate_Url,modules,index,ShowMessage,Mess
   return (
     <View   style={Styles.With100}>
       <View style={Styles.FlexRow}>
-        {/*<View style={{width:'5%',alignItems:'center',justifyContent:"center"}}>*/}
-        {/*<View style={[Styles.DoneTask,{backgroundColor:value.taskStatusColor}]}>*/}
-        {/*  {*/}
-        {/*  value.Status==='done'?*/}
-        {/*    <AntDesign name={"check"} size={15} color={'#fff'} />:*/}
-        {/*    null*/}
-        {/*}*/}
-        {/*</View>*/}
-        {/*  /!*<View style={[modules- 1 !== index?Styles.BorderDash:*!/*/}
-        {/*  /!*  { height:normalize(60),}]}>*!/*/}
-        {/*  /!*</View>*!/*/}
-        {/*</View>*/}
-        <TouchableOpacity onPress={()=> {
-          GLOBAL.ProjectId = value.projectId;
-          Navigate_Url("Project_Sites");
-        }} style={{width:'100%',}}>
-          <View style={Styles.ViewItems_center_transparent_row}>
-
-          <Text style={[Styles.txt_left]}>{value.taskTitle}</Text>
-            <Text style={[Styles.txtRight, {fontSize:normalize(12),color:'#b4b4b4',marginLeft:'auto'}]}>{value.taskCreatedOn}</Text>
+        <View style={{width:'5%',alignItems:'center',justifyContent:"center"}}>
+          <View style={value.taskStatusName==='Completed'?Styles.DoneTask:Styles.NotDoneTask}>
           </View>
-          {/*<View style={[Styles.ViewItems_center_transparent_row,{marginTop:4}]}>*/}
-          {/*  <Text style={[Styles.txt_left, {fontSize:normalize(12),color:'#b4b4b4'}]}>{value?.taskDescription?.slice(0,30)}...</Text>*/}
-          {/*</View>*/}
-          <View style={[Styles.ViewItems_center_transparent_row,{marginTop:4}]}>
-            <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnListTask}>
-              <TouchableOpacity onPress={() => {
-                GLOBAL.UnitId = value.unitId
-                Navigate_Url('Project_Section2');
-              }} >
-                <Text style={[Styles.txt_left2, { fontSize: normalize(13) }]}>  {value.taskStatusName}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+          <View style={[modules- 1 !== index?Styles.BorderDash:
+            { height:normalize(45)}]}>
+          </View>
+        </View>
+        <TouchableOpacity onPress={()=> {
+          GLOBAL.Task_detail=value
+          GLOBAL.TaskId = value.taskId;
+          Navigate_Url("TaskDetail");
+        }} style={{width:'95%',}}>
+          <View style={Styles.ViewItems_center_transparent_row_task}>
+          <Text style={[Styles.txt_left_task]}>{value.taskTitle}</Text>
+
+              <View style={[Styles.btnListTask,{backgroundColor:value.taskStatusColor}]}>
+                <Text style={[Styles.txt_left2, { fontSize: normalize(12) }]}>  {value.taskStatusName}</Text>
+              </View>
+
+          </View>
+          <View style={[Styles.ViewItems_center_transparent_row]}>
+            <Text style={[Styles.txt_left_task, {fontSize:normalize(12),color:'#b4b4b4'}]}>{value.Year}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -67,10 +56,6 @@ function Task_management_Item({value,Navigate_Url,modules,index,ShowMessage,Mess
         animationType="slide"
         transparent={true}
         visible={visible}
-        // onRequestClose={() => {
-        //     Alert.alert("Modal has been closed.");
-        //     setModalVisible(!modalVisible);
-        // }}
       >
         <View style={[Styles.centeredView, {
           justifyContent: "space-between",

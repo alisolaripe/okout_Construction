@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text, Modal,Image,TouchableOpacity
+  Text, Modal, Image, TouchableOpacity, FlatList,
 } from "react-native";
 import { Styles } from "../Styles";
-import { Container, Content } from "native-base";
+import { Container } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
-const GLOBAL = require("../Global");
-
-const Api = require("../Api");
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { AddModal } from "../component/AddModal";
-import Category_items_list from "../component/Category_items_list";
+import List_Items from "../component/list_Items";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import Geolocation from "react-native-geolocation-service";
 import {readOnlineApi } from "../ReadPostApi";
@@ -26,8 +23,8 @@ const data = [
   { label: "Location", value: "14", Icon: "location" },
 ];
 let City=[];
-
-
+const GLOBAL = require("../Global");
+const Api = require("../Api");
 function Project_Sites({ navigation, navigation: { goBack } }) {
   const [modules, setmodules] = useState([]);
   const [Message, setMessage] = useState("");
@@ -62,6 +59,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const onOpen = () => {
     setvisibleAddModal(true);
   };
+  ///add And Update Sit When app is Offline Mode/////////
   const AddSitesDataStorage = async (A) => {
     try {
       let List =modules
@@ -113,10 +111,8 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     );
   };
   const renderModalContent = () => (
-
     <View style={Styles.DeleteModalTotalStyle}>
       <View style={Styles.DeleteModalStyle2}>
-
         <View style={Styles.With100NoFlex}>
           <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                  source={require("../../Picture/png/AlertImage.png")}
@@ -469,53 +465,69 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     });
   };
   ///////////////////////////////////////////
+  const renderItem=({ item ,index})=>(
+    <List_Items key={index} getCity={getCity}
+                ShowWarningMessage={ShowWarningMessage}
+                setShowWarningMessage={setShowWarningMessage}
+                setShowMessage={setShowMessageUpdate} value={item}
+                CityList={CityList} CountryList={CountryList}
+                cityId={cityId} setcityId={setcityId}
+                countryId={countryId} setcountryId={setcountryId}
+                Message={Message} onPress={UpdateSites} data={data}
+                ShowMessage={ShowMessageUpdate} tittlebtn={"Update Sites"} numberValue={4}
+                Navigate_Url={Navigate_Url}
+    />
+  )
+  const renderSectionHeader=()=>(
+    <>
+      {ShowMessage === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+      {
+        showModalDelete &&
+        <View>
+          {
+            _showModalDelete()
+          }
+        </View>
+      }
+    </>
+  )
+  const renderSectionFooter=()=>(
+    <View style={Styles.SectionFooter}/>
+  )
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={goBack}
               Title={"Sites / Buildings"}/>
-      <Content>
+
       <View style={Styles.containerList}>
-        {ShowMessage === true ?
-          <View style={Styles.flashMessageSuccsess}>
-            <View style={{ width: "10%" }} />
-            <View style={{ width: "80%" }}>
-              <Text style={Styles.AlertTxt}>
-                {Message}
-              </Text>
-            </View>
-            <View style={{ width: "10%" }} />
-          </View>
-          :
-          null
-        }
-        {
-          showModalDelete &&
-          <View>
-            {
-              _showModalDelete()
-            }
-          </View>
-        }
         {
           modules!=='' ?
-        <View style={Styles.ItemsBox2}>
-          {modules?.map((item, index) => {
-            return (
-              <Category_items_list key={index} getCity={getCity}
-                                   ShowWarningMessage={ShowWarningMessage}
-                                   setShowWarningMessage={setShowWarningMessage}
-                                   setShowMessage={setShowMessageUpdate} value={item}
-                                   CityList={CityList} CountryList={CountryList}
-                                   cityId={cityId} setcityId={setcityId}
-                                   countryId={countryId} setcountryId={setcountryId}
-                                   Message={Message} onPress={UpdateSites} data={data}
-                                   ShowMessage={ShowMessageUpdate} tittlebtn={"Update Sites"} numberValue={4}
-                                   Navigate_Url={Navigate_Url}
-              />
-            );
-          })
-          }
-
+        <View style={Styles.Center_margin_Bottom3}>
+          {modules&&(
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={modules}
+              style={{width:'100%',flexGrow:0}}
+              renderItem={renderItem}
+              ListHeaderComponent={renderSectionHeader}
+              ListFooterComponent={renderSectionFooter}
+              keyExtractor={(item,index)=>{
+                return index.toString();
+              }}
+            />
+          )}
         </View>:
         <View style={Styles.With90CenterVertical}>
           <Text style={Styles.EmptyText}>
@@ -527,7 +539,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
             </View>
         }
       </View>
-      </Content>
+
       <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
       <AddModal
         numberValue={2}

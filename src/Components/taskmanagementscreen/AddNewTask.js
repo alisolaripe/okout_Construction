@@ -12,7 +12,7 @@ import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
 import { TextInputI } from "../component/TextInputI";
-import {removeDataStorage} from "../Get_Location";
+import { removeDataStorage, writeDataStorage } from "../Get_Location";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -29,6 +29,7 @@ import { Formik } from "formik";
 import { Dropdown } from "react-native-element-dropdown";
 import { ButtonI } from "../component/ButtonI";
 import * as Yup from "yup";
+import { readOnlineApi } from "../ReadPostApi";
 const Api = require("../Api");
 let A=[]
 let numOfLinesCompany = 0;
@@ -304,6 +305,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
               if (json?.status === true) {
                 setMessage(json?.msg);
                 setShowMessage(true);
+                My_TaskList()
                 const timerId = setInterval(() => {
                   setShowMessage(false);
                 }, 4000);
@@ -345,6 +347,14 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       }
     }
 
+  };
+  const My_TaskList =async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        console.log(json,'json')
+        writeDataStorage(GLOBAL.All_Task,json?.tasks)
+      });
+    }
   };
   const onOpen = () => {
     modalizeRef.current?.open();

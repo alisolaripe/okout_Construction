@@ -27,7 +27,7 @@ let TodayDate=''
 let Day=''
 let Month=''
 import Geocoder from "react-native-geocoder";
-import Category_List_Detail_Images_Item from '../component/Category_List_Detail_Images_Item'
+import List_Item_Detail_Images from '../component/List_Item_Detail_Images'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
 import { Filter } from "../component/Filter";
@@ -815,8 +815,8 @@ function Project_Section_Detail({ navigation, navigation: { goBack } }) {
             {
               ImageSourceviewarray.map((value,index) => {
                 return (
-               <Category_List_Detail_Images_Item value ={value} key={index} DeleteImage={DeleteImageFromApi}
-                                                 Change_Gallry_Date={Change_Gallry_Date} Type={'Feature'}/>
+               <List_Item_Detail_Images value ={value} key={index} DeleteImage={DeleteImageFromApi}
+                                        Change_Gallry_Date={Change_Gallry_Date} Type={'Feature'}/>
                     )
               })
             }

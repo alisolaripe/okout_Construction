@@ -18,7 +18,7 @@ import { Colors } from "../Colors";
 import LinearGradient from "react-native-linear-gradient";
 import { Content } from "native-base";
 const GLOBAL = require("../Global");
-function Project_Feature_Image_Item({index,value,DeleteImage,ImagebtnColor,IconColor}) {
+function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,IconColor}) {
   const [FullImage,setFullImage] = useState(false);
   const [visible,setvisible] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
@@ -240,4 +240,4 @@ function Project_Feature_Image_Item({index,value,DeleteImage,ImagebtnColor,IconC
 }
 
 
-export default Project_Feature_Image_Item;
+export default Feature_DYB_detail_Image_Item;

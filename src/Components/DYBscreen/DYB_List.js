@@ -430,10 +430,7 @@ function DYB_List({ navigation, navigation: { goBack } }) {
         <Filter  FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} setShowFilter={setShowFilter}/>
         :null
       }
-      {
-        showModalCalender &&
-        _showModalCalender()
-      }
+
       {ShowDateRange===true?
         <TouchableOpacity onPress={()=>setshowModalCalender( true)} style={Styles.WeekFilterBox}>
           <Text style={Styles.Filter_txt}>
@@ -474,7 +471,7 @@ function DYB_List({ navigation, navigation: { goBack } }) {
             GLOBAL.Feature="Image";
             navigation.navigate('DYB_Detail')
           }}>
-            <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Image</Text>
+            <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Photos</Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -486,7 +483,10 @@ function DYB_List({ navigation, navigation: { goBack } }) {
 
         <View style={Styles.containerList}>
           <View style={[Styles.With90Center_Margin]}>
-
+            {
+              showModalCalender &&
+              _showModalCalender()
+            }
             {
               modules!=='' ?
                 <View style={Styles.FlexWrapDyb}>

@@ -10,7 +10,7 @@ import LinearGradient from "react-native-linear-gradient";
 let numOfLinesCompany = 0;
 const GLOBAL = require("../Global");
 import normalize from "react-native-normalize/src/index";
-function Project_feature_Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
+function Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
   const [FeatureNote,setFeatureNote]= useState(false);
   const [Title,setTitle]= useState(false);
   const [updateText, setupdateText] = useState(false);
@@ -120,6 +120,4 @@ function Project_feature_Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
     </View>
   );
 }
-
-
-export default Project_feature_Notes_Item;
+export default Notes_Item;

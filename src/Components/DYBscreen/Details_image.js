@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
-  View, TouchableOpacity, SafeAreaView, ScrollView, Modal, Image, FlatList,
+  View, TouchableOpacity, SafeAreaView,Modal, Image, FlatList,
 } from "react-native";
 import { ButtonI } from "../component/ButtonI";
-import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import {Container, Content} from "native-base";
-
-import Category_List_Detail_Images_Item from '../component/Category_List_Detail_Images_Item'
-const GLOBAL = require("../Global");
-const Api = require("../Api");
+import List_Item_Detail_Images from '../component/List_Item_Detail_Images'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
@@ -20,6 +16,8 @@ import {readOnlineApi } from "../ReadPostApi";
 import { removeDataStorage } from "../Get_Location";
 import LinearGradient from "react-native-linear-gradient";
 import AntDesign from "react-native-vector-icons/AntDesign";
+const GLOBAL = require("../Global");
+const Api = require("../Api");
 let A=[];
 function Details_image({ navigation, navigation: { goBack } }) {
   const scrollViewRef = useRef();
@@ -414,7 +412,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
     setshowModalDelete(true)
   };
   const renderItem = ({ item }) => (
-    <Category_List_Detail_Images_Item value={item} Type={'DYB'}
+    <List_Item_Detail_Images value={item} Type={'DYB'}
     />
   )
   return (
@@ -480,7 +478,7 @@ function Details_image({ navigation, navigation: { goBack } }) {
                 }}
               />
             )}
-            {ImageSourceviewarray?.length===''&&
+            {ImageSourceviewarray===''&&
               <View style={Styles.With90CenterVertical}>
                 <Text style={Styles.EmptyText}>
                   " No items added  yet"
@@ -490,23 +488,29 @@ function Details_image({ navigation, navigation: { goBack } }) {
             }
           </View>
         </View>
-      {
-        scroll===false?
-          <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn]}>
-            <TouchableOpacity transparent onPress={()=> {
-              scrollViewRef.current.scrollToEnd({ animated: true })
-              setscroll(true)
-            }}>
-              <AntDesign name="down" size={20} color="#fff" />
-            </TouchableOpacity>
-          </LinearGradient>:
-          <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn]}>
-            <TouchableOpacity transparent onPress={()=> {
-              scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
-              setscroll(false)}}>
-              <AntDesign name="up" size={20} color="#fff" />
-            </TouchableOpacity>
-          </LinearGradient>
+
+        {
+          ImageSourceviewarray!==''&&
+          <>
+            {scroll===false?
+            <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn]}>
+              <TouchableOpacity transparent onPress={() => {
+                scrollViewRef.current.scrollToEnd({ animated: true })
+                setscroll(true)
+              }}>
+                <AntDesign name="down" size={20} color="#fff" />
+              </TouchableOpacity>
+            </LinearGradient>:
+            <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn]}>
+              <TouchableOpacity transparent onPress={() => {
+                scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
+                setscroll(false)
+              }}>
+                <AntDesign name="up" size={20} color="#fff" />
+              </TouchableOpacity>
+            </LinearGradient>
+            }
+          </>
       }
       <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>
     </Container>

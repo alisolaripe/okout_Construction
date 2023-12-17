@@ -55,7 +55,11 @@ function LogIn({ navigation }) {
     const Second=date.getSeconds()
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
     setShowDate(Full)
-    setVersionCheck(VersionCheck?.getCurrentVersion()+'.'+6)
+    setVersionCheck(VersionCheck?.getCurrentVersion()+'.'+7)
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+    };
   }, []);
   const writeDataStorage=async (key,obj)=>{
     try {
@@ -63,10 +67,7 @@ function LogIn({ navigation }) {
     }
     catch (e) {
     }
-    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
-    };
+
   }
   const handleBackButtonClick=()=>{
     BackHandler.exitApp()
