@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
-  TouchableOpacity, Modal, Image, FlatList,Button
+  TouchableOpacity, Modal, Image, FlatList,SafeAreaView
 } from "react-native";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
@@ -153,7 +153,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     </View>
   );
   const renderItem = ({ item,index }) => (
-    <Task_management_Item index={index} modules={modules.length}   value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} />
+    <Task_management_Item index={index} key={index} modules={modules.length}   value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} />
   )
   const renderItem_assigned = ({ item,index }) => (
     <Task_management_Item index={index} modules={Assigned.length}   value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} />
@@ -175,7 +175,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               <>
                 {
                   selectItem===item.Id?
-                    <LinearGradient key={index}  angle={angle}
+                    <LinearGradient  angle={angle}
                                      colors={["#6dabec", "#27405c"]}    useAngle={true}
                                      style={Styles.Horizental_Menu_Item}>
                       <TouchableOpacity  key={index}  onPress={()=>setSelectItem(item.Id)}>
@@ -185,7 +185,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                       </TouchableOpacity>
                     </LinearGradient>:
 
-                    <TouchableOpacity key={index} onPress={()=>setSelectItem(item.Id)}  style={Styles.Horizental_Menu_Item_notselect}>
+                    <TouchableOpacity  onPress={()=>setSelectItem(item.Id)}  style={Styles.Horizental_Menu_Item_notselect}>
                       <Text style={Styles.Horizental_Menu_Item_text}>
                         {item.Name}
                       </Text>

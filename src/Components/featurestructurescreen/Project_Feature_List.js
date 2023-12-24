@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity, SafeAreaView, Dimensions, Modal, Image, FlatList,
 } from "react-native";
-import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
@@ -20,7 +19,7 @@ import { Filter } from "../component/Filter";
 import { Header } from "../component/Header";
 import {removeDataStorage} from "../Get_Location";
 import {  readOnlineApi } from "../ReadPostApi";
-import DYB_List_Item from "../DYBscreen/DYB_List_Item";
+
 let A=[];
 function Project_Feature_List({ navigation, navigation: { goBack } }) {
 
@@ -34,8 +33,10 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   const [ShowDateRange,setShowDateRange]=useState(false);
   const [DateRangeList,setDateRangeList]=useState([]);
   const [showModalDelete, setshowModalDelete] = useState(false);
+  const [route, setroute] = useState('');
   useEffect(()=>{
     const unsubscribe = navigation.addListener('focus', () => {
+      setroute(GLOBAL.route)
       getFeatureDetail();
     });
     return unsubscribe;
@@ -43,7 +44,6 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   /////////////////////////
 
   const Make_Week_Filter_List=(A)=>{
-
     let B = [];
     let endDate_Format=''
     let today =''
@@ -419,14 +419,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   );
   const renderSectionHeader=()=>(
     <>
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
       { modules?.length!==0?
         <Filter  FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} setShowFilter={setShowFilter}/>
         :null
@@ -498,12 +491,20 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   )
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Photos / Notes List'}/>
+      <Header  colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack} Title={'DYL List'}/>
         <View style={Styles.containerList}>
           <View style={[Styles.With90Center_Margin]}>
             {
               showModalCalender &&
               _showModalCalender()
+            }
+            {
+              showModalDelete &&
+              <View>
+                {
+                  _showModalDelete()
+                }
+              </View>
             }
             {
             modules!==''?

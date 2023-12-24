@@ -171,11 +171,45 @@ const Styles = StyleSheet.create({
     margin: 7,
     fontWeight:'bold'
   },
+  txtTasktitle: {
+    color: "#fff",
+    fontSize: normalize(17),
+    marginTop: normalize(17),
+    fontWeight:'bold'
+  },
   txtLightColortask: {
     margin: 2,
-    fontWeight:'bold',
     fontSize:normalize(13),color:'#fff',
-    marginTop:normalize(30)
+    textAlign:"left",
+    marginTop:normalize(18),
+    paddingBottom:normalize(25),
+    lineHeight: normalize(20)
+  },
+  txtLightColortaskDescription: {
+    margin: 2,
+    fontWeight:'bold',
+    fontSize:normalize(15),color:'#fff',
+    textAlign:"left"
+  },
+  Description:{
+    width:'100%',
+    alignItems:'flex-start',
+    marginTop:normalize(18),
+
+  },
+  borderBotomWidth:{
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+justifyContent: 'center',
+alignItems: 'center',
+paddingVertical: normalize(10),
+  width: '100%',
+  borderWidth: 20,
+borderTopRightRadius: 800,
+  borderTopLeftRadius: 800,
+    marginTop:normalize(40),
+borderColor:GLOBAL.OFFICIAL_backgroundItem,
+    position: 'absolute', //Here is the trick
+    bottom: normalize(52), //Here is the trick
   },
   txtLightColortask_Items: {
     marginLeft: normalize(10),
@@ -1327,6 +1361,10 @@ flex:1,
     borderTopRightRadius:normalize(550),
     borderBottomRightRadius:normalize(550)
     ,marginTop: normalize(9),height:normalize(16)},
+  DoneTaskDetaislFloat:{width:'15%',
+    borderRadius:normalize(6)
+    ,paddingVertical:normalize(4),position:'absolute',top:normalize(0),
+    zIndex:100,left:normalize(25)},
   FilterBox:{
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_35,marginVertical:normalize(4)
   },
@@ -1639,10 +1677,10 @@ flex:1,
 
   },
   InputeRowItemstask:{
-    width:'95%',
+    width:'90%',
     alignItems:'center',
     justifyContent:'center',
-
+marginTop:normalize(24)
   },
   formContainer: {
     padding: 10,
@@ -1668,8 +1706,9 @@ flex:1,
     width:'100%',
     color:"#fff",
     marginVertical: normalize(15),
-    paddingVertical: 4,
-
+    paddingVertical: normalize(25),
+    alignItems:'center',
+    justifyContent:'center',
   },
   inputStyleLocationAdd : {
     borderWidth:1,
@@ -1845,11 +1884,19 @@ flex:1,
     paddingVertical:normalize(8)
   },
   RowTask:{
-    flexDirection:'row'
+    flexDirection:'row',
+    width:'90%',
+    justifyContent:'center'
+    ,marginTop:normalize(20),
+    alignItems:'center'
   },
+
   RowTask_Items:{
     flexDirection:'row',
-    width:'50%',marginTop:25,
+    width:'50%',
+  },
+  TaskImage:{ width: "100%",paddingBottom:normalize(25), alignItems: "center",
+  position:'absolute',bottom:normalize(50)
   }
 });
 export { Styles };

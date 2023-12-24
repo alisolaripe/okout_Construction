@@ -224,18 +224,31 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
                 geoAddress:obj2?.geoAddress,
                 Country:Country,
               })}})});
-console.log(A,'AA')
-        if(A?.length!==0) {
-          A = [mark2,...A];
-          A?.sort(dateComparison_data)
-          setImageSourceviewarray(A);
-          setMudolList(A);
-          Make_Week_Filter_List(A)
-          Save_Details_Online(A)
+        if(GLOBAL.route==='structure') {
+          if (A?.length !== 0) {
+            A = [mark2, ...A];
+            A?.sort(dateComparison_data)
+            setImageSourceviewarray(A);
+            setMudolList(A);
+            Make_Week_Filter_List(A)
+            Save_Details_Online(A)
+          } else {
+            A = [mark2];
+            setImageSourceviewarray(A);
+          }
         }
         else {
-          A=[mark2];
-          setImageSourceviewarray(A);
+          if (A?.length !== 0) {
+            A?.sort(dateComparison_data)
+            setImageSourceviewarray(A);
+            setMudolList(A);
+            Make_Week_Filter_List(A)
+            Save_Details_Online(A)
+
+          }
+          else {
+            setImageSourceviewarray('')
+          }
         }
       });
     }
@@ -822,14 +835,7 @@ console.log(A,'AA')
           </View>
         </View>
         : null}
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
       {ShowWarningMessage===true&&
       <TouchableOpacity onPress={()=>{
         setShowWarningMessage(false);
@@ -848,7 +854,7 @@ console.log(A,'AA')
         </View>
       </TouchableOpacity>
       }
-      {ImageSourceviewarray.length>1?
+      {ImageSourceviewarray?.length>1?
         <Filter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter}
                 setShowFilter={setShowFilter} />
         : null
@@ -889,38 +895,74 @@ console.log(A,'AA')
       }
     </View>
   );
+  const renderItem_dyb = ({ item }) => (
+    <List_Item_Detail_Images value={item} Type={'DYB'}
+    />
+  )
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={Back_navigate}
+      <Header  colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate}
               Title={"Sites / Buildings Detail"} />
         <View style={Styles.containerList}>
           {
             showModalCalender &&
             _showModalCalender()
           }
+
           <View style={Styles.Center_margin_Bottom2}>
-            {ImageSourceviewarray&&(
-              <FlatList
-                showsVerticalScrollIndicator={false}
-                data={ImageSourceviewarray}
-                style={{width:'100%',flexGrow:0}}
-                renderItem={renderItem}
-                ListHeaderComponent={renderSectionHeader}
-                ListFooterComponent={ListFooter}
-                ref={scrollViewRef}
-                columnWrapperStyle={{justifyContent:"space-between"}}
-                contentContainerStyle={{justifyContent:"space-between"}}
-                numColumns={2}
-                key={'#'}
-                keyExtractor={(item,index)=>{
-                return "#"+index.toString();
-                }}
-              />
-            )}
+            {
+              showModalDelete &&
+              <View>
+                {
+                  _showModalDelete()
+                }
+              </View>
+            }
+            {
+              GLOBAL.route === 'structure' ?
+                <>
+                  {ImageSourceviewarray && (
+                    <FlatList
+                      showsVerticalScrollIndicator={false}
+                      data={ImageSourceviewarray}
+                      style={{ width: '100%', flexGrow: 0 }}
+                      renderItem={renderItem}
+                      ListHeaderComponent={renderSectionHeader}
+                      ListFooterComponent={ListFooter}
+                      ref={scrollViewRef}
+                      columnWrapperStyle={{ justifyContent: "space-between" }}
+                      contentContainerStyle={{ justifyContent: "space-between" }}
+                      numColumns={2}
+                      key={'#'}
+                      keyExtractor={(item, index) => {
+                        return "#" + index.toString();
+                      }}
+                    />
+                  )}
+                </> :
+                <>
+                  {ImageSourceviewarray && (
+                    <FlatList
+                      ref={scrollViewRef}
+                      columnWrapperStyle={{ justifyContent: "space-between", }}
+                      contentContainerStyle={{ justifyContent: "space-between", }}
+                      data={ImageSourceviewarray}
+                      numColumns={2}
+                      style={{ width: '100%', }}
+                      ListHeaderComponent={renderSectionHeader}
+                      renderItem={renderItem_dyb}
+                      key={'#'}
+                      keyExtractor={(item, index) => {
+                        return "#" + index.toString();
+                      }}
+                    />
+                  )}
+                </>
+            }
           </View>
         </View>
         {
-          ImageSourceviewarray.length>1?
+          ImageSourceviewarray?.length>1?
             <>
               {
                 scroll===false?

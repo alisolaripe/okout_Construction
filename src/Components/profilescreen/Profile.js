@@ -14,15 +14,13 @@ const GLOBAL = require("../Global");
 import LinearGradient from "react-native-linear-gradient";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { TextInputI } from "../component/TextInputI";
-import VersionCheck from "react-native-version-check";
 import { Footer1 } from "../component/Footer";
 function Profile( { navigation, navigation: { goBack }}) {
   const [Cheked,setCheked] = useState(false);
   const [Version,setVersionCheck] = useState('');
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect( () => {
-    let A=VersionCheck.getCurrentVersion()+'.'+7
-    setVersionCheck(A)
+    setVersionCheck('1.0.8')
 
   }, []);
 

@@ -17,6 +17,7 @@ import Geolocation from "react-native-geolocation-service";
 import {FloatAddBtn} from "../component/FloatAddBtn";
 import {readOnlineApi} from "../ReadPostApi";
 import { geocodePosition, requestLocationPermission ,writeDataStorage,removeDataStorage} from "../Get_Location";
+import DYB_List_Item from "../component/DYB_List_Item";
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 const data = [
@@ -25,7 +26,13 @@ const data = [
   { label: "Photos", value: "6", Icon: "images" },
   { label: "Location", value: "15", Icon: "location" },
 ];
+const data_dyb = [
+  {label: "Photos",value: "2",Icon: "images" },
+  {label: "Location",value: "14",Icon: "location" },
+];
 let City=[];
+let Filter_units='';
+let Filter_sites='';
 function Project_Units({ navigation, navigation: { goBack } }) {
   const [modules,setmodules]=useState([]);
   const [Message,setMessage]=useState("");
@@ -50,14 +57,62 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const [AddId,setAddId]=useState(0);
   const [showModalDelete,setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
-
+  const [route, setroute] = useState('');
   useEffect(() => {
     getLocation();
-    const unsubscribe = navigation.addListener('focus', () => {
-      getUnits();
-    });
-    return unsubscribe;
+
+      const unsubscribe = navigation.addListener('focus', () => {
+        setroute(GLOBAL.route)
+        if(GLOBAL.route==='structure') {
+        getUnits();
+        }
+        else {
+          getUnits_dyb()
+        }
+      });
+      return unsubscribe;
+
   }, []);
+  const dateComparison_count =(a,b)=>{
+    const date1 = a?.Count
+    const date2 = b?.Count
+    return date2 - date1;
+  }
+  const getUnits_dyb =async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+    let A = [];
+    if (json!==null) {
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
+      if (Filter_units?.units) {
+        Filter_units?.units?.forEach((obj) => {
+          A.push({
+            Id: obj?.unitId,
+            Name: obj?.unitName,
+            Count: obj?.sectionCount,
+            NameCount: 'section',
+            task: obj?.task,
+            ListName: 'Unit',
+            address: obj?.address,
+            geoLat: obj?.geoLat,
+            geoLong: obj?.geoLong,
+            cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
+            countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
+            postalCode: obj?.address?.address_Zip,
+            street: obj?.address?.address_Street,
+            sections:obj?.sections
+          });
+        });
+        if(A?.length!==0) {
+          A?.sort(dateComparison_count)
+          setmodules(A);
+        }
+      else
+        setmodules('');
+      }
+    }
+
+  };
   ///////////////////////////////////////////////////
   const getAllProjectInfo = async () => {
     readOnlineApi(Api.getAllProjectInfo).then(json => {
@@ -224,8 +279,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     {
       let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
       if (json!==null) {
-        let Filter_units = "";
-        let Filter_sites = "";
+
         Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
         Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
 
@@ -530,14 +584,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   )
   const renderSectionHeader=()=>(
     <>
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
       {ShowMessageDelete === true ?
         <View style={Styles.flashMessageSuccsess}>
           <View style={{ width: "10%" }} />
@@ -569,40 +616,85 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
+  const SeeDetail = (Id) => {
+    GLOBAL.UnitId = Id;
+    navigation.navigate("Project_Section2");
+  };
+  const renderItem_dyb = ({ item }) => (
+    <DYB_List_Item  SeeDetail={SeeDetail} data={data_dyb} value={item}  Navigate_Url={Navigate_Url}/>
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Plots / Units'}/>
+      <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack} Title={'Plots / Units'}/>
 
         <View style={Styles.containerList}>
-
           {
-            modules!=='' ?
-              <View style={[Styles.Center_margin_Bottom3]}>
-                {modules&&(
-                  <FlatList
-                    showsVerticalScrollIndicator={false}
-                    data={modules}
-                    style={{width:'100%',flexGrow:0}}
-                    renderItem={renderItem}
-                    ListHeaderComponent={renderSectionHeader}
-                    ListFooterComponent={renderSectionFooter}
-                    keyExtractor={(item,index)=>{
-                      return index.toString();
-                    }}
-                  />
-                )}
-          </View>:
-              <View style={Styles.With90CenterVertical}>
-                <Text style={Styles.EmptyText}>
-                 " No Units defined
-                </Text>
-                <Text style={Styles.EmptyText}>
-                  Add by pressing button below "
-                </Text>
-              </View>
+            showModalDelete &&
+            <View>
+              {
+                _showModalDelete()
+              }
+            </View>
+          }
+          {
+            route=== 'structure' ?
+              <>
+                {
+                  modules !== '' ?
+                    <View style={[Styles.Center_margin_Bottom3]}>
+                      {modules && (
+                        <FlatList
+                          showsVerticalScrollIndicator={false}
+                          data={modules}
+                          style={{ width: '100%', flexGrow: 0 }}
+                          renderItem={renderItem}
+                          ListHeaderComponent={renderSectionHeader}
+                          ListFooterComponent={renderSectionFooter}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No Units defined
+                      </Text>
+                      <Text style={Styles.EmptyText}>
+                        Add by pressing button below "
+                      </Text>
+                    </View>
+                }
+              </> :
+              <>
+                {
+                  modules !== '' ?
+                    <View style={Styles.ItemsBoxDyb}>
+                      {modules && (
+                        <FlatList
+                          data={modules}
+                          showsVerticalScrollIndicator={false}
+                          style={{ width: '100%' }}
+                          renderItem={renderItem_dyb}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No Unites defined "
+                      </Text>
+                    </View>
+                }
+              </>
           }
         </View>
-      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
+      {
+        route==='structure'?
+          <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null}
       <AddModal
         numberValue={11}
         GeoAddressCity={GeoAddressCity}

@@ -753,7 +753,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   }
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={Back_navigate}
+      <Header colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate}
               Title={"Features Detail"} />
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
@@ -829,7 +829,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                   {
                     ImageSourceviewarray.map((value, index) => {
                       return (
-                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle} ImagebtnColor={['#ffadad','#fd5858','#FF0000']}
+                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle} ImagebtnColor={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
                                                     DeleteImage={DeleteImage} ChangeChecked={ChangeChecked2} IconColor={'#F67070FF'} />
                       );
                     })}
@@ -842,7 +842,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                            onpress={AddFeatureImage}
                            categoriIcon={""}
                            title={"Save"}
-                           colorsArray={['#ffc2b5','#fca795','#d1583b']}
+                           colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
                            styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null
                 }
 
@@ -860,7 +860,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                          onpress={AddFeatureImage}
                          categoriIcon={""}
                          title={"Save"}
-                         colorsArray={["#ffadad", "#f67070", "#FF0000"]}
+                         colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
                          styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />
               </View>
           }

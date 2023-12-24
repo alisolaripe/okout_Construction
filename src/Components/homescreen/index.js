@@ -6,7 +6,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import DrawerCustomize from '../drawer/Drawer';
 import Project_structureStack from '../projectstructurescreen/index';
 import Task_managementStack from '../taskmanagementscreen/index';
-import DYBStack from '../DYBscreen/index'
 import Home from "./Home_meno";
 import LogIn from '../loginscreen/Login'
 import ProfileStack from '../profilescreen/index';
@@ -22,7 +21,6 @@ function Home_Navigation() {
         <Stack.Screen name="Home" component={Home_meno} />
         <Stack.Screen name="Project_structureStack" component={Project_structureStack} />
         <Stack.Screen name="Task_managementStack" component={Task_managementStack} />
-        <Stack.Screen name="DYBStack" component={DYBStack} />
         <Stack.Screen name="ProfileStack" component={ProfileStack} />
         <Stack.Screen name="LogIn" component={LogIn} />
 

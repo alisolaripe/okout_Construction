@@ -89,6 +89,7 @@ module.exports = {
   Country:[],
   City:[],
   AllProjectInfo:[],
-  Task_detail:''
+  Task_detail:'',
+  route:""
 
 };

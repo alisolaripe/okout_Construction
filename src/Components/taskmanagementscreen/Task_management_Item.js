@@ -4,15 +4,10 @@ import {
   View,
   TouchableOpacity, Dimensions,Modal
 } from "react-native";
-import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import Entypo from "react-native-vector-icons/Entypo";
 import { TextInputI } from "../component/TextInputI";
-import { Dropdown } from 'react-native-element-dropdown';
-import { Button } from "native-base";
-import LinearGradient from "react-native-linear-gradient";
 const GLOBAL = require("../Global");
 function Task_management_Item({value,Navigate_Url,ShowMessage,Message,ChangeChecked,index,modules}) {
   const [visible,setvisible] = useState(false);
@@ -25,7 +20,7 @@ function Task_management_Item({value,Navigate_Url,ShowMessage,Message,ChangeChec
     }
   }
   return (
-    <View   style={Styles.With100}>
+    <View index={index}   style={Styles.With100}>
       <View style={Styles.FlexRow}>
         <View style={{width:'5%',alignItems:'center',justifyContent:"center"}}>
           <View style={value.taskStatusName==='Completed'?Styles.DoneTask:Styles.NotDoneTask}>

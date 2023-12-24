@@ -8,6 +8,7 @@ import normalize from "react-native-normalize/src/index";
 import LinearGradient from "react-native-linear-gradient";
 import { removeDataStorage } from "../Get_Location";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import Svg, { Path,Defs,Stop } from "react-native-svg"
 import { Colors } from "../Colors";
 const GLOBAL = require("../Global");
 function TaskDetail({ navigation, navigation: { goBack } }) {
@@ -83,28 +84,35 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
       }
       <View style={Styles.container}>
         <View style={Styles.InputeRowItemstask}>
+          <View style={[Styles.DoneTaskDetaislFloat,{backgroundColor:GLOBAL.Task_detail?.taskStatusColor}]}>
+            <Text numberOfLines={3} style={[Styles.txtLightColor]}>{GLOBAL.Task_detail?.taskStatusName}</Text>
+          </View>
           <View style={[Styles.inputStyletask]}>
-            <View style={Styles.RowTask}>
-              <View style={[Styles.DoneTaskDetaisl,{backgroundColor:GLOBAL.Task_detail?.taskStatusColor}]}/>
-              <Text numberOfLines={3} style={[Styles.txtLightColor]}>{GLOBAL.Task_detail?.taskTitle}</Text>
+            <View style={{ width:'90%'}}>
+              <Text numberOfLines={3} style={[Styles.txtTasktitle]}>{GLOBAL.Task_detail?.taskTitle}</Text>
             </View>
-
-            <View style={Styles.RowTask}>
-             <View style={Styles.RowTask_Items}>
-               <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />
-               <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{GLOBAL.Task_detail?.taskPlanStartDate}</Text>
-             </View>
-              <View style={Styles.RowTask_Items}>
-                <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />
-                <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{GLOBAL.Task_detail?.taskPlanDueDate}</Text>
-             </View>
-            </View>
-            <Text numberOfLines={10} style={[Styles.txtLightColortask]}>{GLOBAL.Task_detail?.taskCategoryName
-            }</Text>
+              <View style={Styles.RowTask}>
+                <View style={Styles.RowTask_Items}>
+                  <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />
+                  <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{GLOBAL.Task_detail?.taskPlanStartDate}</Text>
+                </View>
+                <View style={Styles.RowTask_Items}>
+                  <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />
+                  <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{GLOBAL.Task_detail?.taskPlanDueDate}</Text>
+                </View>
+              </View>
+          </View>
+          <View style={Styles.Description}>
+            <Text numberOfLines={10} style={[Styles.txtLightColortaskDescription]}>Description
+            </Text>
+            <Text numberOfLines={100} style={[Styles.txtLightColortask]}>{GLOBAL.Task_detail?.taskCategoryName
+            }
+            </Text>
           </View>
         </View>
       </View>
-    </Content>
+         </Content>
+
     <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>
   </Container>
   )

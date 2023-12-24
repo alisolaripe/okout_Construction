@@ -17,10 +17,15 @@ import { FloatAddBtn } from "../component/FloatAddBtn";
 import Geolocation from "react-native-geolocation-service";
 import {readOnlineApi } from "../ReadPostApi";
 import {requestLocationPermission ,geocodePosition,writeDataStorage,removeDataStorage} from "../Get_Location";
+import DYB_List_Item from "../component/DYB_List_Item";
 const data = [
   { label: "Edit", value: "2", Icon: "edit" },
   { label: "Photos", value: "3", Icon: "images" },
   { label: "Location", value: "14", Icon: "location" },
+];
+const data_dyb = [
+  {label: "Photos",value: "2",Icon: "images" },
+  {label: "Location",value: "14",Icon: "location" },
 ];
 let City=[];
 const GLOBAL = require("../Global");
@@ -49,13 +54,62 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const [AddId,setAddId]=useState(0);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [route, setroute] = useState('');
   useEffect(() => {
     getLocation();
+
     const unsubscribe = navigation.addListener('focus', () => {
+      setroute(GLOBAL.route)
+      if(GLOBAL.route==='structure') {
       getSites();
+      }
+      else {
+        getSites_dyb()
+      }
     });
     return unsubscribe;
+
   }, []);
+  const dateComparison_count =(a,b)=>{
+
+    const date1 = a?.Count
+    const date2 = b?.Count
+
+    return date2 - date1;
+  }
+  const getSites_dyb = async () => {
+    let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+    let A =[];
+    if (json!==null) {
+      let Site_List= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
+      if (Site_List?.sites) {
+        Site_List?.sites?.forEach((obj) => {
+          A.push({
+            Id: obj.siteId,
+            Name: obj.siteName,
+            Count: obj.unitCount,
+            NameCount: "unit",
+            task: '0',
+            ListName: "Site",
+            address: obj?.address,
+            geoLat: obj?.geoLat,
+            geoLong: obj?.geoLong,
+            cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
+            countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
+            postalCode: obj?.address?.address_Zip,
+            street: obj?.address?.address_Street,
+            units: obj?.units,
+          });
+        });
+        if(A?.length!==0) {
+          A?.sort(dateComparison_count)
+        }
+        setmodules(A);
+      }
+    }
+
+  };
+
   const onOpen = () => {
     setvisibleAddModal(true);
   };
@@ -493,54 +547,93 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         :
         null
       }
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
     </>
   )
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
+  const SeeDetail = (Id) => {
+    GLOBAL.SiteId = Id;
+    navigation.navigate("Project_UnitsStack");
+
+  };
+  const renderItem_dyb = ({ item }) => (
+    <DYB_List_Item data={data_dyb} value={item}  SeeDetail={SeeDetail}
+                   Navigate_Url={Navigate_Url}/>
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={goBack}
+      <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack}
               Title={"Sites / Buildings"}/>
 
       <View style={Styles.containerList}>
         {
-          modules!=='' ?
-        <View style={Styles.Center_margin_Bottom3}>
-          {modules&&(
-            <FlatList
-              showsVerticalScrollIndicator={false}
-              data={modules}
-              style={{width:'100%',flexGrow:0}}
-              renderItem={renderItem}
-              ListHeaderComponent={renderSectionHeader}
-              ListFooterComponent={renderSectionFooter}
-              keyExtractor={(item,index)=>{
-                return index.toString();
-              }}
-            />
-          )}
-        </View>:
-        <View style={Styles.With90CenterVertical}>
-          <Text style={Styles.EmptyText}>
-            " No Sites defined
-          </Text>
-          <Text style={Styles.EmptyText}>
-            Add by pressing button below "
-          </Text>
-            </View>
+          showModalDelete &&
+          <View>
+            {
+              _showModalDelete()
+            }
+          </View>
+        }
+        {
+          route==='structure'?
+        <>
+          {
+            modules!=='' ?
+              <View style={Styles.Center_margin_Bottom3}>
+                {modules&&(
+                  <FlatList
+                    showsVerticalScrollIndicator={false}
+                    data={modules}
+                    style={{width:'100%',flexGrow:0}}
+                    renderItem={renderItem}
+                    ListHeaderComponent={renderSectionHeader}
+                    ListFooterComponent={renderSectionFooter}
+                    keyExtractor={(item,index)=>{
+                      return index.toString();
+                    }}
+                  />
+                )}
+              </View>:
+              <View style={Styles.With90CenterVertical}>
+                <Text style={Styles.EmptyText}>
+                  " No Sites defined
+                </Text>
+                <Text style={Styles.EmptyText}>
+                  Add by pressing button below "
+                </Text>
+              </View>
+          }
+        </>:
+        <>
+          {
+            modules!=='' ?
+              <View style={Styles.ItemsBoxDyb}>
+                {modules && (
+                  <FlatList
+                    data={modules}
+                    showsVerticalScrollIndicator={false}
+                    style={{width:'100%'}}
+                    renderItem={renderItem_dyb}
+                    keyExtractor={(item, index) => {
+                      return index.toString();
+                    }}
+                  />
+                )}
+              </View>:
+              <View style={Styles.With90CenterVertical}>
+                <Text style={Styles.EmptyText}>
+                  " No Sites defined "
+                </Text>
+              </View>
+          }
+        </>
         }
       </View>
-
-      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
+      {
+        route==='structure'?
+      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null}
       <AddModal
         numberValue={2}
         GeoAddressCity={GeoAddressCity}

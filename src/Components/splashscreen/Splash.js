@@ -6,20 +6,15 @@ import {
 
 const GLOBAL = require("../Global");
 import {Container} from "native-base";
-import VersionCheck from "react-native-version-check";
+
 const width = Dimensions.get('window').width;
 
 
 
 function Splash() {
-
   const [fadeAnim,setfadeAnim] = useState(new Animated.Value(0));
-  const [Version,setVersionCheck] = useState('');
   useEffect(()=>{
-    setVersionCheck(VersionCheck.getCurrentVersion())
-
     Animated.timing(
-
       fadeAnim,// The animated value to drive
       {
         toValue: 1,// Animate to opacity: 1 (opaque)
@@ -28,7 +23,6 @@ function Splash() {
       },
     ).start();
   }, []);
-
   return(
     <Container style={{backgroundColor:GLOBAL.OFFICIAL_background,justifyContent:'center',flex:2}}>
       <StatusBar

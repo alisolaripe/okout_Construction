@@ -297,18 +297,33 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
             }
           })
         })
-        if(A?.length!==0) {
-          A = [mark2,...A];
-          A?.sort(dateComparison_data)
-          setImageSourceviewarray(A);
-          setMudolList(A);
-          Make_Week_Filter_List(A)
-          Save_Details_Online(A)
+        if(GLOBAL.route==='structure') {
+          if(A?.length!==0) {
+            A = [mark2,...A];
+            A?.sort(dateComparison_data)
+            setImageSourceviewarray(A);
+            setMudolList(A);
+            Make_Week_Filter_List(A)
+            Save_Details_Online(A)
+          }
+          else {
+            A=[mark2];
+            setImageSourceviewarray(A);
+          }
         }
         else {
-          A=[mark2];
-          setImageSourceviewarray(A);
+          if (A?.length !== 0) {
+            A?.sort(dateComparison_data)
+            setImageSourceviewarray(A);
+            setMudolList(A);
+            Make_Week_Filter_List(A)
+            Save_Details_Online(A)
+          }
+          else {
+            setImageSourceviewarray('')
+          }
         }
+
       });
     }
     else {
@@ -802,14 +817,7 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
   )
   const renderSectionHeader=()=>(
     <>
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
       {ShowWarningMessage===true&&
       <TouchableOpacity onPress={()=>{
         setShowWarningMessage(false);
@@ -870,9 +878,13 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
                    styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null}
     </View>
   );
+  const renderItem_dyb = ({ item }) => (
+    <List_Item_Detail_Images value={item} Type={'DYB'}
+    />
+  )
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={Back_navigate} Title={'Plots / Units Detail'}/>
+      <Header  colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate} Title={'Plots / Units Detail'}/>
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
           <View style={Styles.flashMessageSuccsess}>
@@ -887,33 +899,66 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
         </View>
         : null}
         <View style={Styles.containerList}>
+
           <View style={Styles.Center_margin_Bottom2}>
+            {
+              showModalDelete &&
+              <View>
+                {
+                  _showModalDelete()
+                }
+              </View>
+            }
             {
               showModalCalender &&
               _showModalCalender()
             }
-              {ImageSourceviewarray && (
-                <FlatList
-                  showsVerticalScrollIndicator={false}
-                  data={ImageSourceviewarray}
-                  style={{width:'100%',flexGrow:0}}
-                  renderItem={renderItem}
-                  ListHeaderComponent={renderSectionHeader}
-                  ref={scrollViewRef}
-                  ListFooterComponent={ListFooter}
-                  columnWrapperStyle={{ justifyContent: "space-between",}}
-                  contentContainerStyle={{ justifyContent: "space-between",}}
-                  numColumns={2}
-                  key={'#'}
-                  keyExtractor={(item, index) => {
-                    return "#" +index.toString();
-                  }}
-                />
-              )}
+            {
+              GLOBAL.route === 'structure' ?
+                <>
+                  {ImageSourceviewarray && (
+                    <FlatList
+                      showsVerticalScrollIndicator={false}
+                      data={ImageSourceviewarray}
+                      style={{ width: '100%', flexGrow: 0 }}
+                      renderItem={renderItem}
+                      ListHeaderComponent={renderSectionHeader}
+                      ref={scrollViewRef}
+                      ListFooterComponent={ListFooter}
+                      columnWrapperStyle={{ justifyContent: "space-between", }}
+                      contentContainerStyle={{ justifyContent: "space-between", }}
+                      numColumns={2}
+                      key={'#'}
+                      keyExtractor={(item, index) => {
+                        return "#" + index.toString();
+                      }}
+                    />
+                  )}
+                </> :
+                <>
+                  {ImageSourceviewarray && (
+                    <FlatList
+                      ref={scrollViewRef}
+                      columnWrapperStyle={{ justifyContent: "space-between", }}
+                      contentContainerStyle={{ justifyContent: "space-between", }}
+                      data={ImageSourceviewarray}
+                      numColumns={2}
+                      style={{ width: '100%', }}
+                      ListHeaderComponent={renderSectionHeader}
+                      renderItem={renderItem_dyb}
+                      key={'#'}
+                      keyExtractor={(item, index) => {
+                        return "#" + index.toString();
+                      }}
+                    />
+                  )}
+                </>
+            }
+
           </View>
         </View>
       {
-        ImageSourceviewarray.length>1?
+        ImageSourceviewarray?.length>1?
           <>
             {
               scroll===false?

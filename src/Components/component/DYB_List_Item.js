@@ -27,17 +27,12 @@ function DYB_List_Item({
       setvisible(true)
     }
     else if(id=== "3") {
-      GLOBAL.UpdateSiteID =  value.Id;
-      GLOBAL.SectionName='unit';
-      GLOBAL.MenuName='Plots / Unites Detail'
-      Navigate_Url('Details_image');
+      GLOBAL.UpdateUnitID = value.Id;
+      Navigate_Url('Project_Unit_Detail')
     }
     else if(id=== "2") {
-      GLOBAL.SiteId =  value.Id;
-      GLOBAL.UpdateSiteID = value.Id
-      GLOBAL.SectionName = "site";
-      GLOBAL.MenuName = "Sites / Buildings Detail";
-      Navigate_Url('Details_image');
+      GLOBAL.UpdateSiteID = value.Id;
+      Navigate_Url('Project_Site_Detail');
     }
   };
   const renderItem = (item, index) => {

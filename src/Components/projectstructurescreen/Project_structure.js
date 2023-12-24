@@ -13,10 +13,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import { writePostApi } from "../writePostApi";
+import DYB_List_Item from "../component/DYB_List_Item";
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 const data = [{ label: "Edit", value: "1", Icon: "edit" }];
-function Project_structure({ navigation, navigation: { goBack } }) {
+const data_dyb = [];
+function Project_structure({navigation, navigation: { goBack }, }) {
   const [modules, setmodules] = useState([]);
   const [Message, setMessage] = useState("");
   const [ShowMessage, setShowMessage] = useState(false);
@@ -26,13 +28,45 @@ function Project_structure({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [edit, setedit] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [route, setroute] = useState('');
   useEffect(() => {
     get_Country_City();
-    const unsubscribe = navigation.addListener('focus', () => {
-      getProjects();
-    });
-    return unsubscribe;
+
+      const unsubscribe = navigation.addListener("focus", () => {
+        setroute(GLOBAL.route)
+        if(GLOBAL.route==='structure') {
+        getProjects();
+        }
+        else {
+          getProjects_dyb()
+        }
+      });
+      return unsubscribe;
+
   }, []);
+  const getProjects_dyb = async () => {
+    let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+    if (json!==null) {
+      let A = [];
+      json?.forEach((obj) => {
+        A.push({
+          Id: obj.projectId,
+          Name: obj.projectName,
+          Count: obj.siteCount,
+          NameCount: "site",
+          ListName: "Project",
+          notes: obj?.notes,
+          task: obj?.task,
+        });
+      });
+      if(A?.length!==0) {
+        A?.sort(dateComparison_count)
+        setmodules(A);
+      }
+      else
+        setmodules('');
+    }
+  };
   const onOpen = () => {
     setvisibleAddModal(true);
   };
@@ -256,14 +290,6 @@ function Project_structure({ navigation, navigation: { goBack } }) {
         :
         null
       }
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
       </>
   )
   const renderItem=({ item ,index})=>(
@@ -276,41 +302,96 @@ function Project_structure({ navigation, navigation: { goBack } }) {
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
+  const SeeDetail = (Id) => {
+    GLOBAL.ProjectId = Id;
+    navigation.navigate("Project_Sites");
+  };
+  const dateComparison_count =(a,b)=>{
+    const date1 = a?.Count
+    const date2 = b?.Count
+    return date2 - date1;
+  }
+  const renderItem_dyb = ({ item,index }) => (
+    <DYB_List_Item data={data_dyb} value={item}  SeeDetail={SeeDetail} numberValue={25}
+                   Navigate_Url={Navigate_Url}/>
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={["#ffadad", "#f67070", "#FF0000"]} StatusColor={"#ffadad"} onPress={goBack}
+      <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack}
               Title={"Construction Projects"} />
-        <View style={[Styles.containerList]}>
 
-          {modules!=='' ?
-              <View style={Styles.With100NoFlex}>
-                <View style={[Styles.Center_margin_Bottom3]}>
-                  {modules&&(
-                    <FlatList
-                      showsVerticalScrollIndicator={false}
-                      data={modules}
-                      style={{width:'100%',flexGrow:0}}
-                      renderItem={renderItem}
-                      ListHeaderComponent={renderSectionHeader}
-                      ListFooterComponent={renderSectionFooter}
-                      keyExtractor={(item,index)=>{
-                        return index.toString();
-                      }}
-                    />
-                  )}
-                </View>
-              </View>:
-          <View style={Styles.With90CenterVertical}>
-                <Text style={Styles.EmptyText}>
-                  " No Projects defined
-                </Text>
-                <Text style={Styles.EmptyText}>
-                  Add by pressing button below "
-                </Text>
+          <View style={[Styles.containerList]}>
+            {
+              showModalDelete &&
+              <View>
+                {
+                  _showModalDelete()
+                }
               </View>
-          }
-        </View>
-      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
+            }
+            {
+              route === 'structure' ?
+<>
+  {modules !== '' ?
+    <View style={Styles.With100NoFlex}>
+      <View style={[Styles.Center_margin_Bottom3]}>
+        {modules && (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={modules}
+            style={{ width: '100%', flexGrow: 0 }}
+            renderItem={renderItem}
+            ListHeaderComponent={renderSectionHeader}
+            ListFooterComponent={renderSectionFooter}
+            keyExtractor={(item, index) => {
+              return index.toString();
+            }}
+          />
+        )}
+      </View>
+    </View> :
+    <View style={Styles.With90CenterVertical}>
+      <Text style={Styles.EmptyText}>
+        " No Projects defined
+      </Text>
+      <Text style={Styles.EmptyText}>
+        Add by pressing button below "
+      </Text>
+    </View>
+  }
+</>:
+                <View style={{width:'100%',alignItems:'center'}}>
+
+                  {
+                    modules!=='' ?
+                      <View style={Styles.ItemsBoxDyb}>
+                        {modules && (
+                          <FlatList
+                            data={modules}
+                            showsVerticalScrollIndicator={false}
+                            style={{width:'100%'}}
+                            renderItem={renderItem_dyb}
+                            keyExtractor={(item, index) => {
+                              return index.toString();
+                            }}
+                          />
+                        )}
+                      </View>:
+                      <View style={Styles.With90CenterVertical}>
+                        <Text style={Styles.EmptyText}>
+                          " No Project defined "
+                        </Text>
+                      </View>
+                  }
+                </View>
+            }
+          </View>
+
+      {
+        route==='structure'?
+          <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null
+      }
+
       <AddModal ShowMessage={ShowMessage} Message={Message}
                 numberValue={1} ChangeChecked={ChangeChecked} tittlebtn={"Add Project"}
                 setvisibleAddModal={setvisibleAddModal} visibleAddModal={visibleAddModal}

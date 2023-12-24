@@ -550,7 +550,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
     if(item.Type!=='AddImage') {
       return (
         <DYB_List_Details_Image_Item item={item} key={index} DeleteImageFromApi={DeleteImage}
-        colors={["#ffadad", "#f67070", "#FF0000"]} IconColor={"#F67070FF"} />
+        colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} IconColor={"#F67070FF"} />
       );
     }
     else {
@@ -607,7 +607,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   }
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={Back_navigate} Title={GLOBAL.FeatureNameDetail}/>
+      <Header colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate} Title={GLOBAL.FeatureNameDetail}/>
       {ShowMessage === true ?
         <View style={{width:'100%',alignItems:'center'}}>
           <View style={Styles.flashMessageSuccsess}>
@@ -691,7 +691,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
                         onpress={AddFeatureImage}
                         categoriIcon={"FontAwesome"}
                         title={'Save Photos'}
-                        colorsArray={['#ffadad','#f67070','#FF0000']}
+                        colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />:null}
                     </View>
                   )}
@@ -699,17 +699,12 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
                 </View>
                   :
                 <View style={Styles.container2}>
-                  {/*<View style={{ width:'100%', alignItems: 'center',justifyContent:"center"}}>*/}
-                  {/*      <Text style={[Styles.txtFeature, { marginTop: normalize(4), }]}> {GLOBAL.FeatureNameDetail}</Text>*/}
-                  {/*    </View>*/}
-                  {/*    <Text style={[Styles.txtLightColor,{marginTop: normalize(15)}]}> Notes</Text>*/}
                       {FeatureSelectDetail && (
                         FeatureSelectDetail?.map((value, index) => {
                           return (
                             <Notes_Item value={value} key={index} UpdateBuildNote={UpdateBuildNote}
                                                         ShowEditBtn={ShowEditBtn}
                             />
-
                           );
                         })
                       )

@@ -13,13 +13,14 @@ import  List_Items  from "../component/list_Items";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import { writePostApi } from "../writePostApi";
 import { readOnlineApi } from "../ReadPostApi";
-
+import DYB_List_Item from "../component/DYB_List_Item";
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 const data = [
   {label: "Edit",value: "7",Icon: "edit" },
   {label: "Delete",value: "8",Icon: "trash" },
 ];
+const data_dyb = []
 //{ label: "Pictures", value: "9", Icon: "images" },
 function Project_Section({navigation, navigation: { goBack }}) {
   const [modules,setmodules] = useState([]);
@@ -33,13 +34,64 @@ function Project_Section({navigation, navigation: { goBack }}) {
   const [AddId,setAddId]=useState(0);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
-
+  const [route, setroute] = useState('');
   useEffect(()=>{
-    const unsubscribe = navigation.addListener('focus', () => {
-      getSection();
-    });
-    return unsubscribe;
+
+      const unsubscribe = navigation.addListener('focus', () => {
+        setroute(GLOBAL.route)
+        if(GLOBAL.route==='structure') {
+          getSection();
+        }
+        else {
+          getSection_dyb()
+        }
+      });
+      return unsubscribe;
+
+
   }, []);
+  const dateComparison_count =(a,b)=>{
+
+    const date1 = a?.Count
+    const date2 = b?.Count
+    return date2 - date1;
+  }
+  const getSection_dyb = async () => {
+    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+    console.log(json,'json')
+    let A=[];
+    let Filter_units='';
+    let Filter_sites='';
+    let Filter_section='';
+    if (json!==null) {
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
+      if( Filter_section?.sections) {
+        Filter_section?.sections?.forEach((obj) => {
+          if (parseInt(obj.featureCount) !== 0) {
+            A.push({
+              Id:obj.sectionId,
+              Name:obj.sectionName,
+              features:obj.features,
+              Count: obj.featureCount,
+              NameCount:'feature',
+              ListName:'Section',
+              unitId: GLOBAL.UnitId,
+              task: obj?.task,
+            });
+          }
+        });
+        if(A?.length!==0) {
+          A?.sort(dateComparison_count)
+          setmodules(A);
+        }
+      else
+        setmodules('');
+      }
+    }
+
+  };
   const onOpen = () => {
     setvisibleAddModal(true);
   };
@@ -392,14 +444,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
   )
   const renderSectionHeader=()=>(
    <>
-     {
-       showModalDelete &&
-       <View>
-         {
-           _showModalDelete()
-         }
-       </View>
-     }
+
      {ShowMessageDelete === true ?
        <View style={Styles.flashMessageSuccsess}>
          <View style={{ width: "10%" }} />
@@ -431,42 +476,85 @@ function Project_Section({navigation, navigation: { goBack }}) {
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
+  const SeeDetail=(Id)=>{
+    GLOBAL.SectionId=Id;
+    navigation.navigate("Project_Features2");
+  }
+  const renderItem_dyb = ({ item }) => (
+    <DYB_List_Item data={data_dyb} value={item}
+                   SeeDetail={SeeDetail} Navigate_Url={Navigate_Url} />
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Sections'}/>
+      <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'}  onPress={goBack} Title={'Sections'}/>
 
         <View style={Styles.containerList}>
-
           {
-            modules!=='' ?
-          <View style={[Styles.Center_margin_Bottom3]}>
-            {modules&&(
-              <FlatList
-                showsVerticalScrollIndicator={false}
-                data={modules}
-                style={{width:'100%',flexGrow:0}}
-                renderItem={renderItem}
-                ListHeaderComponent={renderSectionHeader}
-                ListFooterComponent={renderSectionFooter}
-                keyExtractor={(item,index)=>{
-                  return index.toString();
-                }}
-              />
-            )}
-          </View>:
-              <View style={Styles.With90CenterVertical}>
-                <Text style={Styles.EmptyText}>
-                  " No Sections defined
-                </Text>
-                <Text style={Styles.EmptyText}>
-                  Add by pressing button below "
-                </Text>
-              </View>
+            showModalDelete &&
+            <View>
+              {
+                _showModalDelete()
+              }
+            </View>
           }
-
+          {
+            route=== 'structure' ?
+              <>
+                {
+                  modules !== '' ?
+                    <View style={[Styles.Center_margin_Bottom3]}>
+                      {modules && (
+                        <FlatList
+                          showsVerticalScrollIndicator={false}
+                          data={modules}
+                          style={{ width: '100%', flexGrow: 0 }}
+                          renderItem={renderItem}
+                          ListHeaderComponent={renderSectionHeader}
+                          ListFooterComponent={renderSectionFooter}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No Sections defined
+                      </Text>
+                      <Text style={Styles.EmptyText}>
+                        Add by pressing button below "
+                      </Text>
+                    </View>
+                }
+              </> :
+              <>
+                {
+                  modules !== '' ?
+                    <View style={Styles.ItemsBoxDyb}>
+                      {modules && (
+                        <FlatList
+                          showsVerticalScrollIndicator={false}
+                          data={modules}
+                          style={{ width: '100%' }}
+                          renderItem={renderItem_dyb}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No Sections defined "
+                      </Text>
+                    </View>
+                }
+              </>
+          }
         </View>
-
-      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
+      {
+        route==='structure'?
+          <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null}
       <AddModal  ShowMessage={ShowMessage} Message={Message}
                 numberValue={13}  ChangeChecked={ChangeChecked}
                 setvisibleAddModal={setvisibleAddModal}

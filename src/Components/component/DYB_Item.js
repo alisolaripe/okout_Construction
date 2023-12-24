@@ -21,11 +21,10 @@ function DYB_Item({index,value,Navigate_Url}) {
   ];
   const [isFocus,setIsFocus] = useState(false);
   const ClickManagement =(id,featureId,featureName)=>{
-
     GLOBAL.DYB=value.DYB
     GLOBAL.FeatureName=featureName
       GLOBAL.UpdateFeatureID=featureId
-    Navigate_Url('DYB_List')
+    Navigate_Url('Project_Feature_List')
   }
   const renderItem = (item,index) => {
     return (
@@ -51,7 +50,7 @@ function DYB_Item({index,value,Navigate_Url}) {
                   GLOBAL.UpdateFeatureID = value.featureId;
                   GLOBAL.DYB=value.DYB
                   GLOBAL.FeatureName=value.featureName
-                  Navigate_Url('DYB_List');
+                  Navigate_Url('Project_Feature_List')
                 }
                 } style={[Styles.txt_left]}>{value.featureName}</Text>
                 <View style={Styles.DYB}>
@@ -62,7 +61,7 @@ function DYB_Item({index,value,Navigate_Url}) {
                           GLOBAL.UpdateFeatureID = value.featureId;
                           GLOBAL.DYB=value.DYB
                           GLOBAL.FeatureName=value.featureName
-                          Navigate_Url('DYB_List');
+                          Navigate_Url('Project_Feature_List')
                         }}   style={Styles.With100DYBbtn}>
                           <Text  style={Styles.txtcenter}> DYB </Text>
                           <Entypo size={normalize(12)} color={'#fff'}  name={'check'} />

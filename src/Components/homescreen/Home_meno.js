@@ -54,11 +54,13 @@ function Home_meno({ navigation }) {
   };
   const Navigate_Between_Modules = (constModule_Id) => {
     if (constModule_Id === "1") {
+     GLOBAL.route='structure'
       navigation.navigate("Project_structureStack");
     } else if (constModule_Id === "4") {
       navigation.navigate("Task_managementStack");
     } else if (constModule_Id === "3") {
-      navigation.navigate("DYBStack");
+      GLOBAL.route='DYB'
+      navigation.navigate("Project_structureStack",{ screenMode:'Dyb'});
     }
   };
   const Navigate_Url= (Url) => {

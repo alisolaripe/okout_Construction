@@ -18,11 +18,16 @@ import {writeDataStorage,removeDataStorage} from "../Get_Location";
 import {  readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
+import DYB_Item from "../component/DYB_Item";
 const data = [
   { label: "Edit", value: "10", Icon: "edit" },
   { label: "Delete", value: "11", Icon: "trash" },
   { label: "Photos / Notes", value: "12", Icon: "level-down" },
   { label: "Change DYB", value: "13", Icon: "retweet" },
+];
+const data_dyb = [
+  {label: "Photos",value: "2",Icon: "images" },
+  {label: "Location",value: "14",Icon: "location" },
 ];
 function Project_Features({ navigation, navigation: { goBack } }) {
   const [modules,setmodules] = useState([]);
@@ -36,12 +41,63 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   const [AddId,setAddId]=useState(0);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [route, setroute] = useState('');
   useEffect(()=>{
-    getFeatures()
+    const unsubscribe = navigation.addListener('focus', () => {
+      setroute(GLOBAL.route)
+      if(GLOBAL.route==='structure'||route==='structure') {
+        getFeatures()
+      }
+      else {
+        getDYB()
+      }
+    });
+
+    return unsubscribe;
   }, []);
   const onOpen = () => {
     setvisibleAddModal(true);
   };
+  const getDYB =async () => {
+    let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+    let A=[];
+    let Count=0
+    let Filter_units='';
+    let Filter_sites='';
+    let Filter_section='';
+    let Filter_feature='';
+    if (json!==null) {
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
+      Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
+      if( Filter_feature?.features) {
+        Filter_feature?.features?.forEach((obj) => {
+          if(obj.DYB==='n')
+            Count=0
+          else
+            Count=Count+1
+          A.push({
+            featureId: obj.featureId,
+            featureName: obj.featureName,
+            DYB: obj.DYB,
+            ListName: 'DYB',
+            sectionId: GLOBAL.SectionId,
+            task: obj?.task,
+            Count:Count.toString()
+          });
+
+        });
+        if(A?.length!==0) {
+          A?.sort(dateComparison_count)
+          setmodules(A);
+        }
+        else
+          setmodules('');
+      }
+    }
+  };
+
   const getDifference=(array1, array2)=> {
     return array1?.filter(object1 => {
       return !array2?.some(object2 => {
@@ -534,14 +590,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   )
   const renderSectionHeader=()=>(
     <>
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
-      }
+
       {ShowMessageDelete === true ?
         <View style={Styles.flashMessageSuccsess}>
           <View style={{ width: "10%" }} />
@@ -573,41 +622,81 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
+  const renderItem_dyb = ({ item }) => (
+    <DYB_Item value={item}  Navigate_Url={Navigate_Url} />
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={['#ffadad','#f67070','#FF0000']} StatusColor={'#ffadad'} onPress={goBack} Title={'Features'}/>
+      <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack} Title={'Features'}/>
         <View style={Styles.containerList}>
           {
-          modules!=='' ?
-          <View style={[Styles.Center_margin_Bottom3]}>
-            {modules&&(
-              <FlatList
-                showsVerticalScrollIndicator={false}
-                data={modules}
-                style={{width:'100%',flexGrow:0}}
-                renderItem={renderItem}
-                ListHeaderComponent={renderSectionHeader}
-                ListFooterComponent={renderSectionFooter}
-                keyExtractor={(item,index)=>{
-                  return index.toString();
-                }}
-              />
-            )}
-          </View>:
-
-              <View style={Styles.With90CenterVertical}>
-                <Text style={Styles.EmptyText}>
-                  " No Features defined
-                </Text>
-                <Text style={Styles.EmptyText}>
-                  Add by pressing button below "
-                </Text>
-              </View>
+            showModalDelete &&
+            <View>
+              {
+                _showModalDelete()
+              }
+            </View>
           }
+          {
+            route === 'structure' ?
+              <>
+                {
+                  modules !== '' ?
+                    <View style={[Styles.Center_margin_Bottom3]}>
+                      {modules && (
+                        <FlatList
+                          showsVerticalScrollIndicator={false}
+                          data={modules}
+                          style={{ width: '100%', flexGrow: 0 }}
+                          renderItem={renderItem}
+                          ListHeaderComponent={renderSectionHeader}
+                          ListFooterComponent={renderSectionFooter}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No Features defined
+                      </Text>
+                      <Text style={Styles.EmptyText}>
+                        Add by pressing button below "
+                      </Text>
+                    </View>
+                }
+              </> :
+              <>
+                {
+                  modules !== '' ?
+                    <View style={Styles.ItemsBoxDyb}>
+                      {modules && (
+                        <FlatList
+                          data={modules}
+                          style={{ width: '100%' }}
+                          renderItem={renderItem_dyb}
+                          keyExtractor={(item, index) => {
+                            return index.toString();
+                          }}
+                        />
+                      )}
+                    </View> :
+                    <View style={Styles.With90CenterVertical}>
+                      <Text style={Styles.EmptyText}>
+                        " No DYB defined "
+                      </Text>
+                    </View>
+                }
+              </>
+          }
+
         </View>
 
-      <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>
-
+      {
+        route==='structure'?
+          <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null}
           <AddModal  ShowMessage={ShowMessage} Message={Message}
                     numberValue={15}  ChangeChecked={ChangeChecked}
                     setvisibleAddModal={setvisibleAddModal}

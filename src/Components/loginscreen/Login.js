@@ -17,7 +17,6 @@ const GLOBAL = require("../Global");
 const Api = require("../Api");
 const serialize = require("../GlobalSerialize");
 import { isNetworkConnected } from "../GlobalConnected";
-import VersionCheck from "react-native-version-check";
 import { readOnlineApi } from "../ReadPostApi";
 import { writeDataStorage } from "../Get_Location";
 function LogIn({ navigation }) {
@@ -55,7 +54,7 @@ function LogIn({ navigation }) {
     const Second=date.getSeconds()
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
     setShowDate(Full)
-    setVersionCheck(VersionCheck?.getCurrentVersion()+'.'+7)
+    setVersionCheck('1.0.8')
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);

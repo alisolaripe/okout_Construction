@@ -355,12 +355,11 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
                           value.DYB!=='n'?
                             <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnList3}>
                               <TouchableOpacity onPress={()=> {
+                                GLOBAL.route='DYB'
                                 GLOBAL.UpdateFeatureID=value.featureId;
                                 GLOBAL.DYB=value.DYB;
                                 GLOBAL.FeatureName=value.featureName;
-                                GLOBAL.UpdateFeatureID=value.featureId;
-                                GLOBAL.Navigation='DYBStack2'
-                                Navigate_Url('DYBStack2');
+                                Navigate_Url('Project_Feature_List');
                               }}  style={Styles.With100DYBbtn} >
                                 <Text  style={Styles.txtcenter}> DYB </Text>
                                 <Entypo size={normalize(12)} color={'#fff'}  name={'check'} />
