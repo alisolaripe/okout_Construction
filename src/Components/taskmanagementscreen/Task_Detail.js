@@ -39,7 +39,9 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   const GetTaskDetail =async () => {
     if(GLOBAL.isConnected===true) {
       readOnlineApi(Api.Task_detail+`&taskId=${GLOBAL.TaskId}`).then(json => {
+        console.log(json?.singleTask,'json?.singleTask')
         setTask_detail(json?.singleTask)
+        if(json?.singleTask)
         Save_Details_Online(json?.singleTask)
       });
     }
@@ -53,15 +55,15 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   };
   const Save_Details_Online=async (A)=>{
    //removeDataStorage(GLOBAL.Task_Detail)
-
     let B=[]
     B.push(A)
-
+    console.log(B,'B')
     let AllList=[];
     let Filter=[];
     let TaskDetailList=JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    Filter=TaskDetailList?.filter((p) =>parseInt(p.taskId)!==parseInt(GLOBAL.TaskId))
-
+    console.log(TaskDetailList,'TaskDetailList')
+    Filter=TaskDetailList?.filter((p) =>parseInt(p?.taskId)!==parseInt(GLOBAL.TaskId))
+    console.log(Filter,'Filter')
     if(TaskDetailList!==null&&Filter!==null) {
       AllList =[].concat(Filter,B)
     }

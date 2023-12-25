@@ -1,6 +1,5 @@
 const GLOBAL = require("./Global");
 export async function readOnlineApi (Url){
-  console.log(GLOBAL.OrgAppLink_value + Url,'Url')
     return (
       fetch(GLOBAL.OrgAppLink_value + Url, {
         method: "GET",

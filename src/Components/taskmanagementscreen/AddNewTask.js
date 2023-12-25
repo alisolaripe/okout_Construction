@@ -32,7 +32,8 @@ import * as Yup from "yup";
 import { readOnlineApi } from "../ReadPostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const Api = require("../Api");
-let A=[]
+let A=[];
+let B=[]
 let numOfLinesCompany = 0;
 function AddNewTask({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
@@ -52,12 +53,12 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const [Message, setMessage] = useState("");
   const [error, setErrors] = useState("");
   const [TaskRelated, setTaskRelated] = useState([]);
+  const [attachmentUrl,setattachmentUrl] = useState([]);
   useEffect(()=>{
-    console.log(GLOBAL.TaskId,'GLOBAL.TaskId')
     Task_category();
     // Task_priority();
     // Task_status();
-    // Task_Users()
+     //Task_Users()
   }, []);
   const  writeDataStorage=async (key, obj)=>{
     try {
@@ -195,6 +196,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
           })
           .then(json => {
             let A = [];
+            console.log( json?.users,' json?.users')
             for (let item in json?.users) {
               let obj = json?.users?.[item];
               A.push({
@@ -204,7 +206,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                 roleId:obj.roleId
               });
             }
-            setTaskuser(A);
+            //setTaskuser(A);
             //GLOBAL.modules=A;
           })
           .catch(error => console.log("error", error));
@@ -374,6 +376,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
           else   {
             setMessage('Your task successfully added')
             setShowMessage(true);
+            Add_Task_Offline(value,TodayDate)
             const timerId = setInterval(() => {
               setShowMessage(false);
             }, 4000);
@@ -415,6 +418,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       } else {
         if(ImageSourceviewarray)
           A = [...ImageSourceviewarray];
+        B = [...ImageSourceviewarray];
         for (let item in response) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
@@ -425,21 +429,35 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
             type: obj.mime,
             fileName: imgName,
           });
+          B.push({
+            attachmentUrl: obj.path,
+            type: obj.mime,
+            attachmentName:imgName,
+          });
 
         }
         setImageSourceviewarray(A);
+        setattachmentUrl(B)
         A = [...A];
+        B=[...B]
       }
     });
 
   }
-  const Add_Task_Offline =async () => {
+  const Add_Task_Offline =async (value,TodayDate) => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
+    let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail))
     let List_Item = [];
+    let List_Item_detail = [];
     let A=[];
+    let B=[];
     List_Item = json;
+    List_Item_detail = json_detail;
     if (List_Item?.length !== 0) {
       A = [...List_Item];
+    }
+    if (List_Item_detail?.length !== 0) {
+      B = [...List_Item_detail];
     }
     A.push({
       taskAssignedTo:'',
@@ -449,17 +467,35 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       taskDescription: value.TaskNote,
       taskId:GLOBAL.TaskId,
       taskPriorityName:'Low',
-      taskRequestBy:'',
+      taskRequestBy:GLOBAL?.UserInformation?.FullName,
       taskRequestDate:TodayDate,
       taskStatusClass:"info",
       taskStatusColor:"#68BC31",
       taskStatusId:"1",
       taskStatusName:'New',
-      taskTitle: value.Title
+      taskTitle: value.Title,
     });
     List_Item = A;
-
+    B.push({
+      taskAssignedTo:'',
+      taskCategoryName: value.SectionName,
+      taskCreatedBy:'0',
+      taskCreatedOn:TodayDate,
+      taskDescription: value.TaskNote,
+      taskId:GLOBAL.TaskId,
+      taskPriorityName:'Low',
+      taskRequestBy:GLOBAL?.UserInformation?.FullName,
+      taskRequestDate:TodayDate,
+      taskStatusClass:"info",
+      taskStatusColor:"#68BC31",
+      taskStatusId:"1",
+      taskStatusName:'New',
+      taskTitle: value.Title,
+      attachments:attachmentUrl
+    });
+    List_Item_detail = A;
     await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item))
+    await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(List_Item_detail))
   };
 
   const selectPhoto=()=> {
@@ -472,13 +508,21 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       var imgName = getFilename[getFilename.length - 1];
       if(ImageSourceviewarray)
         A = [...ImageSourceviewarray];
+      B = [...ImageSourceviewarray];
       A.push({
         uri: response.path,
         type: response.mime,
         fileName: imgName,
       });
+      B.push({
+        attachmentUrl: response.path,
+        type: response.mime,
+        attachmentName:imgName,
+      });
       setImageSourceviewarray(A);
+      setattachmentUrl(B)
       A = [...A];
+      B=[...B]
     });
   }
   const  renderContent= () => (
