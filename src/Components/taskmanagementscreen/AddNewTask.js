@@ -30,6 +30,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { ButtonI } from "../component/ButtonI";
 import * as Yup from "yup";
 import { readOnlineApi } from "../ReadPostApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Api = require("../Api");
 let A=[]
 let numOfLinesCompany = 0;
@@ -52,13 +53,49 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const [error, setErrors] = useState("");
   const [TaskRelated, setTaskRelated] = useState([]);
   useEffect(()=>{
+    console.log(GLOBAL.TaskId,'GLOBAL.TaskId')
     Task_category();
     // Task_priority();
     // Task_status();
     // Task_Users()
   }, []);
-  const Task_category = () => {
+  const  writeDataStorage=async (key, obj)=>{
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(obj));
+    } catch (e) {
+    }
+  }
+  const Task_category =async () => {
+    if(GLOBAL.isConnected===true) {
+      readOnlineApi(Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        let A = [];
+        writeDataStorage(GLOBAL.Task_Category,json)
+        for (let item in json?.categories) {
+          let obj = json?.categories?.[item];
+          A.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+          });
+        }
+
+        setTaskcategory(A);
+      })
+      }
+    else {
+      let json =JSON.parse( await AsyncStorage.getItem(GLOBAL.Task_Category));
+      for (let item in json?.categories) {
+        let obj = json?.categories?.[item];
+        A.push({
+          value: obj.categoryId,
+          label: obj.categoryTitle,
+        });
+      }
+
+      setTaskcategory(A);
+
+    }
     isNetworkConnected().then(status => {
+      console.log(status,'status?.status')
       if (status) {
         fetch(GLOBAL.OrgAppLink_value + Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`, {
           method: "GET",
@@ -256,7 +293,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       </View>
     </View>
   );
-
   const logout_Url= () => {
     setshowModalDelete(true)
   };
@@ -351,7 +387,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const My_TaskList =async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
-        console.log(json,'json')
         writeDataStorage(GLOBAL.All_Task,json?.tasks)
       });
     }
@@ -398,14 +433,35 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     });
 
   }
-  const Add_Task_Offline = () => {
+  const Add_Task_Offline =async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
     let List_Item = [];
-    let A = [];
-    List_Item =
-    A = [...List_Item];
+    let A=[];
+    List_Item = json;
+    if (List_Item?.length !== 0) {
+      A = [...List_Item];
+    }
+    A.push({
+      taskAssignedTo:'',
+      taskCategoryName: value.SectionName,
+      taskCreatedBy:'0',
+      taskCreatedOn:TodayDate,
+      taskDescription: value.TaskNote,
+      taskId:GLOBAL.TaskId,
+      taskPriorityName:'Low',
+      taskRequestBy:'',
+      taskRequestDate:TodayDate,
+      taskStatusClass:"info",
+      taskStatusColor:"#68BC31",
+      taskStatusId:"1",
+      taskStatusName:'New',
+      taskTitle: value.Title
+    });
+    List_Item = A;
 
-    Save_Details(List_Item);
+    await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item))
   };
+
   const selectPhoto=()=> {
     onClose()
     ImagePicker.openCamera({

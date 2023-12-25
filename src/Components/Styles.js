@@ -174,7 +174,6 @@ const Styles = StyleSheet.create({
   txtTasktitle: {
     color: "#fff",
     fontSize: normalize(17),
-    marginTop: normalize(17),
     fontWeight:'bold'
   },
   txtLightColortask: {
@@ -185,6 +184,14 @@ const Styles = StyleSheet.create({
     paddingBottom:normalize(25),
     lineHeight: normalize(20)
   },
+  txtLightColortaskdescription: {
+    margin: 2,
+    fontSize:normalize(13),color:'#fff',
+    textAlign:"left",
+    marginTop:normalize(4),
+    paddingBottom:normalize(5),
+    lineHeight: normalize(20)
+  },
   txtLightColortaskDescription: {
     margin: 2,
     fontWeight:'bold',
@@ -192,10 +199,8 @@ const Styles = StyleSheet.create({
     textAlign:"left"
   },
   Description:{
-    width:'100%',
+    width:'90%',
     alignItems:'flex-start',
-    marginTop:normalize(18),
-
   },
   borderBotomWidth:{
     backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
@@ -215,6 +220,11 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     marginLeft: normalize(10),
     fontWeight:'bold',
     fontSize:normalize(13),color:'#fff',
+  },
+  txtLightColortask_Items_Date: {
+    marginLeft: normalize(2),
+    fontWeight:'bold',
+    fontSize:normalize(12),color:'#fff',
   },
   txtLightColor_Left: {
     color: "#fff",
@@ -1361,10 +1371,10 @@ flex:1,
     borderTopRightRadius:normalize(550),
     borderBottomRightRadius:normalize(550)
     ,marginTop: normalize(9),height:normalize(16)},
-  DoneTaskDetaislFloat:{width:'15%',
+  DoneTaskDetaislFloat:{paddingHorizontal:normalize(10),
     borderRadius:normalize(6)
     ,paddingVertical:normalize(4),position:'absolute',top:normalize(0),
-    zIndex:100,left:normalize(25)},
+    zIndex:100,left:normalize(25),alignItems:'center'},
   FilterBox:{
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_35,marginVertical:normalize(4)
   },
@@ -1627,6 +1637,9 @@ flex:1,
   sliderContentContainer: {
     paddingVertical: normalize(2) // for custom animation
   },
+  tasksliderContentContainer: {
+    paddingVertical: normalize(1) // for custom animation
+  },
   exampleContainer: {
     paddingVertical: 30
   },
@@ -1680,7 +1693,23 @@ flex:1,
     width:'90%',
     alignItems:'center',
     justifyContent:'center',
-marginTop:normalize(24)
+    borderBottomWidth:1,
+    borderStyle: "dashed",
+    borderColor:'rgba(147,147,147,0.71)'
+  },
+  InputeRowItemstask4:{
+    width:'90%',
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:normalize(45)
+  },
+  InputeRowItemstask2:{
+    width:'90%',
+    alignItems:'center',
+    justifyContent:'center',
+    borderBottomWidth:1,
+    borderStyle: "dashed",
+    borderColor:'rgba(147,147,147,0.71)'
   },
   formContainer: {
     padding: 10,
@@ -1699,16 +1728,49 @@ marginTop:normalize(24)
     paddingVertical: 4,
 
   },
+
   inputStyletask : {
     borderRadius:normalize(6),
     backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
     padding:6,
     width:'100%',
     color:"#fff",
-    marginVertical: normalize(15),
-    paddingVertical: normalize(25),
+    marginTop: normalize(15),
+    paddingVertical: normalize(20),
     alignItems:'center',
     justifyContent:'center',
+  },
+  inputStyletask3 : {
+    borderRadius:normalize(6),
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    marginTop: normalize(25),
+    paddingVertical: normalize(20),
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  inputStyletask2 : {
+    borderRadius:normalize(6),
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    paddingVertical: normalize(16),
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  inputStyletask4 : {
+    borderRadius:normalize(6),
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    paddingVertical: normalize(16),
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:normalize(10)
   },
   inputStyleLocationAdd : {
     borderWidth:1,
@@ -1886,8 +1948,15 @@ marginTop:normalize(24)
   RowTask:{
     flexDirection:'row',
     width:'90%',
+    justifyContent:'center',
+
+    alignItems:'center'
+  },
+ RowTaskDate:{
+    flexDirection:'row',
+    width:'90%',
     justifyContent:'center'
-    ,marginTop:normalize(20),
+    ,marginTop:normalize(10),
     alignItems:'center'
   },
 

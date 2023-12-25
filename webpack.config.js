@@ -55,7 +55,6 @@ const fileLoaderConfiguration = {
         outputPath: 'fonts/',
       },
     },
-
   ],
 };
 module.exports = {
@@ -63,15 +62,12 @@ module.exports = {
     // load any web API polyfills
     path.resolve(appDirectory, 'index.web.js'),
   ],
-
   // configures where the build ends up
   output: {
     filename: 'bundle.web.js',
     path: path.resolve(appDirectory, 'dist'),
   },
-
   // ...the rest of your config
-
   module: {
     rules: [imageLoaderConfiguration, fileLoaderConfiguration,babelLoaderConfiguration,
       {
@@ -79,10 +75,29 @@ module.exports = {
         include: path.resolve(__dirname, "./src"),
         exclude: /node_modules/,
         use: ["babel-loader"],
-      },{ test: /\.txt$/, use: 'raw-loader' }
+      },{ test: /\.txt$/, use: 'raw-loader' },{
+        test: /\.js$/,
+        use: [
+          {
+            loader:'babel-loader',
+            options: {
+              /* ... */
+            },
+          }]},
+      {
+        test: /\.ts$/,
+        use: [
+          {
+            loader:'babel-loader',
+            options: {
+              /* ... */
+            },
+          }]}
     ],
   },
-
+  // resolveLoader: {
+  //   modules: ['node_modules', path.resolve(__dirname, 'loaders')],
+  // },
   resolve: {
     // This will only alias the exact import "react-native"
     alias: {
@@ -110,6 +125,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: appDirectory + '/public/index.html',
     }),
-  ]
+  ],
+
 };
 

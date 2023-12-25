@@ -53,6 +53,8 @@ module.exports = {
   AllProjectInfo_dyb:'@MySuperStore:AllProjectInfo_dyb',
   Assigned_TaskList:'@MySuperStore:Assigned_TaskList',
   All_Task:'@MySuperStore:All_Task',
+  Task_Detail:'@MySuperStore:Task_Detail',
+  Task_Category:'@MySuperStore:TaskCategory',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",
@@ -90,6 +92,7 @@ module.exports = {
   City:[],
   AllProjectInfo:[],
   Task_detail:'',
+
   route:""
 
 };

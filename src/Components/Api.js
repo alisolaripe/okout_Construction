@@ -11,6 +11,7 @@ module.exports = {
    Task_status:`api/ApiTask/getTaskStatusCombo?`,
    Task_Users:`api/ApiGetCommonInfo/getUsers?`,
    Task_Project:`api/ApiTask/getCategoryRelatedTableComboList?`,
+   Task_detail:`api/ApiTask/getSingleTask?`,
    getCountry:`api/ApiGetCommonInfo/getCountry`,
    getCity:`api/ApiGetCommonInfo/getCity`,
    CreatProject:`api/ApiConstruction/addProject`,

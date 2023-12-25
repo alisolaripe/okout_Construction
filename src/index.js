@@ -1,8 +1,11 @@
-import {AppRegistry} from 'react-native';
-import App from './Components/App';
-import {name as appName} from '../app.json';
 
-AppRegistry.registerComponent(appName, () => App);
- AppRegistry.runApplication(appName, {
-     rootTag: document.getElementById('root'),
-   });
+import App from './Components/App';
+import React, {Component} from 'react';
+export default class index extends Component {
+
+  render() {
+    return (
+        <App/>
+    );
+  }
+}

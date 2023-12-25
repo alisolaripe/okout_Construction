@@ -714,9 +714,7 @@ function Project_Section_Detail({ navigation, navigation: { goBack } }) {
     );
   };
   const renderModalContent = () => (
-
     <View style={Styles.DeleteModalStyle}>
-
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                source={require("../../Picture/png/AlertImage.png")}
@@ -727,7 +725,6 @@ function Project_Section_Detail({ navigation, navigation: { goBack } }) {
           </Text>
         </View>
       </View>
-
       <View style={Styles.With100Row}>
         <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
           <TouchableOpacity onPress={() => setshowModalDelete( false)} >
@@ -738,7 +735,7 @@ function Project_Section_Detail({ navigation, navigation: { goBack } }) {
           <TouchableOpacity onPress={() => {
             removeDataStorage(GLOBAL.PASSWORD_KEY)
             navigation.navigate('LogIn');
-          }} >
+          }}>
             <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
           </TouchableOpacity>
         </LinearGradient>

@@ -12,10 +12,10 @@ import Task_management_Item from "./Task_management_Item";
 import LinearGradient from "react-native-linear-gradient";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
-import { removeDataStorage,writeDataStorage } from "../Get_Location";
+import { removeDataStorage} from "../Get_Location";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const Api = require("../Api");
+
 const taskmenu=[ { Name: "my Task ",Id:1, },
   {Id:2,Name: "Assigned to me",},
  ]
@@ -36,6 +36,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   //${GLOBAL.UserInformation?.userId}
   const My_TaskList =async () => {
         let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task))
+
         let A = [];
         for (let item in json) {
           let obj = json?.[item];
@@ -94,6 +95,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         }
   };
   const handleSubmit = () => {
+    if(modules?.length!==0)
+    GLOBAL.TaskId=parseInt(modules?.[modules?.length-1]?.taskId)+1
+    else
+      GLOBAL.TaskId=1
     navigation.navigate("AddNewTask");
   };
 
@@ -178,14 +183,20 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     <LinearGradient  angle={angle}
                                      colors={["#6dabec", "#27405c"]}    useAngle={true}
                                      style={Styles.Horizental_Menu_Item}>
-                      <TouchableOpacity  key={index}  onPress={()=>setSelectItem(item.Id)}>
+                      <TouchableOpacity  key={index}  onPress={()=> {
+                        setSelectItem(item.Id);
+                        GLOBAL.Task_List=item.Name
+                      }}>
                         <Text style={Styles.Horizental_Menu_Item_text}>
                           {item.Name}
                         </Text>
                       </TouchableOpacity>
                     </LinearGradient>:
 
-                    <TouchableOpacity  onPress={()=>setSelectItem(item.Id)}  style={Styles.Horizental_Menu_Item_notselect}>
+                    <TouchableOpacity  onPress={()=> {
+                      setSelectItem(item.Id);
+                      GLOBAL.Task_List=item.Name
+                    }}  style={Styles.Horizental_Menu_Item_notselect}>
                       <Text style={Styles.Horizental_Menu_Item_text}>
                         {item.Name}
                       </Text>
