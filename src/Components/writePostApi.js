@@ -14,7 +14,7 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         .then(resp => {
           return resp.json();
         }).then(json => {
-
+        console.warn(json,'json')
         return json;
       }).catch(error => console.log("Imageee", error)));
     };
@@ -53,6 +53,7 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         let List = [];
         let AllList=[];
         let ID=0
+
         if(get_MethodsList!==null) {
           ID = parseInt(JSON.parse(get_MethodsList).length) + 1;
         }
@@ -72,7 +73,7 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         else {
           AllList = [...List]
         }
-
+     console.log(AllList,'AllList')
         var returnData = saveAsynStorage(GLOBAL.offline_data,AllList);
         return returnData;
       }

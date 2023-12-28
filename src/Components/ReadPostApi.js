@@ -5,7 +5,6 @@ export async function readOnlineApi (Url){
         method: "GET",
         headers: {"Content-Type": "application/json"}
       }).then(resp => {
-        console.log(resp,'Url:resp')
         return resp.json();})
         .catch(error => console.log("dd", error)));
   }

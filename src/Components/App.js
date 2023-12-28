@@ -62,6 +62,7 @@ class App extends Component {
     });
   }
   check_MethodsList=async ()=> {
+    //await  AsyncStorage.removeItem(GLOBAL.offline_data)
     GLOBAL.OrgAppLink_value =JSON.parse(await AsyncStorage.getItem(GLOBAL.OrgAppLink))
      if (GLOBAL.isConnected === true) {
        syncLocalStorageToServer()

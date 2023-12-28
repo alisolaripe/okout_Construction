@@ -99,7 +99,7 @@ import { useNavigation } from "@react-navigation/native";
                    return resp.txt();
                  })
                  .then(txt => {
-                   console.log(txt, "txttxt");
+
                  })
                  .catch(error => console.log("errorwwww", error));
              }
@@ -115,9 +115,7 @@ import { useNavigation } from "@react-navigation/native";
 
 i++;
        }
-       console.log(get_MethodsList?.length,i,'length')
     if(i===parseInt(get_MethodsList?.length)){
-      console.log('navigate')
       await AsyncStorage.removeItem(GLOBAL.offline_data)
       const timerId = setInterval(() => {
         navigate('Home')

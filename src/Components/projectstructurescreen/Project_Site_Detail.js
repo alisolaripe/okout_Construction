@@ -253,12 +253,40 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       });
     }
     else {
+      let B=[]
       let Filter = JSON.parse(await AsyncStorage.getItem(GLOBAL.SiteDetail_KEY))?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateSiteID));
-      Filter?.sort(dateComparison_data);
+      //Filter?.sort(dateComparison_data);
+      let mark2 = {
+        uri: "",
+        type:'',
+        fileName: '',
+        buildId:'',
+        Type: "",
+        Day:'',
+        Date:'',
+        Month:'',
+        WeekDay:'',
+        relatedId:'',
+        buildIdAttachmentId: '',
+        geoLat:'',
+        geoLong: '',
+        geoAddress: '',
+        Country:'',
+      };
       if (Filter) {
-        Make_Week_Filter_List(Filter);
-        setImageSourceviewarray(Filter);
-        setMudolList(Filter);
+        if(GLOBAL.route==='structure') {
+          B = [mark2,...Filter];
+          B?.sort(dateComparison_data)
+          Make_Week_Filter_List(B)
+          setImageSourceviewarray(B);
+          setMudolList(B)
+        }
+        else {
+          Filter?.sort(dateComparison_data)
+          Make_Week_Filter_List(Filter)
+          setImageSourceviewarray(Filter);
+          setMudolList(Filter)
+        }
       }
       setGeoAddress("");
       setCountry("");

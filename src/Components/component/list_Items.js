@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, Linking, Modal, Platform, Text,TouchableOpacity, View } from "react-native";
+import { Image, Linking, Modal, Platform, Text,TouchableOpacity, View,KeyboardAvoidingView } from "react-native";
 import { Styles } from "../Styles";
 import Entypo from "react-native-vector-icons/Entypo";
 import normalize from "react-native-normalize/src/index";
@@ -11,13 +11,14 @@ import {  Content } from "native-base";
 import { TextInputI } from "./TextInputI";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { removeDataStorage } from "../Get_Location";
 
 const GLOBAL = require("../Global");
 function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
                                cityId, setcityId,edit, setedit,ShowWarningMessage,setShowWarningMessage,
-                               countryId, setcountryId                          }){
-  const [visible,setvisible] = useState(false);
-  const [isFocus, setIsFocus] = useState(false);
+                               countryId, setcountryId}){
+
+
   const [Name, setName] = useState(false);
   const [Cheked,setCheked] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
@@ -28,7 +29,8 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
   const [GeoAddressStreet, setGeoAddressStreet] = useState('');
   const [GeoAddressCountry, setGeoAddressCountry] = useState('');
   const [GeoAddressCity, setGeoAddressCity] = useState('');
-
+  const [visible,setvisible] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
   const renderItem = (item,key) => {
     return (
       <View key={key} style={Styles.renderItemStyle}>
@@ -49,8 +51,10 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
   }
   const ClickManagement =(id)=>{
     if (id === "1") {
+
       GLOBAL.UpdateProjectId = value.projectId;
       setName(value.projectName)
+
       setvisible(true);
     }
     else if (id === "2"|| id === "14") {
@@ -92,8 +96,6 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
         setcityId(value?.cityId)
         setGeoAddressPostalCode(value?.postalCode)
         setGeoAddressStreet(value?.street)
-        console.log(GeoAddressCountry,'GeoAddressCountry')
-        console.log(GeoAddressCity,'GeoAddressCity')
         setvisible(true);
       }
     }
@@ -377,7 +379,7 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
                     </View>
                     :null
         }
-        <View style={{ width: "35%" }}>
+        <View style={{width:"35%"}}>
           <Dropdown
             containerStyle={Styles.DropDown}
             selectedTextStyle={Styles.selectedTextStyle}
@@ -418,7 +420,6 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
 
         </View>
       }
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -428,10 +429,10 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
           flexGrow: 1,
           backgroundColor: "rgba(0,0,0, 0.5)",
           justifyContent: "center",
+          zIndex:110
         }]}>
           <View style={[Styles.ModalStyle]}>
-            <View style={[{ width: "90%", marginVertical: "4%" }]}>
-
+            <KeyboardAvoidingView style={[{ width: "90%", marginVertical: "4%" }]}>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
                   <View style={{ width: "80%" }}>
@@ -443,56 +444,24 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
                 :
                 null
               }
-              {/*{*/}
-              {/*  ShowMessage===true&&*/}
-              {/*  <TouchableOpacity onPress={() => {*/}
-              {/*    setvisible(false);*/}
-              {/*    setShowMessage(false);*/}
-              {/*    setShowWarningMessage(false);*/}
-              {/*  }} style={Styles.CancelBtnLeftAlign3}>*/}
-              {/*    <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
-              {/*  </TouchableOpacity>}*/}
-            {/*  {*/}
-            {/*    ShowWarningMessage===true&&*/}
-            {/*    <TouchableOpacity onPress={()=>{*/}
-            {/*      setvisible(false);*/}
-            {/*      setShowMessage(false);*/}
-            {/*      setShowWarningMessage(false);*/}
-            {/*    }} style={Styles.flashMessageWarning}>*/}
-            {/*      <View style={{ width: "15%",alignItems:'center' }}>*/}
-            {/*        <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />*/}
-            {/*      </View>*/}
-            {/*      <View style={{ width: "65%",alignItems:'flex-start' }}>*/}
-            {/*        <Text style={Styles.AddedtTxt}>*/}
-            {/*          You will lost all changes.*/}
-            {/*        </Text>*/}
-            {/*      </View>*/}
-            {/*      <View style={Styles.CancelBtnLeftAlignwarn}>*/}
-            {/*        <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
-            {/*      </View>*/}
-            {/*    </TouchableOpacity>*/}
-            {/*}*/}
-
-            </View>
-
-              <TextInputI onChangeText={(value) => {
-                onPress(value, Cheked);
-
-              }} numberValue={numberValue}
-                          ChangeChecked={(value) => {
-                            ChangeChecked(value);
-
-                          }}
-                          ShowMessage={ShowMessage}
+            </KeyboardAvoidingView>
+            <TextInputI onChangeText={(value) => {
+              onPress(value, Cheked);
+            }}
+                        numberValue={numberValue}
+                        ChangeChecked={(value) => {
+                        ChangeChecked(value);
+                        }}
+                        ShowMessage={ShowMessage}
                         Name={Name} setShowMessage={setShowMessage} setvisible={setvisible}
                         ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
                         GeoAddressStreet={GeoAddressStreet}
                         setCheked={setCheked}
                         CityList={CityList} CountryList={CountryList}
-                          setGeoAddressCity={setGeoAddressCity} GeoAddressPostalCode={GeoAddressPostalCode}
-                          GeoAddressCity={GeoAddressCity} GeoAddressCountry={GeoAddressCountry}
-                          setGeoAddressCountry={setGeoAddressCountry}
-                          setcountryId={setcountryId} setcityId={setcityId}
+                        setGeoAddressCity={setGeoAddressCity} GeoAddressPostalCode={GeoAddressPostalCode}
+                        GeoAddressCity={GeoAddressCity} GeoAddressCountry={GeoAddressCountry}
+                        setGeoAddressCountry={setGeoAddressCountry}
+                        setcountryId={setcountryId} setcityId={setcityId}
                         getCity={getCity}
                         geoLat={value?.geoLat}
                         geoLong={value?.geoLong}
@@ -502,9 +471,10 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
         </Content>
       </Modal>
       <Modal
-        animationType="slide"
         transparent={true}
-        visible={ShowUpdateModal}>
+        visible={ShowUpdateModal}
+        avoKeyboard={true}
+        >
         <Content contentContainerStyle={[Styles.centeredView, {
           flexGrow: 1,
           backgroundColor: "rgba(0,0,0, 0.5)",

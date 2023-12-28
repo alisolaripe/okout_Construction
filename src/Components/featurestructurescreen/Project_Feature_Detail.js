@@ -151,8 +151,9 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           });
 
         }
-        AddImageOffline();
-
+        if (GLOBAL.isConnected === false) {
+          AddImageOffline();
+        }
       }
     }
     /////////Send Note/////////////

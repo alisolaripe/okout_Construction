@@ -29,6 +29,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
   const [edit, setedit] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
+
   useEffect(() => {
     get_Country_City();
 
@@ -75,7 +76,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
     GLOBAL.City =JSON.parse(await AsyncStorage.getItem(GLOBAL.All_City));
   }
   const getAllProjectInfo = async () => {
-      readOnlineApi(Api.getAllProjectInfo).then(json => {
+      readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         let A = [];
         json?.projects?.forEach((obj) => {
           A.push({

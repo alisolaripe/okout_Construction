@@ -397,6 +397,7 @@ function TextInputI({ GeoAddressCity,
                 onChangeText={handleChange("Projectname")}
                 onFocus={()=> {
                   setFieldTouched("Projectname");
+
                 }}
 
                 placeholderTextColor={'#fff'}/>
@@ -2481,9 +2482,9 @@ function TextInputI({ GeoAddressCity,
                     setRelatedId(item.value)
                   }}
                 />
-                {error==='selectedrelated' && selectedrelated==='' ?
-                  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select related! Please?</Text>:null
-                }
+                {/*{error==='selectedrelated' && selectedrelated==='' ?*/}
+                {/*  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select related! Please?</Text>:null*/}
+                {/*}*/}
                 <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
                 <TextInput
                   value={values.TaskNote}

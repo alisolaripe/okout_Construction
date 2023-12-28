@@ -20,7 +20,7 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [Version,setVersionCheck] = useState('');
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect( () => {
-    setVersionCheck('1.0.8')
+    setVersionCheck('1.0.9')
 
   }, []);
 

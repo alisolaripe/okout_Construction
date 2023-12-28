@@ -25,10 +25,6 @@ const data = [
   { label: "Photos / Notes", value: "12", Icon: "level-down" },
   { label: "Change DYB", value: "13", Icon: "retweet" },
 ];
-const data_dyb = [
-  {label: "Photos",value: "2",Icon: "images" },
-  {label: "Location",value: "14",Icon: "location" },
-];
 function Project_Features({ navigation, navigation: { goBack } }) {
   const [modules,setmodules] = useState([]);
   const [Message,setMessage] = useState('');
@@ -41,6 +37,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   const [AddId,setAddId]=useState(0);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [ShowChangedybMessage, setShowChangedybMessage] = useState(false);
   const [route, setroute] = useState('');
   useEffect(()=>{
     const unsubscribe = navigation.addListener('focus', () => {
@@ -141,14 +138,17 @@ function Project_Features({ navigation, navigation: { goBack } }) {
         }
   }
   const getAllProjectInfo = async () => {
-    readOnlineApi(Api.getAllProjectInfo).then(json => {
+    readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
 
       let A = [];
       let B=''
 
       let Filter_sites = json?.projects?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+
       let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+
       let Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
+
       let Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
 
       if(Filter_feature?.features) {
@@ -166,7 +166,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
             ListName: "DYB",
             FeatureNote: "",
             sectionId: GLOBAL.SectionId,
-            task: "0",
+            task: obj?.task,
           });
         });
         if (A?.length !== 0)
@@ -193,6 +193,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
           Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
           Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
+          console.log(Filter_feature?.features,'Filter_feature?.features')
           if(Filter_feature?.features)
           {
             Filter_feature?.features?.forEach((obj) => {
@@ -379,9 +380,14 @@ function Project_Features({ navigation, navigation: { goBack } }) {
       if (json) {
 
         if (json?.status === true) {
-          setMessage(json?.msg)
-          setShowMessageUpdate(true)
           getAllProjectInfo()
+          setMessage(json?.msg)
+          setShowChangedybMessage(true)
+          const timerId = setInterval(() => {
+            setShowChangedybMessage(false)
+          }, 4000)
+          return () => clearInterval(timerId);
+
         }
       }
       else  {
@@ -393,8 +399,11 @@ function Project_Features({ navigation, navigation: { goBack } }) {
         SaveFeatures(markers)
         setmodules(markers)
         setMessage('Your feature successfully updated')
-        setShowMessageUpdate(true)
-
+        setShowChangedybMessage(true)
+        const timerId = setInterval(() => {
+          setShowChangedybMessage(false)
+        }, 4000)
+        return () => clearInterval(timerId);
       }
     });
 
@@ -605,6 +614,19 @@ function Project_Features({ navigation, navigation: { goBack } }) {
         null
       }
       {ShowMessage === true ?
+        <View style={Styles.flashMessageSuccsess}>
+          <View style={{ width: "10%" }} />
+          <View style={{ width: "80%" }}>
+            <Text style={Styles.AlertTxt}>
+              {Message}
+            </Text>
+          </View>
+          <View style={{ width: "10%" }} />
+        </View>
+        :
+        null
+      }
+      {ShowChangedybMessage === true ?
         <View style={Styles.flashMessageSuccsess}>
           <View style={{ width: "10%" }} />
           <View style={{ width: "80%" }}>

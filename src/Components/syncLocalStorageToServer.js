@@ -69,23 +69,32 @@ export async function syncLocalStorageToServer()
                 id = obj?.id;
                 if(obj?.ImageSourceviewarrayUpload){
                   var formdata = new FormData();
-                  if(obj3?.[0]!=='attachment')
-                  {
+                  for (let j = 0; j < obj2?.length; j++) {
+                    obj3 = obj2[j];
+                    if(obj3?.[0]!=='attachments[]')
+                    {
                       formdata.append(obj3?.[0], obj3?.[1]);
                     }
+                  }
+
                   for (let i = 0; i < obj?.ImageSourceviewarrayUpload?.length; i++) {
                     let idsArray = obj?.ImageSourceviewarrayUpload[i];
-                    formdata.append("attachment", {
+                    formdata.append("attachments[]", {
                       uri:idsArray.uri,
                       type:idsArray.type,
                       name:idsArray.fileName,
                     });
+                    console.log(formdata,'formdata')
+                    console.log(obj.type, obj.Url,'obj.type, obj.Url')
                     let returnData = await writePostApi(obj.type, obj.Url, formdata)
+
                     if(returnData != undefined)
                     {
+console.log(returnData,'returnData')
                       if(returnData.status === true)
                       {
                         removeItemValue(id);
+                        My_TaskList()
                       }
                     }
                   }
@@ -96,13 +105,15 @@ export async function syncLocalStorageToServer()
                     obj3 = obj2[j];
                     formdata.append(obj3?.[0], obj3?.[1]);
                   }
+
                   let returnData = await writePostApi(obj.type, obj.Url, formdata);
                   if(returnData != undefined)
                   {
+
                     if(returnData.status === true)
                     {
                       removeItemValue(id);
-                      getAllProjectInfo()
+                      My_TaskList()
                     }
                   }
                 }
@@ -224,6 +235,13 @@ export async function syncLocalStorageToServer()
         writeDataStorage(GLOBAL.All_Lists, json?.projects);
       });
   };
+  const My_TaskList =async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        writeDataStorage(GLOBAL.All_Task,json?.tasks)
+      });
+    }
+  };
   const readDataStorage=async (key)=> {
   try{
     let storeObj = await AsyncStorage.getItem(key);
@@ -245,9 +263,11 @@ export async function syncLocalStorageToServer()
   }
   const  removeItemValue=async (id)=> {
     let  get_MethodsList = await readDataStorage(GLOBAL.offline_data);
+    console.log(get_MethodsList,'removeItemValue')
     let index = get_MethodsList.findIndex((p) => p.id === id);
     let markers = [...get_MethodsList];
     markers.splice(index, 1);
+    console.log(markers,'removeItemValue:markers')
     await writeDataStorage(GLOBAL.offline_data,markers)
   }
   try{

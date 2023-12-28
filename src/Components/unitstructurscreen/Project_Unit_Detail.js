@@ -328,13 +328,42 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
     }
     else {
       let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY))
+      let mark2 = {
+        uri: "",
+        type:'',
+        fileName: '',
+        buildId:'',
+        Type: "",
+        Day:'',
+        Date:'',
+        Month:'',
+        WeekDay:'',
+        relatedId:'',
+        buildIdAttachmentId: '',
+        geoLat:'',
+        geoLong: '',
+        geoAddress: '',
+        Country:'',
+      };
       if (json!==null) {
+        let B=[]
         let Filter = json?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateUnitID))
         if (Filter) {
-          Filter?.sort(dateComparison_data)
-          Make_Week_Filter_List(Filter)
-          setImageSourceviewarray(Filter);
-          setMudolList(Filter)
+
+          if(GLOBAL.route==='structure') {
+            B = [mark2,...Filter];
+
+            B?.sort(dateComparison_data)
+            Make_Week_Filter_List(B)
+            setImageSourceviewarray(B);
+            setMudolList(B)
+          }
+          else {
+            Filter?.sort(dateComparison_data)
+            Make_Week_Filter_List(Filter)
+            setImageSourceviewarray(Filter);
+            setMudolList(Filter)
+          }
         }
         setGeoAddress("");
         setCountry("");

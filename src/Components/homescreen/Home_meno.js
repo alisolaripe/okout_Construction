@@ -16,14 +16,30 @@ import LinearGradient from "react-native-linear-gradient";
 import { readOnlineApi } from "../ReadPostApi";
 import { Footer1 } from "../component/Footer";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect(() => {
     getAllProjectInfo();
     getAllProjectInfo_dyb();
     Assigned_TaskList();
-    My_TaskList()
+    My_TaskList();
+    Task_category();
   }, []);
+  const  writeDataStorage=async(key,obj)=>{
+    try {
+      await AsyncStorage.setItem(key,JSON.stringify(obj));
+    }
+    catch (e) {
+    }
+  }
+  const Task_category =async () => {
+    if(GLOBAL.isConnected===true) {
+      readOnlineApi(Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        writeDataStorage(GLOBAL.Task_Category,json)
+      })
+    }
+  };
   const getAllProjectInfo = async () => {
     if (GLOBAL.isConnected === true){
       readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {

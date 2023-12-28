@@ -24,7 +24,7 @@ const data = [
   { label: "Location", value: "14", Icon: "location" },
 ];
 const data_dyb = [
-  {label: "Photos",value: "2",Icon: "images" },
+  {label: "Photos",value: "3",Icon: "images" },
   {label: "Location",value: "14",Icon: "location" },
 ];
 let City=[];
@@ -107,7 +107,6 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         setmodules(A);
       }
     }
-
   };
 
   const onOpen = () => {
@@ -210,7 +209,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   }
 
   const getAllProjectInfo = async () => {
-    readOnlineApi(Api.getAllProjectInfo).then(json => {
+    readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
       let A = [];
       let Site= json?.projects?.find((p) => p?.projectId === GLOBAL?.ProjectId)
 
@@ -241,84 +240,51 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     });
   };
   const getSites = async () => {
-    if (GLOBAL.isConnected === true) {
-      let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-      let A = [];
-      if (json!==null) {
-        let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
-          Site?.sites?.forEach((obj) => {
-            A.push({
-              siteId: obj.siteId,
-              siteName: obj.siteName,
-              unitCount: obj.unitCount,
-              task: "0",
-              note: obj?.notes,
-              address: obj?.address,
-              geoLat: obj?.geoLat,
-              geoLong: obj?.geoLong,
-              cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
-              countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
-              coutryId: obj?.address?.address_Country,
-              cityId: obj?.address?.address_City,
-              postalCode: obj?.address?.address_Zip,
-              street: obj?.address?.address_Street,
-              units: obj?.units,
-            });
-          });
-        if(A?.length!==0)
-          setmodules(A)
-        else
-            setmodules('')
-        }
-      }
-    else {
-      let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-      if (json!==null) {
-          setJson(json);
-          let A = [];
-          let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
-          if(Site?.sites) {
-            Site?.sites?.forEach((obj) => {
-              A.push({
-                siteId: obj.siteId,
-                siteName: obj.siteName,
-                unitCount: obj.unitCount,
-                task: "0",
-                note: obj?.notes,
-                address: obj?.address,
-                geoLat: obj?.geoLat,
-                geoLong: obj?.geoLong,
-                cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
-                countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
-                coutryId: obj?.address?.address_Country,
-                cityId: obj?.address?.address_City,
-                postalCode: obj?.address?.address_Zip,
-                street: obj?.address?.address_Street,
-                units: obj?.units,
-              });
-
-            });
-            if(A?.length!==0)
-              setmodules(A);
-            else
-              setmodules('');
-          }
-          setGeoAddressCountry("United States");
-          setGeoAddressCity("California");
-          getCountry_city("United States", "California");
-          let All_Sites = [];
-          json?.forEach((obj) => {
-            obj?.sites?.forEach((obj2) => {
-              All_Sites?.push(
-                { Id: obj2?.siteId },
-              );
-            });
-          });
-          All_Sites?.sort(dateComparison)
-
-          setAddId(All_Sites);
-        }
+    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
+    let A = [];
+    if (json!==null) {
+      let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
+      Site?.sites?.forEach((obj) => {
+        A.push({
+          siteId: obj.siteId,
+          siteName: obj.siteName,
+          unitCount: obj.unitCount,
+          task: "0",
+          note: obj?.notes,
+          address: obj?.address,
+          geoLat: obj?.geoLat,
+          geoLong: obj?.geoLong,
+          cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
+          countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
+          coutryId: obj?.address?.address_Country,
+          cityId: obj?.address?.address_City,
+          postalCode: obj?.address?.address_Zip,
+          street: obj?.address?.address_Street,
+          units: obj?.units,
+        });
+      });
+      if(A?.length!==0)
+        setmodules(A)
+      else
+        setmodules('')
     }
+    if (GLOBAL.isConnected === false) {
+      setGeoAddressCountry("United States");
+      setGeoAddressCity("California");
+      getCountry_city("United States", "California");
+      let All_Sites = [];
+      json?.forEach((obj) => {
+        obj?.sites?.forEach((obj2) => {
+          All_Sites?.push(
+            { Id: obj2?.siteId },
+          );
+        });
+      });
+      All_Sites?.sort(dateComparison)
+
+      setAddId(All_Sites);
+      }
+
   }
   const AddSites = (value) => {
   if(GeoAddressCity===''){

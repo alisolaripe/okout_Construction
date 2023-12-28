@@ -22,6 +22,7 @@ const Styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: GLOBAL.OFFICIAL_background,
     width: "100%",
+    zIndex:100
   },
   ViewItems_center_transparent: {
     justifyContent: "center",
@@ -1185,7 +1186,7 @@ paddingHorizontal:7,
     width:'100%',
     alignItems:'center',
     marginTop:'auto',
-
+    zIndex:120,
     paddingVertical:normalize(10),
 
   },
@@ -1638,7 +1639,7 @@ flex:1,
     paddingVertical: normalize(2) // for custom animation
   },
   tasksliderContentContainer: {
-    paddingVertical: normalize(1) // for custom animation
+    paddingVertical: normalize(12) // for custom animation
   },
   exampleContainer: {
     paddingVertical: 30
@@ -1924,14 +1925,14 @@ flex:1,
     paddingBottom:normalize(20),
   },
   Horizental_Menu_Item:{
-    width:'35%',paddingVertical:normalize(2),
+    width:'100%',paddingVertical:normalize(2),
     alignItems: "center",
     justifyContent: "center",
     borderRadius:normalize(6),
 
   },
   Horizental_Menu_Item_notselect:{
-    width:'35%',paddingVertical:normalize(2),
+    width:'100%',paddingVertical:normalize(2),
     alignItems: "center",
     justifyContent: "center",
     borderRadius:normalize(6),

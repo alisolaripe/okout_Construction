@@ -20,7 +20,7 @@ function TaskDetailImage({ item,colors,IconColor,index}) {
   return (
     <View index={index} style={Styles.cardContainer}>
       <View style={Styles.card}>
-        <ImageBackground source={{uri:GLOBAL?.OrgAppLink_value + "/" +item.attachmentUrl }}
+        <ImageBackground source={{uri:item.attachmentUrl }}
                          style={Styles.FatureDetailImagestyleFullScreen}
                          resizeMode="stretch">
           <LinearGradient colors={colors} style={[Styles.ImageBtnFeature, {

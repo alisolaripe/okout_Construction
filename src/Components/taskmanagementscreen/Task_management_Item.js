@@ -30,6 +30,7 @@ function Task_management_Item({value,Navigate_Url,ShowMessage,Message,ChangeChec
           </View>
         </View>
         <TouchableOpacity onPress={()=> {
+          console.log(value.taskId,'value.taskId')
           GLOBAL.Task_detail=value
           GLOBAL.TaskId = value.taskId;
           Navigate_Url("TaskDetail");

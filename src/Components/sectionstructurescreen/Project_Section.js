@@ -96,7 +96,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
     setvisibleAddModal(true);
   };
   const getAllProjectInfo = async () => {
-    readOnlineApi(Api.getAllProjectInfo).then(json => {
+    readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
       let A = [];
       let Filter_sites= json?.projects?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites
       let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
@@ -106,7 +106,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
             sectionId: obj.sectionId,
             sectionName: obj.sectionName,
             featureCount: obj.featureCount,
-            task: "0",
+            task: obj?.task,
             ListName: "Section",
             unitId: GLOBAL.UnitId,
             features: obj.features,
@@ -125,9 +125,8 @@ function Project_Section({navigation, navigation: { goBack }}) {
     return date1 - date2;
   }
   const getSection = async () => {
-    if(GLOBAL.isConnected===true) {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
-      if (json!==null) {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
+    if (json!==null) {
       let A = [];
       let Filter_units = "";
       let Filter_sites = "";
@@ -136,63 +135,33 @@ function Project_Section({navigation, navigation: { goBack }}) {
       Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
       Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
 
-        Filter_section?.sections?.forEach((obj) => {
-          A.push({
-            sectionId: obj.sectionId,
-            sectionName: obj.sectionName,
-            featureCount: obj.featureCount,
-            task: obj?.task,
-            ListName: "Section",
-            unitId: GLOBAL.UnitId,
-            features: obj.features,
-          });
+      Filter_section?.sections?.forEach((obj) => {
+        A.push({
+          sectionId: obj.sectionId,
+          sectionName: obj.sectionName,
+          featureCount: obj.featureCount,
+          task: obj?.task,
+          ListName: "Section",
+          unitId: GLOBAL.UnitId,
+          features: obj.features,
         });
-        if(A?.length!==0)
-          setmodules(A);
-        else
-          setmodules('');
+      });
+      if(A?.length!==0)
+        setmodules(A);
+      else
+        setmodules('');
     }
+    if(GLOBAL.isConnected===false) {
+      let All_Sites = [];
+      json?.forEach((obj) => {
+        obj?.sites?.forEach((obj2) => {
+          obj2?.units?.forEach((obj3) => {
+            obj3?.sections?.forEach((obj4) => {
+              All_Sites?.push({ Id: obj4?.sectionId })})})})});
+      All_Sites?.sort(dateComparison)
+      setAddId(All_Sites);
     }
-    else {
-      let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-      if (json!==null) {
-            setJson(json);
-            let A = [];
-            let Filter_units = "";
-            let Filter_sites = "";
-            let Filter_section = "";
-            Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-            Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-            Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
 
-            if (Filter_section?.sections) {
-              Filter_section?.sections?.forEach((obj) => {
-                A.push({
-                  sectionId: obj.sectionId,
-                  sectionName: obj.sectionName,
-                  featureCount: obj.featureCount,
-                  task: obj?.task,
-                  ListName: "Section",
-                  unitId: GLOBAL.UnitId,
-                  features: obj.features,
-                });
-
-              });
-            }
-            if(A?.length!==0)
-              setmodules(A);
-            else
-              setmodules('');
-            let All_Sites = [];
-            json?.forEach((obj) => {
-              obj?.sites?.forEach((obj2) => {
-                obj2?.units?.forEach((obj3) => {
-                  obj3?.sections?.forEach((obj4) => {
-                    All_Sites?.push({ Id: obj4?.sectionId })})})})});
-            All_Sites?.sort(dateComparison)
-            setAddId(All_Sites);
-          }
-    }
   };
   const getDifference=(array1, array2)=> {
     return array1?.filter(object1 => {

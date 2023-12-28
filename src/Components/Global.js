@@ -55,6 +55,7 @@ module.exports = {
   All_Task:'@MySuperStore:All_Task',
   Task_Detail:'@MySuperStore:Task_Detail',
   Task_Category:'@MySuperStore:TaskCategory',
+  Task_attachments:'@MySuperStore:Task_attachments',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",

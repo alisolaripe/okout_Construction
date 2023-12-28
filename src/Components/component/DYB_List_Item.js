@@ -26,11 +26,11 @@ function DYB_List_Item({
     if(id=== "14") {
       setvisible(true)
     }
-    else if(id=== "3") {
+    else if(id=== "2") {
       GLOBAL.UpdateUnitID = value.Id;
       Navigate_Url('Project_Unit_Detail')
     }
-    else if(id=== "2") {
+    else if(id=== "3") {
       GLOBAL.UpdateSiteID = value.Id;
       Navigate_Url('Project_Site_Detail');
     }

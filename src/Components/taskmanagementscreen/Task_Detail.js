@@ -29,6 +29,7 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [Task_detail, setTask_detail] = useState('');
   const [slider1ActiveSlide,setslider1ActiveSlide] = useState(0);
+  const [attachments,setattachments] = useState([]);
   let _slider1Ref = useRef(null);
   useEffect(() => {
     GetTaskDetail()
@@ -39,31 +40,41 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   const GetTaskDetail =async () => {
     if(GLOBAL.isConnected===true) {
       readOnlineApi(Api.Task_detail+`&taskId=${GLOBAL.TaskId}`).then(json => {
-        console.log(json?.singleTask,'json?.singleTask')
+
+        let A=[]
+        json?.singleTask?.attachments?.forEach((obj) => {
+          A.push({
+            taskId:json?.singleTask?.taskId,
+            attachmentUrl:GLOBAL?.OrgAppLink_value + "/"+obj?.attachmentUrl
+          })
+        })
+        setattachments(A)
         setTask_detail(json?.singleTask)
         if(json?.singleTask)
         Save_Details_Online(json?.singleTask)
+        Save_attachments_Online(A)
       });
     }
     else {
       let Modules = await AsyncStorage.getItem(GLOBAL.Task_Detail)
-      let Filter=JSON.parse(Modules)?.find((p) => parseInt(p.taskId) === parseInt(GLOBAL.TaskId))
+      let Filter=JSON.parse(Modules)?.find((p) => parseInt(p?.taskId) === parseInt(GLOBAL.TaskId))
+      let Modules_attachments = await AsyncStorage.getItem(GLOBAL.Task_attachments)
+      let Filter_attachments=JSON.parse(Modules_attachments)?.filter((p) => parseInt(p?.taskId) === parseInt(GLOBAL.TaskId))
       setTask_detail(Filter)
+      setattachments(Filter_attachments)
       }
-
-
   };
   const Save_Details_Online=async (A)=>{
    //removeDataStorage(GLOBAL.Task_Detail)
     let B=[]
     B.push(A)
-    console.log(B,'B')
+
     let AllList=[];
     let Filter=[];
     let TaskDetailList=JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    console.log(TaskDetailList,'TaskDetailList')
+
     Filter=TaskDetailList?.filter((p) =>parseInt(p?.taskId)!==parseInt(GLOBAL.TaskId))
-    console.log(Filter,'Filter')
+
     if(TaskDetailList!==null&&Filter!==null) {
       AllList =[].concat(Filter,B)
     }
@@ -72,6 +83,22 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
     }
 
     await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(AllList));
+  }
+  const Save_attachments_Online=async (B)=>{
+    let AllList=[];
+    let Filter=[];
+    let TaskDetailList=JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_attachments));
+
+    Filter=TaskDetailList?.filter((p) =>parseInt(p?.taskId)!==parseInt(GLOBAL.TaskId))
+
+    if(TaskDetailList!==null&&Filter!==null) {
+      AllList =[].concat(Filter,B)
+    }
+    else {
+      AllList=B
+    }
+
+    await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(AllList));
   }
   const logout_Url= () => {
     setshowModalDelete(true)
@@ -256,12 +283,12 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
           </View>
 
         </View>
-        {Task_detail?.attachments?.length!==0 && (
-          <View style={Styles.With100_NoFlex}>
+        {attachments?.length!==0 && (
+          <View style={Styles.With100NoFlexMarginBotoom}>
 
             <Carousel
               ref={c => _slider1Ref = c}
-              data={Task_detail?.attachments}
+              data={attachments}
               renderItem={_renderItem_Carousel}
               sliderWidth={sliderWidth}
               itemWidth={itemWidth}
@@ -274,7 +301,7 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
               onSnapToItem={(index) => setslider1ActiveSlide(index)}
             />
             <Pagination
-              dotsLength={Task_detail?.attachments?.length}
+              dotsLength={attachments?.length}
               activeDotIndex={slider1ActiveSlide}
               containerStyle={Styles.paginationContainer}
               dotColor={'rgba(255, 255, 255, 0.92)'}

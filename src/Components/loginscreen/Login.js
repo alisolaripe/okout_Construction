@@ -54,7 +54,7 @@ function LogIn({ navigation }) {
     const Second=date.getSeconds()
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
     setShowDate(Full)
-    setVersionCheck('1.0.8')
+    setVersionCheck('1.0.9')
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
@@ -171,7 +171,7 @@ function LogIn({ navigation }) {
           return resp.json();
         })
           .then(json => {
-            console.log(json,'jsonjsonjson')
+
             if (json?.status===true) {
               GLOBAL.UserInformation=json;
               setBtn(true)

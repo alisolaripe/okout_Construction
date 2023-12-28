@@ -115,7 +115,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   };
   ///////////////////////////////////////////////////
   const getAllProjectInfo = async () => {
-    readOnlineApi(Api.getAllProjectInfo).then(json => {
+    readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
       let A = [];
       let Filter_sites= json?.projects?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites
       let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
@@ -248,7 +248,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     formdata.append("cityId",cityId);
     formdata.append("countryId",countryId);
     formdata.append("street",value.GeoAddressStreet);
-    console.log(formdata,'formdata')
+
     writePostApi("POST", Api.UpdateUnit,formdata).then(json => {
       if (json) {
         if (json?.status === true) {
@@ -275,90 +275,54 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   };
 
   const getUnits =async () => {
-    if(GLOBAL.isConnected===true)
-    {
-      let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-      if (json!==null) {
+    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
+    if (json!==null) {
 
-        Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-        Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
 
-          let A = [];
-          Filter_units?.units?.forEach((obj) => {
-            A.push({
-              unitId: obj?.unitId,
-              unitName: obj?.unitName,
-              sectionCount: obj?.sectionCount,
-              task: obj?.task,
-              note: obj?.notes,
-              address: obj?.address,
-              geoLat: obj?.geoLat,
-              geoLong: obj?.geoLong,
-              cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
-              countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
-              coutryId: obj?.address?.address_Country,
-              cityId: obj?.address?.address_City,
-              postalCode: obj?.address?.address_Zip,
-              street: obj?.address?.address_Street,
-              sections: obj?.sections
-            });
-          })
-        if(A?.length!==0)
-          setmodules(A);
-         else
-          setmodules('');
-      }
+      let A = [];
+      Filter_units?.units?.forEach((obj) => {
+        A.push({
+          unitId: obj?.unitId,
+          unitName: obj?.unitName,
+          sectionCount: obj?.sectionCount,
+          task: obj?.task,
+          note: obj?.notes,
+          address: obj?.address,
+          geoLat: obj?.geoLat,
+          geoLong: obj?.geoLong,
+          cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
+          countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
+          coutryId: obj?.address?.address_Country,
+          cityId: obj?.address?.address_City,
+          postalCode: obj?.address?.address_Zip,
+          street: obj?.address?.address_Street,
+          sections: obj?.sections
+        });
+      })
+      if(A?.length!==0)
+        setmodules(A);
+      else
+        setmodules('');
     }
-    else {
-      let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-      if (json!==null) {
-         setJson(json);
-         let A = [];
-         let Filter_units = "";
-         let Filter_sites = "";
-         Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-         Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
-         if (Filter_units?.units) {
-           Filter_units?.units?.forEach((obj) => {
-             A.push({
-               unitId: obj?.unitId,
-               unitName: obj?.unitName,
-               sectionCount: obj?.sectionCount,
-               task: obj?.task,
-               note: obj?.notes,
-               address: obj?.address,
-               geoLat: obj?.geoLat,
-               geoLong: obj?.geoLong,
-               cityName: GLOBAL.City?.cities?.find((p) => p?.cityId === obj?.address?.address_City)?.cityName,
-               countryName: GLOBAL.Country?.countries?.find((p) => p?.countryId === obj?.address?.address_Country)?.countryName,
-               coutryId: obj?.address?.address_Country,
-               cityId: obj?.address?.address_City,
-               postalCode: obj?.address?.address_Zip,
-               street: obj?.address?.address_Street,
-               sections: obj?.sections,
-             });
-           });
-           if(A?.length!==0)
-             setmodules(A);
-           else
-             setmodules('');
-         }
-         setGeoAddressCountry("United States");
-         setGeoAddressCity("California");
-         getCountry_city("United States", "California");
-         let All_Sites = [];
-         json?.forEach((obj) => {
-           obj?.sites?.forEach((obj2) => {
-             obj2?.units?.forEach((obj3) => {
-             All_Sites?.push(
-               { Id: obj3?.unitId },
-             );
-           });
-           });
-         });
-         All_Sites?.sort(dateComparison)
-         setAddId(All_Sites);
-       }
+    if(GLOBAL.isConnected===false)
+    {
+      setGeoAddressCountry("United States");
+      setGeoAddressCity("California");
+      getCountry_city("United States", "California");
+      let All_Sites = [];
+      json?.forEach((obj) => {
+        obj?.sites?.forEach((obj2) => {
+          obj2?.units?.forEach((obj3) => {
+            All_Sites?.push(
+              { Id: obj3?.unitId },
+            );
+          });
+        });
+      });
+      All_Sites?.sort(dateComparison)
+      setAddId(All_Sites);
     }
   };
   const getCountry_city = async (country,adminArea) => {
