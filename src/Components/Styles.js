@@ -35,9 +35,10 @@ const Styles = StyleSheet.create({
     alignItems:'center'
   },
   ViewItems_center_transparent_row_task:{
-    width:'100%',flexDirection:'row',
+    width:'65%',
     alignItems:'center',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
+    backgroundColor:'red'
   },
   txt: {
     color: "#fff",
@@ -57,6 +58,13 @@ const Styles = StyleSheet.create({
     paddingBottom: 15,
     fontWeight:'bold'
   },
+  txtMenuHome2: {
+    fontSize: normalize(15),
+    textAlign: "left",
+    color: '#fff',
+    paddingVertical: 15,
+    fontWeight:'bold'
+  },
   txt_left:{
     color: GLOBAL.OFFICIAL_WITE_COLOR,
     fontSize: normalize(14),
@@ -65,11 +73,10 @@ const Styles = StyleSheet.create({
     fontWeight:'bold'
   },
   txt_left_task:{
-    color: GLOBAL.OFFICIAL_WITE_COLOR,
-    fontSize: normalize(14),
+
     textAlign: "left",
     fontWeight:'bold',
-    paddingLeft:normalize(10)
+    fontSize:normalize(12),color:'#b4b4b4'
   },
   txt_Left_padding_horizontal: {
     color: GLOBAL.OFFICIAL_WITE_COLOR,
@@ -553,6 +560,12 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     alignItems: "center",
 
   },
+  container_task2: {
+    flex: 1,
+
+    alignItems: "center",
+
+  },
   container2: {
     flex: 1,
     justifyContent: "center",
@@ -674,6 +687,12 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     width: width/2.3, backgroundColor: "#F4F4FB"
     , marginBottom: "5%", borderRadius: normalize(15),
   },
+  ModuleBox2: {
+    width: width/2.3
+    , marginBottom: "5%", borderRadius: normalize(15),
+    alignItems: "center",
+    justifyContent: "center",
+  },
   FooterFloatBtn: {
     alignItems: "center",
     justifyContent: "center",
@@ -715,7 +734,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     alignItems: "center",
     margin: normalize(5),
 
-    backgroundColor: "rgba(0,0,0,0.47)",
+    backgroundColor: "rgba(56,46,46,0.93)",
 
   },
   UnitDetailAddTextBox23: {
@@ -830,6 +849,16 @@ paddingHorizontal:7,
     width: "100%",
     alignSelf: "center",
     backgroundColor: GLOBAL.OFFICIAL_background,
+    zIndex:1000
+  },
+  ModalizetaskStyle: {
+    alignItems: "center",
+
+    flex: 0.2,
+    width: "100%",
+    alignSelf: "center",
+    backgroundColor: GLOBAL.OFFICIAL_background,
+    zIndex:1000
   },
   BtnBox: {
     width: "100%",
@@ -838,6 +867,22 @@ paddingHorizontal:7,
     flexWrap: "wrap",
     justifyContent: "center",
     marginTop: normalize(12),
+  },
+  BtnBoxtask: {
+    width: "100%",
+    backgroundColor: 'rgba(163,152,151,0.87)',
+    height: '100%',
+    justifyContent:'flex-end'
+  },
+  BtnBoxtask2: {
+    width: "100%",
+    backgroundColor:GLOBAL.OFFICIAL_background,
+    paddingVertical: normalize(15),
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+
   },
   UploadBtn: {
     width: "80%", backgroundColor: "rgb(42,48,82)"
@@ -965,6 +1010,24 @@ paddingHorizontal:7,
     alignItems: "center",
     flexWrap: "wrap",
     marginTop: normalize(7),},
+  BtnListStyle2:
+    {
+    width: "30%",
+    alignItems: "center",
+    },
+  TaskListStyle:{width: "100%",
+
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginTop: normalize(7),}
+  ,
+  taskbtnStyle:{width: "100%",
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginTop: normalize(7),},
   btnList:
     {
       backgroundColor: "#7953FAFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(5),
@@ -994,20 +1057,51 @@ paddingHorizontal:7,
       marginRight: normalize(7),
 
     },
+ btntask:
+    {
+      backgroundColor: "#4B75FCFF", filter: "blur(15)",paddingHorizontal:normalize(10), paddingVertical: normalize(10),
+      borderRadius: normalize(6),
+      marginRight: normalize(7),
 
+    },
+  triangle:{
+    width:0,
+    height:0,
+    backgroundColor:"transparent",
+    borderStyle:"solid",
+    borderLeftWidth:9,
+    borderRightWidth:9,
+    borderBottomWidth:19,
+    borderLeftColor:"transparent",
+    borderRightColor:"transparent",
+  },
+  guide:{
+    width:'100%',
+    flexDirection:"row",
+    paddingVertical:normalize(10)
+  },
+  guideItem:{
+    width:'20%',
+    justifyContent:"flex-start",
+    flexDirection:"row",
+  },
+  guideItembox:{
+    width:'80%',
+    justifyContent:"flex-start",
+    flexDirection:"row",
+    flexWrap: "wrap",
+  },
   btnList2:
     {
       backgroundColor: "rgb(55,167,239)", filter: "blur(15)", width: "37%", paddingVertical: normalize(5),
       borderRadius: normalize(6),
       marginRight: normalize(7),
-
     },
   btnListDelete:
     {
-    width: "20%", paddingVertical: normalize(5),
-      borderRadius: normalize(6),
-      marginHorizontal: normalize(20),
-
+    width:"20%",paddingVertical:normalize(5),
+    borderRadius:normalize(6),
+    marginHorizontal:normalize(20),
     },
   btnList3:
     {
@@ -1015,7 +1109,6 @@ paddingHorizontal:7,
       borderRadius: normalize(6),
       marginRight: normalize(7),
       flexDirection:'row',alignItems:'center',justifyContent:'center'
-
     },
   btnListedit:
     {
@@ -1100,7 +1193,7 @@ paddingHorizontal:7,
     width: width-SPACING.space_25,alignItems:'center',marginBottom:normalize(55)
   },
   ItemsBoxDyb:{
-    margin:normalize(20),justifyContent:'space-between',
+    marginBottom:normalize(20),justifyContent:'space-between',
     width: width-SPACING.space_25,alignItems:'center',
   },
   Header:{
@@ -1168,6 +1261,8 @@ paddingHorizontal:7,
     borderRadius: normalize(6),
   },
   With90:{width:'90%',flexDirection:'row'},
+ With93_row:{width:'93%',flexDirection:'row'},
+
   With65:{width:'65%'},
   With35:{width:'35%'},
   With90_zIndex:{width:'90%',flexDirection:'row',zIndex:-1},
@@ -1303,6 +1398,7 @@ flex:1,
 
   },
   SectionFooter:{width:'100%',height:normalize(60)},
+  SectionHeader:{width:'100%',height:normalize(10)},
   With100:{width:'100%'
     ,alignItems:"center",flex:1},
   With94:{width:'94%'
@@ -1356,9 +1452,15 @@ flex:1,
     justifyContent: "center",
     flexDirection: "row",
   },
-  FlexRow:{width:'94%',flexDirection:'row'},
+  FlexRow:{width:'94%',flexDirection:'row',backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    marginBottom:normalize(10),paddingVertical:normalize(10),borderRadius:normalize(6)},
   With80:{width:'80%',alignItems:'center',borderRadius:150/2, margin: 5,},
-  DoneTask:{width:'90%',paddingVertical:normalize(10),alignItems:'center',borderRadius:normalize(550), marginTop: normalize(6),backgroundColor:'#786b6b'},
+  DoneTask:{width:'7%',
+    paddingVertical:normalize(9),alignItems:'center',borderRadius:normalize(550),
+    backgroundColor:'#786b6b',marginRight:normalize(7)},
+  DoneTask2:{width:'70%',
+    paddingVertical:normalize(6),alignItems:'center',borderRadius:normalize(550),
+    backgroundColor:'#CC0000',marginRight:normalize(7)},
   NotDoneTask: {borderWidth:1,borderColor:'#656464',width:'90%',paddingVertical:normalize(9),alignItems:'center',borderRadius:normalize(550), marginTop: normalize(6)},
   Task_satus:{
     paddingVertical:normalize(5),width:'20%',alignItems:'center',borderRadius:150/2, margin: 5,},
@@ -1421,10 +1523,10 @@ flex:1,
   },
   View_Task:{
     width:'100%',
-    backgroundColor:GLOBAL.OFFICIAL_background,
+    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
     borderBottomRightRadius:22,
     borderBottomLeftRadius:22,
-    height:250,
+    height:50,
   },
   Circle:{
     width:'10%',
@@ -1967,6 +2069,11 @@ flex:1,
   },
   TaskImage:{ width: "100%",paddingBottom:normalize(25), alignItems: "center",
   position:'absolute',bottom:normalize(50)
+  },
+  home:{
+    width:'100%',
+    height:350,
+    backgroundColor:"red"
   }
 });
 export { Styles };

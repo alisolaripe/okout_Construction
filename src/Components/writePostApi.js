@@ -14,7 +14,7 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         .then(resp => {
           return resp.json();
         }).then(json => {
-        console.warn(json,'json')
+
         return json;
       }).catch(error => console.log("Imageee", error)));
     };

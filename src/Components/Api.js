@@ -21,6 +21,8 @@ module.exports = {
    DeleteBuildNote:`api/ApiConstruction/deleteBuildNote`,
    AddBuildNotes:`api/ApiConstruction/addBuildNotes`,
    AddTask:`api/ApiTask/createTask`,
+   UpdateTask:`api/ApiTask/updateTask`,
+   DeleteAttachment:`api/ApiGetCommonInfo/deleteAttachment`,
    DeleteUnit:`api/ApiConstruction/deleteUnit`,
    CreateUnit:`api/ApiConstruction/addUnit`,
    UpdateUnit:`api/ApiConstruction/updateUnit`,

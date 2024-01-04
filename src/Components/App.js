@@ -4,21 +4,13 @@ import SignupStack from "../Components/loginscreen/index";
 import "react-native-gesture-handler";
 import Homescreen  from './homescreen/index';
 const GLOBAL =require("./Global");
-const Api =require("./Api");
-
 import { NavigationContainer } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
 import Splash from "./splashscreen/index";
-import {writePostApi} from "./writePostApi";
 import {syncLocalStorageToServer} from "./syncLocalStorageToServer";
 import Geocoder from "react-native-geocoder";
 Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
 let userDetail=null;
-let get_MethodsList='';
-let obj2=''
-let obj3=''
-let i = 0;
-let id=0;
 class App extends Component {
   constructor(props) {
     super(props);

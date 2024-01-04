@@ -56,6 +56,8 @@ module.exports = {
   Task_Detail:'@MySuperStore:Task_Detail',
   Task_Category:'@MySuperStore:TaskCategory',
   Task_attachments:'@MySuperStore:Task_attachments',
+  priorities:'@MySuperStore:priorities',
+  Task_status:'@MySuperStore:Task_status',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",
@@ -93,7 +95,7 @@ module.exports = {
   City:[],
   AllProjectInfo:[],
   Task_detail:'',
-
+  selectItem:0,
   route:""
 
 };

@@ -109,6 +109,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const Navigate_Url= (Url) => {
     navigation.navigate(Url);
   };
+
   const _showModalDelete = () => {
     return (
       <View style={Styles.bottomModal}>

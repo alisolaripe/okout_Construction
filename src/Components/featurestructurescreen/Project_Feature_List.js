@@ -155,13 +155,9 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
                 setMessage(json.msg);
                 setShowMessage(true);
                 getFeatureDetail()
-                const timerId = setInterval(() => {
-                  setShowMessage(false);
-                  setchangeScreen(false)
-                }, 2000);
+                setTimeout(function(){ setShowMessage(false)}, 2000)
+                setchangeScreen(false)
 
-                //navigation.navigate('Project_Feature_List')
-                return () => clearInterval(timerId);
               }
             } else {
               setMessage('Your build notes successfully added');

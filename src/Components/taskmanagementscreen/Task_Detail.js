@@ -40,12 +40,13 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   const GetTaskDetail =async () => {
     if(GLOBAL.isConnected===true) {
       readOnlineApi(Api.Task_detail+`&taskId=${GLOBAL.TaskId}`).then(json => {
-
+console.log(json?.singleTask,'json?.singleTask')
         let A=[]
         json?.singleTask?.attachments?.forEach((obj) => {
           A.push({
             taskId:json?.singleTask?.taskId,
-            attachmentUrl:GLOBAL?.OrgAppLink_value + "/"+obj?.attachmentUrl
+            attachmentUrl:GLOBAL?.OrgAppLink_value + "/"+obj?.attachmentUrl,
+            attachmentId:obj?.attachmentId
           })
         })
         setattachments(A)

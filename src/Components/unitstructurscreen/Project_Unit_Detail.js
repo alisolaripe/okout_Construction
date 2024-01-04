@@ -145,8 +145,8 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
         formData.append("userId", "1");
         formData.append("relatedName", "unit");
         formData.append("relatedId", GLOBAL.UpdateUnitID);
-          formData.append("geoLat", location.latitude);
-          formData.append("geoLong", location.longitude);
+        formData.append("geoLat", location.latitude);
+        formData.append("geoLong", location.longitude);
         formData.append("geoAddress",GeoAddress);
         formData.append("buildType", "general");
         if (ImageSourceviewarrayUpload.length !== 0) {
@@ -162,8 +162,8 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
               if (json) {
               if (json?.status === true) {
                 setMessage(json?.msg);
+                setMessage(json?.msg);
                 setShowMessage(true);
-
                 const timerId = setInterval(() => {
                   setShowMessage(false);
                 }, 4000);

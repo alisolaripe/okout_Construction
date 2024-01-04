@@ -76,7 +76,6 @@ export async function syncLocalStorageToServer()
                       formdata.append(obj3?.[0], obj3?.[1]);
                     }
                   }
-
                   for (let i = 0; i < obj?.ImageSourceviewarrayUpload?.length; i++) {
                     let idsArray = obj?.ImageSourceviewarrayUpload[i];
                     formdata.append("attachments[]", {
@@ -84,18 +83,69 @@ export async function syncLocalStorageToServer()
                       type:idsArray.type,
                       name:idsArray.fileName,
                     });
-                    console.log(formdata,'formdata')
-                    console.log(obj.type, obj.Url,'obj.type, obj.Url')
-                    let returnData = await writePostApi(obj.type, obj.Url, formdata)
+                  }
+                  let returnData = await writePostApi(obj.type, obj.Url, formdata)
 
-                    if(returnData != undefined)
+                  if(returnData != undefined)
+                  {
+
+                    if(returnData.status === true)
                     {
-console.log(returnData,'returnData')
-                      if(returnData.status === true)
-                      {
-                        removeItemValue(id);
-                        My_TaskList()
-                      }
+                      removeItemValue(id);
+                      My_TaskList()
+                    }
+                  }
+                }
+                else {
+                  var formdata = new FormData();
+                  for (let j = 0; j < obj2?.length; j++) {
+                    obj3 = obj2[j];
+                    formdata.append(obj3?.[0], obj3?.[1]);
+                  }
+
+                  let returnData = await writePostApi(obj.type, obj.Url, formdata);
+                  if(returnData != undefined)
+                  {
+
+                    if(returnData.status === true)
+                    {
+                      removeItemValue(id);
+                      My_TaskList()
+                    }
+                  }
+                }
+              }
+
+
+              else if(obj.Url === Api.UpdateTask){
+                obj2 = obj?.formdata._parts;
+                id = obj?.id;
+                if(obj?.ImageSourceviewarrayUpload){
+                  var formdata = new FormData();
+                  for (let j = 0; j < obj2?.length; j++) {
+                    obj3 = obj2[j];
+                    if(obj3?.[0]!=='attachments[]')
+                    {
+                      formdata.append(obj3?.[0], obj3?.[1]);
+                    }
+                  }
+                  for (let i = 0; i < obj?.ImageSourceviewarrayUpload?.length; i++) {
+                    let idsArray = obj?.ImageSourceviewarrayUpload[i];
+                    formdata.append("attachments[]", {
+                      uri:idsArray.uri,
+                      type:idsArray.type,
+                      name:idsArray.fileName,
+                    });
+                  }
+                  let returnData = await writePostApi(obj.type, obj.Url, formdata)
+
+                  if(returnData != undefined)
+                  {
+
+                    if(returnData.status === true)
+                    {
+                      removeItemValue(id);
+                      My_TaskList()
                     }
                   }
                 }

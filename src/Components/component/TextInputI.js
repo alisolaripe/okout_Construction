@@ -5,7 +5,7 @@ import {
   View,
   StyleSheet,
   Dimensions,
-  TouchableOpacity, Linking, Platform, ImageBackground,
+  TouchableOpacity, Linking, Platform, ImageBackground, Modal, Image,
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -21,6 +21,7 @@ import { useNavigation } from "@react-navigation/native";
 import ToggleSwitch from "toggle-switch-react-native";
 import { Dropdown,MultiSelect } from "react-native-element-dropdown";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import LinearGradient from "react-native-linear-gradient";
 let numOfLinesCompany = 0;
 function TextInputI({ GeoAddressCity,
                       GeoAddressCountry,
@@ -48,6 +49,8 @@ function TextInputI({ GeoAddressCity,
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
+  const [attachmentId, setattachmentId] = useState(true);
+  const [taskId, settaskId] = useState(true);
   const [iconsecuret, setIconsecuret] = useState("eye-off");
   const [isFocus, setIsFocus] = useState(false);
   const [switchDYB, setswitchDYB] = useState(false);
@@ -57,6 +60,7 @@ function TextInputI({ GeoAddressCity,
   const [isFocusrelated, setIsFocusrelated] = useState(false);
   const [isFocususer, setIsFocususer] = useState(false);
   const [isFocusstatus, setIsFocusstatus] = useState(false);
+  const [showModalDelete, setshowModalDelete] = useState(false);
   const validationSchema1 = Yup.object().shape({
     name: Yup.string().required(),
     email: Yup.string()
@@ -136,6 +140,56 @@ function TextInputI({ GeoAddressCity,
     TaskNote: Yup.string()
       .required("Description ! Please?"),
   });
+  const validationSchema24 = Yup.object().shape({
+
+    TaskNote: Yup.string()
+      .required("Description ! Please?"),
+  });
+
+  const _showModalDelete = () => {
+    return (
+      <View style={Styles.bottomModal}>
+        <Modal
+          isVisible={showModalDelete}
+          avoKeyboard={true}
+          onBackdropPress={() => setshowModalDelete( false)}
+          transparent={true}>
+          {renderModalContent()}
+        </Modal>
+      </View>
+    );
+  };
+  const renderModalContent = () => (
+    <View style={Styles.DeleteModalStyle}>
+      <View style={Styles.With100NoFlex}>
+        <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
+               source={require("../../Picture/png/AlertImage.png")}
+               resizeMode="contain" />
+        <View style={Styles.With100NoFlex}>
+          <Text style={Styles.txt_left2}>
+            Do you want to delete Image from List?
+          </Text>
+        </View>
+      </View>
+      <View style={Styles.With100Row}>
+        <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
+          <TouchableOpacity onPress={() => setshowModalDelete( false)} >
+            <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+        <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
+          <TouchableOpacity onPress={() => {
+            DeleteImage(attachmentId, ImageSourceviewarray,taskId);
+            setshowModalDelete( false)
+            setIsFocus(false)
+          }} >
+            <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+    </View>
+  );
+
   const width = Dimensions.get("screen").width;
   const inputStyle = {
     borderWidth: 1,
@@ -2543,6 +2597,107 @@ function TextInputI({ GeoAddressCity,
           </Formik>
 
         </View>
+
+
+    );
+  }
+  if (numberValue === 25) {
+    return (
+
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Title:value?.taskTitle,
+            TaskNote: value?.taskDescription,
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema24}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={[Styles.formContainer2,]}>
+              {
+                showModalDelete &&
+                <View>
+                  {
+                    _showModalDelete()
+                  }
+                </View>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
+              <TextInput
+                value={values.Title}
+                style={[Styles.inputStyleTask]}
+                onChangeText={handleChange("Title")}
+                onFocus={() => setFieldTouched("Title")}
+                multiline={true}
+                placeholderTextColor={"#fff"} />
+              {touched.Title && errors.Title &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
+              <TextInput
+                value={values.TaskNote}
+                style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                onChangeText={handleChange("TaskNote")}
+                onFocus={() => setFieldTouched("TaskNote")}
+                multiline={true}
+                placeholderTextColor={'#fff'} />
+              {touched.TaskNote && errors.TaskNote &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
+              }
+              <View style={Styles.FlexWrap}>
+                {
+                  ImageSourceviewarray?.map((value,key) => {
+                    return (
+                      <View key={key} style={Styles.UnitDetailImageBoxFeatureStyle2}>
+                        <ImageBackground source={{uri:value.uri}}
+                                         imageStyle={{borderRadius:normalize(6)}}
+                                         style={Styles.UnitDetailImagestyle}
+                                         resizeMode="stretch">
+                          <TouchableOpacity onPress={()=> {
+                            setattachmentId(value.attachmentId)
+                            settaskId(value?.taskId)
+                            setshowModalDelete(true)
+                          }} style={Styles.UnitDetailAddTextBox}>
+                            <MaterialCommunityIcons name={"delete"} size={17} color={'#fff'} />
+                          </TouchableOpacity>
+                        </ImageBackground>
+                      </View>
+                    )
+                  })
+                }
+                <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
+                  <Text style={Styles.UploadImageText}>
+                    Add Photos
+                  </Text>
+                  <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                </TouchableOpacity>
+              </View>
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#a39898','#786b6b','#382e2e']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
 
 
     );
