@@ -35,6 +35,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
+  const [ShowButton, setShowButton] = useState(true);
   useEffect(()=>{
 
       const unsubscribe = navigation.addListener('focus', () => {
@@ -74,7 +75,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
               Id:obj.sectionId,
               Name:obj.sectionName,
               features:obj.features,
-              Count: obj.featureCount,
+              Count: obj.features?.length,
               NameCount:'feature',
               ListName:'Section',
               unitId: GLOBAL.UnitId,
@@ -208,6 +209,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
 
   }
   const UpdateSection=(value)=>{
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("sectionName", value.SectionName);
     formdata.append("userId", "1");
@@ -219,6 +221,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
           setMessage(json?.msg)
           setShowWarningMessage(false)
           setShowMessageUpdate(true);
+          setShowButton(true)
           getAllProjectInfo();
         }
         }
@@ -232,11 +235,12 @@ function Project_Section({navigation, navigation: { goBack }}) {
           setShowWarningMessage(false)
           setMessage('Your section successfully updated')
           setShowMessageUpdate(true)
-
+          setShowButton(true)
         }
       });
   }
   const AddSection =(value)=>{
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("sectionName", value.SectionName);
     formdata.append("userId", "1");
@@ -251,6 +255,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
         {
           setMessage(json?.msg);
           setShowMessage(true);
+          setShowButton(true)
           getAllProjectInfo();
           setvisibleAddModal(false)
           const timerId = setInterval(() => {
@@ -285,6 +290,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
           setMessage('Your section successfully added')
           setShowMessage(true)
           setvisibleAddModal(false)
+          setShowButton(true)
           let All_Sites = [];
           json?.forEach((obj) => {
             obj?.sites?.forEach((obj2) => {
@@ -407,7 +413,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} ShowWarningMessage={ShowWarningMessage}
                 setShowWarningMessage={setShowWarningMessage}
                 Navigate_Url={Navigate_Url} Message={Message} onPress={UpdateSection} data={data}
-                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Section'} numberValue={14} onPressDelete={DeleteSection}
+                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Section'} numberValue={14} onPressDelete={DeleteSection} ShowButton={ShowButton}
     />
 
   )
@@ -528,7 +534,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
                 numberValue={13}  ChangeChecked={ChangeChecked}
                 setvisibleAddModal={setvisibleAddModal}
                 visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
-                onPressAdd={AddSection} tittlebtn={'Add Section'}/>
+                onPressAdd={AddSection} tittlebtn={'Add Section'} ShowButton={ShowButton}/>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}/>
 
     </Container>

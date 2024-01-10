@@ -16,7 +16,7 @@ import { removeDataStorage } from "../Get_Location";
 const GLOBAL = require("../Global");
 function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
                                cityId, setcityId,edit, setedit,ShowWarningMessage,setShowWarningMessage,
-                               countryId, setcountryId}){
+                               countryId, setcountryId,ShowButton}){
 
 
   const [Name, setName] = useState(false);
@@ -451,7 +451,7 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
                         numberValue={numberValue}
                         ChangeChecked={(value) => {
                         ChangeChecked(value);
-                        }}
+                        }} ShowButton={ShowButton}
                         ShowMessage={ShowMessage}
                         Name={Name} setShowMessage={setShowMessage} setvisible={setvisible}
                         ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}

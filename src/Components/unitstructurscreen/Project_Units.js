@@ -58,6 +58,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const [showModalDelete,setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
+  const [ShowButton, setShowButton] = useState(true);
   useEffect(() => {
     getLocation();
 
@@ -89,7 +90,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
           A.push({
             Id: obj?.unitId,
             Name: obj?.unitName,
-            Count: obj?.sectionCount,
+            Count: obj.sections?.length,
             NameCount: 'section',
             task: obj?.task,
             ListName: 'Unit',
@@ -148,6 +149,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   };
 
   const AddUnits = (value) => {
+    setShowButton(false)
       var formdata= new FormData();
       formdata.append("unitName",value.Unitname);
       formdata.append("userId", "1");
@@ -168,7 +170,9 @@ function Project_Units({ navigation, navigation: { goBack } }) {
             setMessage(json?.msg);
             setShowMessage(true);
             setvisibleAddModal(false)
+            setShowButton(true)
             getAllProjectInfo();
+
             const timerId = setInterval(() => {
               setShowMessage(false);
             }, 4125);
@@ -222,6 +226,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
           setMessage('Your unit successfully added')
           setShowMessage(true)
           setvisibleAddModal(false)
+          setShowButton(true)
           const timerId = setInterval(() => {
             setShowMessage(false);
           }, 4125);
@@ -236,7 +241,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     return date1 - date2;
   }
   const UpdateUnits = (value) => {
-
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("unitName", value.Unitname);
     formdata.append("userId", "1");
@@ -255,6 +260,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
           setMessage(json?.msg);
           setShowWarningMessage(false);
           setShowMessageUpdate(true);
+          setShowButton(true)
           getAllProjectInfo();
 
         }
@@ -269,7 +275,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
         setShowWarningMessage(false);
         setMessage('Your unit successfully updated')
         setShowMessageUpdate(true)
-
+        setShowButton(true)
       }
     });
   };
@@ -543,7 +549,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} getCity={getCity} CityList={CityList} CountryList={CountryList}
                 Navigate_Url={Navigate_Url} Message={Message} onPress={UpdateUnits} data={data} cityId={cityId} setcityId={setcityId}
                 countryId={countryId} setcountryId={setcountryId} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Unit'} numberValue={12} onPressDelete={DeleteUnits}
+                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Unit'} numberValue={12} onPressDelete={DeleteUnits} ShowButton={ShowButton}
     />
   )
   const renderSectionHeader=()=>(
@@ -677,7 +683,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
         validatemsg={validatemsg}
         getCity={getCity} touch={touch} setvisibleAddModal={setvisibleAddModal}
         visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
-        onPressAdd={AddUnits} tittlebtn={'Add Unit'}/>
+        onPressAdd={AddUnits} tittlebtn={'Add Unit'} ShowButton={ShowButton}/>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}/>
     </Container>
   );

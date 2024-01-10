@@ -15,6 +15,7 @@ const Api = require("../Api");
 import LinearGradient from "react-native-linear-gradient";
 import { readOnlineApi } from "../ReadPostApi";
 import { Footer1 } from "../component/Footer";
+import {UserPermission} from '../CheckPermission'
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 function Home_meno({ navigation }) {
@@ -25,7 +26,21 @@ function Home_meno({ navigation }) {
     Assigned_TaskList();
     My_TaskList();
     Task_category();
+    getUserPermissions()
   }, []);
+  const getUserPermissions =async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.getUserPermissions+`userRoleId=1`).then(json => {
+        console.log(json,'json')
+        GLOBAL.UserPermissionsList=json?.menu_privileges
+        writeDataStorage(GLOBAL.UserPermissions,json);
+      });
+    }
+    else {
+      let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.UserPermissions))
+      GLOBAL.UserPermissionsList=json
+    }
+  };
   const  writeDataStorage=async(key,obj)=>{
     try {
       await AsyncStorage.setItem(key,JSON.stringify(obj));
@@ -70,8 +85,18 @@ function Home_meno({ navigation }) {
   };
   const Navigate_Between_Modules = (constModule_Id) => {
     if (constModule_Id === "1") {
-     GLOBAL.route='structure'
-      navigation.navigate("Project_structureStack");
+        GLOBAL.route = "structure";
+        navigation.navigate("Project_structureStack");
+      // UserPermission(GLOBAL.UserPermissionsList, 'Project').then(res =>{
+      //   console.log(res,'rrrrrrrrr')
+      // })
+      // if(GLOBAL.UserPermissionsList?.menu_privileges?.Project?.view==='1') {
+      //   GLOBAL.route = "structure";
+      //   navigation.navigate("Project_structureStack");
+      // }
+      // else {
+      //
+      // }
     } else if (constModule_Id === "4") {
       navigation.navigate("Task_managementStack");
     } else if (constModule_Id === "3") {

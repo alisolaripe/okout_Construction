@@ -657,18 +657,16 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             if (json?.status === true) {
               setMessage(json?.msg);
               setShowMessage(true);
-              const timerId = setInterval(() => {
-                setShowMessage(false);
-              }, 4000);
-              return () => clearInterval(timerId);
+              setShowBackBtn(true)
+              setTimeout(function(){ setShowMessage(false)}, 4000)
+              Navigate_Url('Project_Sites')
             }
           } else {
             setMessage("Your BuildNotes successfully added");
             setShowMessage(true);
-            const timerId = setInterval(() => {
-              setShowMessage(false);
-            }, 4000);
-            return () => clearInterval(timerId);
+            setShowBackBtn(true)
+            setTimeout(function(){ setShowMessage(false)}, 4000)
+            Navigate_Url('Project_Sites')
           }
         });
       }
@@ -839,6 +837,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       setShowWarningMessage(true);
       scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
       setscroll(false);
+      setTimeout(function(){ setShowBackBtn(true)}, 2000)
     }
     else {
       goBack()

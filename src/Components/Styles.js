@@ -635,6 +635,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     borderRadius: 100,
 
   },
+
   dropdown: {
     margin: 16,
     height: 50,
@@ -1064,6 +1065,12 @@ paddingHorizontal:7,
       marginRight: normalize(7),
 
     },
+  btntask1:
+    {
+      backgroundColor: "#4B75FCFF", filter: "blur(15)",paddingHorizontal:normalize(4), paddingVertical: normalize(4),
+      borderRadius: normalize(6),
+      marginRight: normalize(2),
+    },
   triangle:{
     width:0,
     height:0,
@@ -1072,6 +1079,17 @@ paddingHorizontal:7,
     borderLeftWidth:9,
     borderRightWidth:9,
     borderBottomWidth:19,
+    borderLeftColor:"transparent",
+    borderRightColor:"transparent",
+  },
+  triangle1:{
+    width:0,
+    height:0,
+    backgroundColor:"transparent",
+    borderStyle:"solid",
+    borderLeftWidth:6,
+    borderRightWidth:6,
+    borderBottomWidth:12,
     borderLeftColor:"transparent",
     borderRightColor:"transparent",
   },
@@ -1480,6 +1498,9 @@ flex:1,
     zIndex:100,left:normalize(25),alignItems:'center'},
   FilterBox:{
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_35,marginVertical:normalize(4)
+  },
+  FilterBoxtask:{
+    flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_25,marginVertical:normalize(4)
   },
   FilterBoxItems: {
     backgroundColor: "#F4F4FB",

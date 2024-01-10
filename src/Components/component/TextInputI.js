@@ -45,7 +45,7 @@ function TextInputI({ GeoAddressCity,
                       Taskpriority,selectedpriority,setSelectedpriority,setOpen,setdateType
                       ,DateFormatplanend,DateFormatplanstart,Taskstatus,selectedstatus, setSelectedstatus,
                       selecteduser,setSelecteduser,Taskuser,setUserId,setCategoryId,setRelatedId,setParentTaskId,setPriorityId,setTaskStatusId,
-                      Task_RelatedList,TaskRelated,selectedrelated,setSelectedrelated,error
+                      Task_RelatedList,TaskRelated,selectedrelated,setSelectedrelated,error,ShowButton
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
@@ -400,21 +400,26 @@ function TextInputI({ GeoAddressCity,
                   numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
                 }}
                 placeholderTextColor={'#fff'} />
-              <View style={[Styles.ViewItems_center]}>
-                <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
-                  flexDirection: "row",
-                  width: '100%',
-                  paddingVertical: 2,
-                  marginTop: normalize(30),
 
-                }]}//handleSubmit
-                         onpress={handleSubmit}
-                         categoriIcon={""}
-                         title={tittlebtn}
-                         colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              {
+                ShowButton===true?
+                  <View style={[Styles.ViewItems_center]}>
+                    <ButtonI style={[Styles.btn, {
+                      //margin: normalize(15),
+                      flexDirection: "row",
+                      width: '100%',
+                      paddingVertical: 2,
+                      marginTop: normalize(30),
+
+                    }]}//handleSubmit
+                             onpress={handleSubmit}
+                             categoriIcon={""}
+                             title={tittlebtn}
+                             colorsArray={['#ffadad','#f67070','#FF0000']}
+                             styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                  </View>:null
+              }
+
             </View>
 
           )}
@@ -470,6 +475,8 @@ function TextInputI({ GeoAddressCity,
 
                 multiline={true}
                 placeholderTextColor={'#fff'} />
+              {
+                ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
                   //margin: normalize(15),
@@ -484,7 +491,8 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null
+              }
             </View>
 
           )}
@@ -666,19 +674,20 @@ function TextInputI({ GeoAddressCity,
                 onFocus={() => setFieldTouched("siteNote")}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
-                  <ButtonI style={[Styles.btn, {
-                    //margin: normalize(15),
-                    flexDirection: "row",
-                    width: '100%',
-                    paddingVertical: 2,
-                    marginTop: normalize(15),
-                  }]}//handleSubmit
-                           onpress={handleSubmit}
-                           categoriIcon={""}
-                           title={tittlebtn}
-                           colorsArray={['#ffadad','#f67070','#FF0000']}
-                           styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-
+              {ShowButton===true ?
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(15),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />:null
+              }
             </View>
           )}
         </Formik>
@@ -876,18 +885,21 @@ function TextInputI({ GeoAddressCity,
                 onFocus={() => setFieldTouched("siteNote")}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
-              <ButtonI style={[Styles.btn, {
-                //margin: normalize(15),
-                flexDirection: "row",
-                width: '100%',
-                paddingVertical: 2,
-                marginTop: normalize(30),
-              }]}//handleSubmit
-                       onpress={handleSubmit}
-                       categoriIcon={""}
-                       title={tittlebtn}
-                       colorsArray={['#ffadad','#f67070','#FF0000']}
-                       styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+              {ShowButton===true?
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />:null
+              }
+
 
             </View>
           )}
@@ -1073,20 +1085,23 @@ function TextInputI({ GeoAddressCity,
               {touched.UnitNote && errors.UnitNote &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UnitNote}</Text>
               }
-              <View style={[Styles.ViewItems_center]}>
-                <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
-                  flexDirection: "row",
-                  width: '100%',
-                  paddingVertical: 2,
-                  marginTop: normalize(15),
-                }]}//handleSubmit
-                         onpress={handleSubmit}
-                         categoriIcon={""}
-                         title={tittlebtn}
-                         colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              {ShowButton===true?
+                <View style={[Styles.ViewItems_center]}>
+                  <ButtonI style={[Styles.btn, {
+                    //margin: normalize(15),
+                    flexDirection: "row",
+                    width: '100%',
+                    paddingVertical: 2,
+                    marginTop: normalize(15),
+                  }]}//handleSubmit
+                           onpress={handleSubmit}
+                           categoriIcon={""}
+                           title={tittlebtn}
+                           colorsArray={['#ffadad','#f67070','#FF0000']}
+                           styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                </View>:null
+              }
+
             </View>
 
           )}
@@ -1280,6 +1295,7 @@ function TextInputI({ GeoAddressCity,
               {touched.UnitNote && errors.UnitNote &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UnitNote}</Text>
               }
+              {ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
                   //margin: normalize(15),
@@ -1293,7 +1309,7 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null}
             </View>
 
           )}
@@ -1343,20 +1359,24 @@ function TextInputI({ GeoAddressCity,
                 onFocus={() => setFieldTouched("SectionNote")}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
-              <View style={[Styles.ViewItems_center]}>
-                <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
-                  flexDirection: "row",
-                  width: '100%',
-                  paddingVertical: 2,
-                  marginTop: normalize(30),
-                }]}//handleSubmit
-                         onpress={handleSubmit}
-                         categoriIcon={""}
-                         title={tittlebtn}
-                         colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              {
+                ShowButton===true?
+                  <View style={[Styles.ViewItems_center]}>
+                    <ButtonI style={[Styles.btn, {
+                      //margin: normalize(15),
+                      flexDirection: "row",
+                      width: '100%',
+                      paddingVertical: 2,
+                      marginTop: normalize(30),
+                    }]}//handleSubmit
+                             onpress={handleSubmit}
+                             categoriIcon={""}
+                             title={tittlebtn}
+                             colorsArray={['#ffadad','#f67070','#FF0000']}
+                             styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                  </View>:null
+              }
+
             </View>
 
           )}
@@ -1408,6 +1428,8 @@ function TextInputI({ GeoAddressCity,
                 onFocus={() => setFieldTouched("SectionNote")}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
+              {
+                ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
                   //margin: normalize(15),
@@ -1421,7 +1443,7 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null}
             </View>
 
           )}
@@ -1509,6 +1531,8 @@ function TextInputI({ GeoAddressCity,
                 />
 
               </View>
+              {
+                ShowButton===true?
               <View style={Styles.ViewItems_center}>
                 <ButtonI style={Styles.btnFullWith}//handleSubmit
                          onpress={handleSubmit}
@@ -1516,7 +1540,7 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null}
             </View>
 
           )}
@@ -1610,6 +1634,8 @@ function TextInputI({ GeoAddressCity,
                 />
 
               </View>
+              {
+                ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
                   //margin: normalize(15),
@@ -1623,7 +1649,7 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null}
             </View>
 
           )}
@@ -2554,6 +2580,12 @@ function TextInputI({ GeoAddressCity,
                 <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
                 }
                 <View style={Styles.FlexWrap}>
+                  <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
+                    <Text style={Styles.UploadImageText}>
+                      Add Photos
+                    </Text>
+                    <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                  </TouchableOpacity>
                   {
                     ImageSourceviewarray.map((value,key) => {
                       return (
@@ -2570,27 +2602,26 @@ function TextInputI({ GeoAddressCity,
                       )
                     })
                   }
-                  <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-                    <Text style={Styles.UploadImageText}>
-                      Add Photos
-                    </Text>
-                    <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
-                  </TouchableOpacity>
+
                 </View>
-                <View style={[Styles.ViewItems_center]}>
-                  <ButtonI style={[Styles.btn, {
-                    //margin: normalize(15),
-                    flexDirection: "row",
-                    width: '100%',
-                    paddingVertical: 2,
-                    marginTop: normalize(30),
-                  }]}//handleSubmit
-                           onpress={handleSubmit}
-                           categoriIcon={""}
-                           title={'Add Task'}
-                           colorsArray={['#a39898','#786b6b','#382e2e']}
-                           styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-                </View>
+                {
+                  ShowButton===true?
+                    <View style={[Styles.ViewItems_center]}>
+                      <ButtonI style={[Styles.btn, {
+                        //margin: normalize(15),
+                        flexDirection: "row",
+                        width: '100%',
+                        paddingVertical: 2,
+                        marginTop: normalize(30),
+                      }]}//handleSubmit
+                               onpress={handleSubmit}
+                               categoriIcon={""}
+                               title={'Add Task'}
+                               colorsArray={['#a39898','#786b6b','#382e2e']}
+                               styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                    </View>:null
+                }
+
               </View>
 
             )}
@@ -2651,6 +2682,12 @@ function TextInputI({ GeoAddressCity,
               <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
               }
               <View style={Styles.FlexWrap}>
+                <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
+                  <Text style={Styles.UploadImageText}>
+                    Add Photos
+                  </Text>
+                  <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                </TouchableOpacity>
                 {
                   ImageSourceviewarray?.map((value,key) => {
                     return (
@@ -2671,13 +2708,10 @@ function TextInputI({ GeoAddressCity,
                     )
                   })
                 }
-                <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-                  <Text style={Styles.UploadImageText}>
-                    Add Photos
-                  </Text>
-                  <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
-                </TouchableOpacity>
+
               </View>
+              {
+              ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
                   //margin: normalize(15),
@@ -2691,7 +2725,8 @@ function TextInputI({ GeoAddressCity,
                          title={tittlebtn}
                          colorsArray={['#a39898','#786b6b','#382e2e']}
                          styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>
+              </View>:null
+              }
             </View>
 
           )}

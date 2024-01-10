@@ -8,46 +8,59 @@ import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { TextInputI } from "../component/TextInputI";
-import LinearGradient from "react-native-linear-gradient";
 import { Dropdown } from "react-native-element-dropdown";
 import { Container, Content } from "native-base";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
 import { Colors } from "../Colors";
-import { Modalize } from "react-native-modalize";
 import ImagePicker from "react-native-image-crop-picker";
+import { writeDataStorage } from "../Get_Location";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 const GLOBAL = require("../Global");
 let A=[]
 let B=[]
 function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,ChangeChecked,index,Cheked,
-                                UpdateTask,My_TaskList_server,
-                                Taskpriority,Taskstatus,DeleteAttachment,ImageSourceviewarrayUpload,setImageSourceviewarrayUpload}) {
+                                UpdateTask,ShowButton,DeleteAttachment,ImageSourceviewarrayUpload,setImageSourceviewarrayUpload,ShowWarningMessage,
+                                setShowWarningMessage,ShowBackBtn,setShowBackBtn
+                              }) {
   const [visible,setvisible]=useState(false);
-  const [visibleguide,setvisibleguide]=useState(false);
+
   const [isFocus,setIsFocus]=useState(false);
   const [taskId,settaskId]=useState(false);
   const [showModalAddImage,setshowModalAddImage]=useState(false);
   const [ImageSourceviewarray,setImageSourceviewarray] = useState([]);
 
   const ClickManagement =(id)=>{
-
     if(id==='1'){
       let A=[]
+      let uri=''
       settaskId(value.taskId);
-
       value?.attachments?.forEach((obj) => {
+        if(obj.attachmentUrl.split("/")?.[0]==='uploads'){
+          uri=GLOBAL?.OrgAppLink_value + "/"+obj?.attachmentUrl
+        }
+    else {
+          uri=obj?.attachmentUrl
+        }
         A.push({
-          uri: GLOBAL?.OrgAppLink_value + "/"+obj?.attachmentUrl,
+          uri:uri,
           type: obj?.attachmentName.split(".")?.[1],
           fileName: obj?.attachmentName,
           attachmentId:obj?.attachmentId
         })
       })
+
       setImageSourceviewarray(A)
       setvisible(true)
     }
+
+  }
+  const Back_navigate=()=>{
+    if (ShowBackBtn===false) {
+      setShowWarningMessage(true);
+      setTimeout(function(){ setShowBackBtn(true)}, 2000)
+    }
     else {
-      setvisibleguide(true)
+      setvisible(false);
     }
   }
   const renderItem = (item,index) => {
@@ -123,6 +136,7 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
           let obj = response[item];
           var getFilename = obj.path.split("/");
           var imgName = getFilename[getFilename.length - 1];
+          console.warn(obj.path,'response.path,')
           let attachmentId=0;
           if(A?.length!==0){
             attachmentId= parseInt(A?.[A?.length - 1]?.attachmentId) + 1;
@@ -147,6 +161,7 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
         }
         setImageSourceviewarray(A);
         setImageSourceviewarrayUpload(B);
+        setShowBackBtn(false);
         A = [...A];
         B = [...B];
       }
@@ -159,12 +174,15 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
       width: 300,
       height: 400,
     }).then(response => {
+     // console.warn(response,'response')
       var getFilename = response.path.split("/");
+      console.warn(response.path,'response.path,')
+      writeDataStorage(GLOBAL.ImageSourceviewarray, response);
       var imgName=getFilename[getFilename.length - 1];
       if(ImageSourceviewarray)
-        A=[...ImageSourceviewarray];
+        A = [...ImageSourceviewarray];
       if(ImageSourceviewarrayUpload)
-        B=[...ImageSourceviewarrayUpload];
+        B = [...ImageSourceviewarrayUpload];
       let attachmentId=0;
       if(A?.length!==0){
         attachmentId= parseInt(A?.[A?.length - 1]?.attachmentId) + 1;
@@ -172,6 +190,8 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
       else {
         attachmentId = attachmentId + 1;
       }
+
+
       A.push({
         uri:response.path,
         type:response.mime,
@@ -186,14 +206,18 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
         attachmentId:attachmentId,
         taskId:taskId
       });
+
       setImageSourceviewarray(A);
       setImageSourceviewarrayUpload(B);
+      setShowBackBtn(false);
       A = [...A];
       B = [...B];
     });
+
+
   };
   const DeleteImage_task = (attachmentId,ImageSourceviewarray) => {
-    console.log(attachmentId,taskId,'attachmentId,taskId')
+
     let List_Item = ImageSourceviewarray;
     const index = List_Item.findIndex((p) => p.attachmentId === attachmentId);
     let markers = [...List_Item];
@@ -317,7 +341,6 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
           {/*</View>*/}
          <View style={[Styles.BtnListStyle,{marginTop:normalize(7)}]}>
            <View style={[Styles.btntask,{backgroundColor:value.taskStatusColor}]}/>
-
            <View style={[Styles.triangle,{borderBottomColor:value.taskPriorityColor}]} />
           </View>
         </View>
@@ -355,8 +378,9 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
           <View style={[Styles.ModalLocationStyle]}>
             <View style={[{ width: "89%", marginBottom: "4%" }]}>
               <TouchableOpacity onPress={() => {
-                setvisible(false);
-                  My_TaskList_server();
+                Back_navigate()
+
+
               }} style={Styles.CancelBtnLeftAlign}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
@@ -375,8 +399,25 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
                   </View>
                 </View>
                 : null}
-
-              <TextInputI onChangeText={(value)=>{UpdateTask(value,taskId)}} numberValue={25} ChangeChecked={(value)=>ChangeChecked(value)} Cheked={Cheked}
+              {ShowWarningMessage===true&&
+              <TouchableOpacity onPress={()=>{
+                setShowWarningMessage(false);
+                setShowBackBtn(true)
+              }} style={Styles.flashMessageWarning2}>
+                <View style={{ width: "15%",alignItems:'center' }}>
+                  <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                </View>
+                <View style={{ width: "65%",alignItems:'flex-start' }}>
+                  <Text style={Styles.AddedtTxt}>
+                    You will lose all changes.
+                  </Text>
+                </View>
+                <View style={Styles.CancelBtnLeftAlignwarn}>
+                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                </View>
+              </TouchableOpacity>
+              }
+              <TextInputI onChangeText={(value)=>{UpdateTask(value,taskId)}} numberValue={25} ChangeChecked={(value)=>ChangeChecked(value)} Cheked={Cheked} ShowButton={ShowButton}
                           tittlebtn={'Update Task'} onOpen={onOpen} DeleteImage={DeleteImage_task} value={value} ImageSourceviewarray={ImageSourceviewarray}
               />
               {
@@ -391,56 +432,7 @@ function Task_management_Item({value,Navigate_Url,data,ShowMessage,Message,Chang
           </View>
         </Content>
       </Modal>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={visibleguide}>
-        <Content contentContainerStyle={[Styles.centeredView,
-        {flexGrow:1,backgroundColor:"rgba(0,0,0, 0.5)",justifyContent:"center"}]}>
-          <View style={[Styles.ModalLocationStyle]}>
-            <View style={[{ width: "89%", marginBottom: "4%" }]}>
-              <TouchableOpacity onPress={() => {
-                setvisibleguide(false);
-              }} style={Styles.CancelBtnLeftAlign}>
-                <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
-              </TouchableOpacity>
-            </View>
-            <View style={Styles.formContainer}>
-             <View style={Styles.guide}>
-               <View style={Styles.guideItem}>
-                 <Text style={[Styles.txt_left]}>Status</Text>
-               </View>
-               <View style={Styles.guideItembox}>
-                 {
-                   Taskstatus?.map((value,index) => {
-                     return (
-                       <View key={index} style={Styles.BtnListStyle2}>
-                       <View style={[Styles.btntask,{backgroundColor:value?.statusColorCode}]}/>
 
-                       <Text style={[Styles.txt_left]}>{value?.label}</Text>
-                       </View>
-                       )})}
-               </View>
-             </View>
-              <View style={Styles.guide}>
-                <View style={Styles.guideItem}>
-                  <Text style={[Styles.txt_left]}>Priority</Text>
-                </View>
-                <View style={Styles.guideItembox}>
-                  {
-                    Taskpriority?.map((value,index) => {
-                      return (
-                        <View key={index} style={Styles.BtnListStyle2}>
-                          <View style={[Styles.triangle,{borderBottomColor:value.taskPriorityColor}]} />
-                          <Text style={Styles.txt_left}>{value?.label}</Text>
-                        </View>
-                      )})}
-                </View>
-              </View>
-            </View>
-          </View>
-        </Content>
-      </Modal>
     </TouchableOpacity>
   );
 }

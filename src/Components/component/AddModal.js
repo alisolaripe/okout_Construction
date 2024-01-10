@@ -8,7 +8,7 @@ function AddModal ({numberValue,GeoAddressCity,GeoAddressCountry,GeoAddressStree
                      onPressAdd,tittlebtn,setCheked,Cheked,ShowButton,ChangeChecked,
                      setGeoAddressCity,setGeoAddressCountry,
                      setGeoAddressStreet,setGeoAddressPostalCode,
-                     setcountryId,setcityId,getCity,setvisibleAddModal,visibleAddModal,setShowMessage,
+                     setcountryId,setcityId,getCity,setvisibleAddModal,visibleAddModal,setShowMessage
                    }){
 
 

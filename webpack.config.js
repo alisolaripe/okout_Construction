@@ -56,26 +56,31 @@ module.exports = {
       {
         test: /\.(js|mjs|jsx|ts|tsx)$/,
         include: path.resolve(__dirname, "./src"),
-        // exclude: /node_modules/,
+        exclude: /node_modules/,
         use: ["babel-loader"],
       },{ test: /\.txt$/, use: 'raw-loader' },{
         test: /\.js$/,
         use: [
           {
             loader:'babel-loader',
+            options: {
+              /* ... */
+            },
           }]},
       {
         test: /\.ts$/,
         use: [
           {
             loader:'babel-loader',
+            options: {
+              /* ... */
+            },
           }]}
     ],
   },
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
-      'react-native-linear-gradient': 'react-native-web-linear-gradient',
     },
     extensions: [
       '.web.js',
@@ -94,10 +99,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: appDirectory + '/public/index.html',
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      __DEV__: process.env.NODE_ENV !== 'production' || true,
     }),
   ],
 

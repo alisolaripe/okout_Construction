@@ -52,9 +52,11 @@ module.exports = {
   All_City:'@MySuperStore:All_City',
   AllProjectInfo_dyb:'@MySuperStore:AllProjectInfo_dyb',
   Assigned_TaskList:'@MySuperStore:Assigned_TaskList',
+  UserPermissions:'@MySuperStore:UserPermissions',
   All_Task:'@MySuperStore:All_Task',
   Task_Detail:'@MySuperStore:Task_Detail',
   Task_Category:'@MySuperStore:TaskCategory',
+  ImageSourceviewarray:'@MySuperStore:  let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));',
   Task_attachments:'@MySuperStore:Task_attachments',
   priorities:'@MySuperStore:priorities',
   Task_status:'@MySuperStore:Task_status',
@@ -96,6 +98,8 @@ module.exports = {
   AllProjectInfo:[],
   Task_detail:'',
   selectItem:0,
-  route:""
+  route:"",
+  TaskMenuName:"",
+  UserPermissionsList:''
 
 };

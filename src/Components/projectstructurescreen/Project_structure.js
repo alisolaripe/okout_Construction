@@ -29,7 +29,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
   const [edit, setedit] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
-
+  const [ShowButton, setShowButton] = useState(true);
   useEffect(() => {
     get_Country_City();
 
@@ -47,13 +47,15 @@ function Project_structure({navigation, navigation: { goBack }, }) {
   }, []);
   const getProjects_dyb = async () => {
     let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
+
     if (json!==null) {
       let A = [];
       json?.forEach((obj) => {
+
         A.push({
           Id: obj.projectId,
           Name: obj.projectName,
-          Count: obj.siteCount,
+          Count: obj.sites?.length,
           NameCount: "site",
           ListName: "Project",
           notes: obj?.notes,
@@ -143,6 +145,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
     }
   };
   const UpdateProject = (value) => {
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("projectName", value.Projectname);
     formdata.append("userId", "1");
@@ -153,6 +156,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
         if (json?.status === true) {
           setMessage(json.msg);
           setShowMessageUpdate(true);
+          setShowButton(true)
           setShowWarningMessage(false)
           getAllProjectInfo();
         }
@@ -166,11 +170,13 @@ function Project_structure({navigation, navigation: { goBack }, }) {
         setmodules(markers);
         setMessage("Your project successfully updated");
         setShowMessageUpdate(true);
+        setShowButton(true)
         AddProjectsDataStorage(markers);
       }
     });
   };
   const AddProject = async (value) => {
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("projectName", value.Projectname);
     formdata.append("userId", "1");
@@ -182,6 +188,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
           setMessage(json.msg);
           setShowMessage(true);
           getAllProjectInfo();
+          setShowButton(true)
           setvisibleAddModal(false);
           const timerId = setInterval(() => {
             setShowMessage(false);
@@ -213,6 +220,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
         setmodules(List_Item);
         setMessage("Your project successfully added");
         setShowMessage(true);
+        setShowButton(true)
         AddProjectsDataStorage(List_Item);
         setvisibleAddModal(false);
         const timerId = setInterval(() => {
@@ -297,7 +305,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item}
                 Message={Message} onPress={UpdateProject} data={data} edit={edit} setedit={setedit}
                 ShowMessage={ShowMessageUpdate} tittlebtn={"Update Project"} numberValue={3} ShowWarningMessage={ShowWarningMessage}
-                setShowWarningMessage={setShowWarningMessage}
+                setShowWarningMessage={setShowWarningMessage}  ShowButton={ShowButton}
                 Navigate_Url={Navigate_Url}/>
   )
   const renderSectionFooter=()=>(
@@ -396,7 +404,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
       <AddModal ShowMessage={ShowMessage} Message={Message}
                 numberValue={1} ChangeChecked={ChangeChecked} tittlebtn={"Add Project"}
                 setvisibleAddModal={setvisibleAddModal} visibleAddModal={visibleAddModal}
-                setShowMessage={setShowMessage}
+                setShowMessage={setShowMessage}  ShowButton={ShowButton}
                 onPressAdd={AddProject}/>
       <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url} />
     </Container>

@@ -55,7 +55,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
-
+  const [ShowButton, setShowButton] = useState(true);
   let _slider1Ref = useRef(null);
   const DeleteImageFromApi=(buildId)=>
   {
@@ -157,6 +157,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
     });
   };
   const AddFeatureImage = async (value) => {
+    setShowButton(false)
     let idsArray = "";
     const formData = new FormData();
     formData.append("userId", "1");
@@ -187,6 +188,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
             if (json.status === true) {
               setMessage(json.msg);
               setShowMessage(true);
+              setShowButton(true)
               const timerId = setInterval(() => {
                 setShowMessage(false);
               }, 4000);
@@ -196,6 +198,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
           else {
             setMessage('Your build notes successfully added');
             setShowMessage(true);
+            setShowButton(true)
             const timerId = setInterval(() => {
               setShowMessage(false);
             }, 4000);
@@ -600,6 +603,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   const Back_navigate=()=>{
     if (ShowBackBtn===false) {
       setShowWarningMessage(true);
+      setTimeout(function(){ setShowBackBtn(true)}, 2000)
     }
     else {
       goBack()
@@ -685,7 +689,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
                         inactiveDotScale={0.6}
                       />
 
-                      {ImageSourceviewarrayUpload.length!==0?
+                      {ImageSourceviewarrayUpload.length!==0&&ShowButton===true?
                       <ButtonI
                         style={Styles.btnDYBListDetail}
                         onpress={AddFeatureImage}

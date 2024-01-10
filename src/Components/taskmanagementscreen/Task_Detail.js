@@ -216,32 +216,32 @@ console.log(json?.singleTask,'json?.singleTask')
 
         </View>
 
-        <View style={Styles.InputeRowItemstask}>
-          <View style={[Styles.inputStyletask2]}>
-            <View style={Styles.RowTask}>
+        {/*<View style={Styles.InputeRowItemstask}>*/}
+        {/*  <View style={[Styles.inputStyletask2]}>*/}
+        {/*    /!*<View style={Styles.RowTask}>*!/*/}
 
-              <View style={Styles.RowTask_Items}>
-                <AntDesign name="adduser" size={normalize(14)} color={Colors.withe} />
-                <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>AssignedTo</Text>
-              </View>
-              <View style={Styles.RowTask_Items}>
-                <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{Task_detail?.taskAssignedTo}</Text>
-              </View>
-            </View>
-            {/*<View style={Styles.RowTask}>*/}
+        {/*    /!*  <View style={Styles.RowTask_Items}>*!/*/}
+        {/*    /!*    <AntDesign name="adduser" size={normalize(14)} color={Colors.withe} />*!/*/}
+        {/*    /!*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>AssignedTo</Text>*!/*/}
+        {/*    /!*  </View>*!/*/}
+        {/*    /!*  <View style={Styles.RowTask_Items}>*!/*/}
+        {/*    /!*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{Task_detail?.taskAssignedTo}</Text>*!/*/}
+        {/*    /!*  </View>*!/*/}
+        {/*    /!*</View>*!/*/}
+        {/*    /!*<View style={Styles.RowTask}>*!/*/}
 
-            {/*  <View style={Styles.RowTask_Items}>*/}
+        {/*    /!*  <View style={Styles.RowTask_Items}>*!/*/}
 
-            {/*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items_Date]}>RequestedBy :{Task_detail?.taskRequestBy}</Text>*/}
-            {/*  </View>*/}
-            {/*  <View style={Styles.RowTask_Items}>*/}
-            {/*    <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />*/}
-            {/*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{Task_detail?.taskRequestDate}</Text>*/}
-            {/*  </View>*/}
-            {/*</View>*/}
-          </View>
+        {/*    /!*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items_Date]}>RequestedBy :{Task_detail?.taskRequestBy}</Text>*!/*/}
+        {/*    /!*  </View>*!/*/}
+        {/*    /!*  <View style={Styles.RowTask_Items}>*!/*/}
+        {/*    /!*    <AntDesign name="calendar" size={normalize(14)} color={Colors.withe} />*!/*/}
+        {/*    /!*    <Text numberOfLines={10} style={[Styles.txtLightColortask_Items]}>{Task_detail?.taskRequestDate}</Text>*!/*/}
+        {/*    /!*  </View>*!/*/}
+        {/*    /!*</View>*!/*/}
+        {/*  </View>*/}
 
-        </View>
+        {/*</View>*/}
         <View style={Styles.InputeRowItemstask}>
           <View style={[Styles.inputStyletask2]}>
             <View style={Styles.RowTask}>
@@ -282,7 +282,6 @@ console.log(json?.singleTask,'json?.singleTask')
               </View>
             </View>
           </View>
-
         </View>
         {attachments?.length!==0 && (
           <View style={Styles.With100NoFlexMarginBotoom}>

@@ -88,6 +88,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
           <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]}  style={Styles.ModuleBox2}>
             <TouchableOpacity onPress={()=>{
             GLOBAL.selectItem=1;
+            GLOBAL.TaskMenuName='My Task'
               navigation.navigate("Task_Management")
             }
             }  style={{
@@ -104,6 +105,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
           <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.ModuleBox2}>
             <TouchableOpacity onPress={()=>{
               GLOBAL.selectItem=2;
+              GLOBAL.TaskMenuName='The Workshop'
               navigation.navigate("Task_Management")
             }
             }  style={{

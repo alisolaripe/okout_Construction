@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Text, View, TouchableOpacity, Modal, Image, FlatList, SafeAreaView } from "react-native";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
@@ -13,59 +13,48 @@ import { Footer1 } from "../component/Footer";
 import { removeDataStorage, writeDataStorage } from "../Get_Location";
 import { FloatAddBtn } from "../component/FloatAddBtn";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Colors } from "../Colors";
-import { TextInputI } from "../component/TextInputI";
-import { Modalize } from "react-native-modalize";
 import { readOnlineApi } from "../ReadPostApi";
-import { isNetworkConnected } from "../GlobalConnected";
 import { writePostApi } from "../writePostApi";
-import ImagePicker from "react-native-image-crop-picker";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { Filter } from "../component/Filter";
+import { TaskFilter } from "../component/TaskFilter";
+import { TaskFilter_Item } from "../component/TaskFilter_Item";
 import { ButtonI } from "../component/ButtonI";
-
 let A = [];
 let B = [];
-const data = [{ label: "Edit", value: "1", Icon: "edit" }, { label: "Shapes guide", value: "2", Icon: "flag" }];
-const dataassigned = [{ label: "Shapes guide", value: "2", Icon: "flag" }];
-
+const data = [{ label: "Edit", value: "1", Icon: "edit" }];
+const dataassigned = [];
 function Task_Management({ navigation, navigation: { goBack } }) {
   const [modules, setmodules] = useState([]);
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [changeScreen, setchangeScreen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [selectedcategory, setSelectedcategory] = useState("");
-  const [selectedrelated, setSelectedrelated] = useState("");
   const [Cheked, setCheked] = useState(false);
-  const [Taskcategory, setTaskcategory] = useState([]);
-  const [dateType, setdateType] = useState(false);
-  const [categoryId, setCategoryId] = useState(0);
-  const [relatedId, setRelatedId] = useState(0);
-  const modalizeRef = React.createRef();
   const [ImageSourceviewarray, setImageSourceviewarray] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
-  const [error, setErrors] = useState("");
-  const [TaskRelated, setTaskRelated] = useState([]);
   const [showModalCalender, setshowModalCalender] = useState(false);
   const [selectedRange, setRange] = useState({});
   const [ShowDateRange, setShowDateRange] = useState(false);
   const [DateRangeList, setDateRangeList] = useState([]);
   const [ShowFilter, setShowFilter] = useState(false);
+  const [Filtertype, setFiltertype] = useState(false);
+  const [FilterName, setFilterName] = useState('');
   const [MudolList, setMudolList] = useState([]);
   const [Taskpriority, setTaskpriority] = useState([]);
   const [Taskstatus, setTaskstatus] = useState([]);
   const [ImageSourceviewarrayUpload,setImageSourceviewarrayUpload] = useState([]);
+  const [ShowButton, setShowButton] = useState(true);
+  const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [ShowBackBtn, setShowBackBtn] = useState(true);
+  const [Taskpriorityfilter, setTaskpriorityfilter] = useState([]);
+  const [Taskstatusfilter, setTaskstatusfilter] = useState([]);
+  const [visibleguide,setvisibleguide]=useState(false);
+  const [FilterTimeList, setFilterTimeList] = useState([{value:0,label:'All',Icon:'calendar-month'},{value:1,label:'Week',Icon:'calendar-week'},{value:2,label:'Day',Icon:'calendar-today'}]);
   useEffect(() => {
     Task_status();
     Task_priority();
     if (GLOBAL.selectItem === 1) {
-      const unsubscribe = navigation.addListener("focus", () => {
+      const unsubscribe = navigation.addListener('focus', () => {
         My_TaskList();
-
-        Task_category();
-      });
+      })
       return unsubscribe;
     } else {
       Assigned_TaskList();
@@ -77,90 +66,15 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     return isNaN(dayOfWeek) ? null :
       ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
   };
-  const Task_priority = async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_priority + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
-        for (let item in json?.priorities) {
-          let obj = json?.priorities?.[item];
-          let taskPriorityColor = "";
-          if (obj?.priorityTitle === "Low")
-            taskPriorityColor = "#fcd274";
-          else if (obj?.priorityTitle === "Medium")
-            taskPriorityColor = "#fefe77";
-          else
-            taskPriorityColor = "#d2fd77";
-          A.push({
-            value: obj.priorityId,
-            label: obj.priorityTitle,
-            taskPriorityColor: taskPriorityColor,
-          });
-        }
 
-        writeDataStorage(GLOBAL.priorities, json);
-        setTaskpriority(A);
-      });
-    } else {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.priorities));
-      for (let item in json?.priorities) {
-        let obj = json?.priorities?.[item];
-        let taskPriorityColor = "";
-        if (obj?.priorityTitle === "Low")
-          taskPriorityColor = "#fcd274";
-        else if (obj?.priorityTitle === "Medium")
-          taskPriorityColor = "#fefe77";
-        else
-          taskPriorityColor = "#d2fd77";
-        A.push({
-          value: obj.priorityId,
-          label: obj.priorityTitle,
-          taskPriorityColor: taskPriorityColor,
-        });
-      }
-
-      setTaskpriority(A);
-
-    }
-  };
-  const Task_status = async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_status + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
-        for (let item in json?.taskStatus) {
-          let obj = json?.taskStatus?.[item];
-          A.push({
-            value: obj.statusId,
-            label: obj.statusTitle,
-            statusColorCode: obj.statusColorCode,
-          });
-        }
-        setTaskstatus(A);
-        writeDataStorage(GLOBAL.Task_status, json);
-      });
-    } else {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_status));
-      for (let item in json?.taskStatus) {
-        let obj = json?.taskStatus?.[item];
-        A.push({
-          value: obj.statusId,
-          label: obj.statusTitle,
-          statusColorCode: obj.statusColorCode,
-        });
-      }
-      setTaskstatus(A);
-
-    }
-  };
   const My_TaskList = async () => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
+    console.log(json,'json')
     let A = [];
-    console.log(json,'json:My_TaskList')
     for (let item in json) {
       let obj = json?.[item];
       let taskPriorityColor = "";
       const Year = obj.taskCreatedOn.split(" ");
-      const taskPlanStar = obj.taskPlanStartDate.split(" ");
-      const taskPlanDue = obj.taskPlanDueDate.split(" ");
       const Day = Year?.[0]?.split("-");
       const W = Day?.[2]?.split(" ");
       if (obj?.taskPriorityName === "Low")
@@ -176,8 +90,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         taskPriorityName: obj.taskPriorityName,
         taskDescription: obj.taskDescription,
         taskParentTaskId: obj.taskParentTaskId,
-        taskPlanStartDate: taskPlanStar?.[0],
-        taskPlanDueDate: taskPlanDue?.[0],
         taskStatusColor: obj.taskStatusColor,
         taskCreatedOn: obj.taskCreatedOn,
         taskStatusName: obj.taskStatusName,
@@ -205,7 +117,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     return date1 - date2;
   };
   const Make_Week_Filter_List = (A) => {
-
     let B = [];
     let endDate_Format = "";
     let today = "";
@@ -306,12 +217,11 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       GLOBAL.TaskId = parseInt(modules?.[modules?.length - 1]?.taskId) + 1;
     else
       GLOBAL.TaskId = 1;
-    // navigation.navigate("AddNewTask");
-    setchangeScreen(true);
+     navigation.navigate("AddNewTask");
+
   };
   const logout_Url = () => {
     setshowModalDelete(true);
-
   };
   const Navigate_Url = (Url) => {
     navigation.navigate(Url);
@@ -367,276 +277,134 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const renderItem = ({ item, index }) => (
     <Task_management_Item data={GLOBAL?.selectItem === 1 ? data : dataassigned} index={index} key={index}
                           modules={modules?.length} ImageSourceviewarrayUpload={ImageSourceviewarrayUpload}
-                          setImageSourceviewarrayUpload={setImageSourceviewarrayUpload}
+                          setImageSourceviewarrayUpload={setImageSourceviewarrayUpload} ShowButton={ShowButton}
                           value={item} Navigate_Url={Navigate_Url} ShowMessage={ShowMessage} Cheked={Cheked}
                           UpdateTask={UpdateTask} Taskpriority={Taskpriority} Message={Message} My_TaskList_server={My_TaskList_server}
                           DeleteImage={DeleteImage} Taskstatus={Taskstatus} DeleteAttachment={DeleteAttachment}
-
+                          ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
+                          ShowBackBtn={ShowBackBtn} setShowBackBtn={setShowBackBtn}
     />
   );
 
   const renderSectionFooter = () => (
     <View style={Styles.SectionFooter} />
   );
-  const Task_category = async () => {
+  const Task_status = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_category + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
-        for (let item in json?.categories) {
-          let obj = json?.categories?.[item];
-          A.push({
-            value: obj.categoryId,
-            label: obj.categoryTitle,
+      readOnlineApi(Api.Task_status + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        let D = [];
+        let Filter={value:10,
+          label: 'All',
+          statusColorCode:'#bd04ae',
+          Icon:'status'}
+        let C=[]
+        for (let item in json?.taskStatus) {
+          let obj = json?.taskStatus?.[item];
+          D.push({
+            value: obj.statusId,
+            label: obj.statusTitle,
+            statusColorCode: obj.statusColorCode,
+            Icon:'status'
           });
         }
-        writeDataStorage(GLOBAL.Task_Category, json);
-        setTaskcategory(A);
 
+        C = [Filter,...D];
+        setTaskstatus(D);
+        setTaskstatusfilter(C)
+        writeDataStorage(GLOBAL.Task_status, json);
       });
     } else {
-      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Category));
-      for (let item in json?.categories) {
-        let obj = json?.categories?.[item];
-        A.push({
-          value: obj.categoryId,
-          label: obj.categoryTitle,
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_status));
+      let D = [];
+      let Filter={value:10,
+        label: 'All',
+        statusColorCode:'#bd04ae',
+        Icon:'status'}
+      let C=[]
+      for (let item in json?.taskStatus) {
+        let obj = json?.taskStatus?.[item];
+        D.push({
+          value: obj.statusId,
+          label: obj.statusTitle,
+          statusColorCode: obj.statusColorCode,
+          Icon:'status'
         });
       }
-
-      setTaskcategory(A);
-
+      setTaskstatus(D);
+      C = [Filter,...D];
+      setTaskstatusfilter(C)
     }
   };
-  const Task_RelatedList = (Id) => {
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              A.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-            setTaskRelated(A);
-            //GLOBAL.modules=A;
-          })
-          .catch(error => console.log("error", error));
-      }
-    });
-  };
-  const ChangeChecked = (value) => {
-    setCheked(!Cheked);
-  };
-  const AddTask = (value) => {
-    let idsArray = "";
-    const date = new Date();
-    const Year = date.getFullYear();
-    const Day = date.getDate();
-    const Month = date.getMonth() + 1;
-    const TodayDate = `${Year}-${Month}-${Day}`;
-    const formData = new FormData();
-    if (categoryId === 0) {
-      setErrors("selectedcategory");
-    } else {
-      formData.append("userId", "1");
-      formData.append("categoryId", categoryId);
-      formData.append("relatedId", relatedId);
-      formData.append("requestDate", TodayDate);
-      formData.append("priorityId", "1");
-      formData.append("planStartDate", null);
-      formData.append("planEndDate", null);
-      formData.append("taskStatusId", "1");
-      formData.append("title", value?.Title);
-      formData.append("description", value?.TaskNote);
-      formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
-      formData.append("requestBy", GLOBAL?.UserInformation?.userId);
-      formData.append("parentTaskId", null);
-      formData.append("assignedTo", null);
-      if (GLOBAL.isConnected === false) {
-        Add_Task_Offline(value, TodayDate);
-      }
-      if (ImageSourceviewarray.length !== 0) {
-        for (let i = 0; i < ImageSourceviewarray?.length; i++) {
-          idsArray = ImageSourceviewarray[i];
-          formData.append("attachments[]", {
-            uri: idsArray.uri,
-            type: idsArray.type,
-            name: idsArray.fileName,
+  const Task_priority = async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_priority + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        let A = [];
+        let Filter={value:10,
+          label: 'All',
+          taskPriorityColor:'#bd04ae',
+          Icon:'prioriti'}
+        let C=[]
+        for (let item in json?.priorities) {
+          let obj = json?.priorities?.[item];
+          let taskPriorityColor = "";
+          if (obj?.priorityTitle === "Low")
+            taskPriorityColor = "#fcd274";
+          else if (obj?.priorityTitle === "Medium")
+            taskPriorityColor = "#fefe77";
+          else
+            taskPriorityColor = "#d2fd77";
+          A.push({
+            value: obj.priorityId,
+            label: obj.priorityTitle,
+            taskPriorityColor: taskPriorityColor,
+            Icon:'prioriti'
           });
         }
-        writePostApi("POST", Api.AddTask, formData, ImageSourceviewarray).then(json => {
-          if (json) {
-            if (json?.status === true) {
-              setMessage(json?.msg);
-              setShowMessage(true);
-              setImageSourceviewarray([]);
-              My_TaskList_server();
-              const timerId = setInterval(() => {
-                setShowMessage(false);
-                setchangeScreen(false);
-              }, 2000);
-              return () => clearInterval(timerId);
-            }
-          } else {
-            My_TaskList();
-            setMessage("Your task successfully added");
-            setShowMessage(true);
-            setImageSourceviewarray([]);
-            const timerId = setInterval(() => {
-              setShowMessage(false);
-              setchangeScreen(false);
 
-            }, 2000);
-            return () => clearInterval(timerId);
-          }
+        writeDataStorage(GLOBAL.priorities, json);
+        setTaskpriority(A);
+        C = [Filter,...A];
+        setTaskpriorityfilter(C)
+      });
+    } else {
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.priorities));
+      let Filter={value:10,
+        label: 'All',
+        taskPriorityColor:'#bd04ae',
+        Icon:'prioriti'}
+      let C=[]
+      for (let item in json?.priorities) {
+        let obj = json?.priorities?.[item];
+        let taskPriorityColor = "";
+        if (obj?.priorityTitle === "Low")
+          taskPriorityColor = "#fcd274";
+        else if (obj?.priorityTitle === "Medium")
+          taskPriorityColor = "#fefe77";
+        else
+          taskPriorityColor = "#d2fd77";
+        A.push({
+          value: obj.priorityId,
+          label: obj.priorityTitle,
+          taskPriorityColor: taskPriorityColor,
+          Icon:'prioriti'
         });
       }
-      else {
-        writePostApi("POST", Api.AddTask, formData).then(json => {
-          if (json) {
-            if (json?.status === true) {
-              setMessage(json?.msg);
-              setShowMessage(true);
-              My_TaskList_server();
-              setTimeout(function(){ setShowMessage(false)}, 2000)
-              setchangeScreen(false)
-              setCategoryId(0)
-              setRelatedId(0)
-            }
-          }
-          else {
-            My_TaskList();
-            setMessage("Your task successfully added");
-            setShowMessage(true);
-            const timerId = setInterval(() => {
-              setShowMessage(false);
-              setchangeScreen(false);
-            }, 3000);
-            return () => clearInterval(timerId);
-          }
-        });
-      }
+
+      setTaskpriority(A);
+      C = [Filter,...A];
+      setTaskpriorityfilter(C)
     }
   };
   const My_TaskList_server = async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList + `userId=1`).then(json => {
+        console.warn(json,'json:My_TaskList_server')
         writeDataStorage(GLOBAL.All_Task, json?.tasks);
         My_TaskList();
       });
     }
   };
-  const onOpen = () => {
-    modalizeRef.current?.open();
-  };
-  const onClose = () => {
-    modalizeRef.current?.close();
-  };
-  const Add_Task_Offline = async (value, TodayDate) => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
-    let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    let json_attachments = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_attachments));
-    let List_Item = [];
-    let List_Item_detail = [];
-    let List_attachments = [];
-    let A = [];
-    let B = [];
-    let C = [];
-    List_Item = json;
-    List_Item_detail = json_detail;
-    List_attachments = json_attachments;
-    if (List_Item?.length !== 0) {
-      A = [...List_Item];
-    }
-    if (List_Item_detail?.length !== 0) {
-      B = [...List_Item_detail];
-    }
-    if (List_attachments?.length !== 0) {
-      C = [...List_attachments];
-    }
-    A.push({
-      taskAssignedTo: "",
-      taskCategoryName: value.SectionName,
-      taskCreatedBy: "0",
-      taskCreatedOn: TodayDate,
-      taskDescription: value.TaskNote,
-      taskId: GLOBAL.TaskId,
-      taskPriorityName: "Low",
-      taskRequestBy: GLOBAL?.UserInformation?.FullName,
-      taskRequestDate: TodayDate,
-      taskStatusClass: "info",
-      taskStatusColor: "#68BC31",
-      taskStatusId: "1",
-      taskStatusName: "New",
-      taskTitle: value.Title,
-    });
-    List_Item = A;
-    B.push({
-      taskAssignedTo: "",
-      taskCategoryName: value.SectionName,
-      taskCreatedBy: "0",
-      taskCreatedOn: TodayDate,
-      taskDescription: value.TaskNote,
-      taskId: GLOBAL.TaskId,
-      taskPriorityName: "Low",
-      taskRequestBy: GLOBAL?.UserInformation?.FullName,
-      taskRequestDate: TodayDate,
-      taskStatusClass: "info",
-      taskStatusColor: "#68BC31",
-      taskStatusId: "1",
-      taskStatusName: "New",
-      taskTitle: value.Title,
-    });
-    List_Item_detail = B;
-    ImageSourceviewarray?.forEach((obj) => {
-        C.push({
-          taskId: GLOBAL.TaskId,
-          attachmentUrl: obj?.uri,
-        });
-      },
-    );
-    List_attachments = C;
-    let D = [];
-    for (let item in List_Item) {
-      let obj = List_Item?.[item];
-      const Year = obj.taskCreatedOn.split(" ");
-      D.push({
-        taskId: obj.taskId,
-        taskTitle: obj.taskTitle,
-        taskCategoryName: obj.taskCategoryName,
-        taskPriorityName: obj.taskPriorityName,
-        taskDescription: obj.taskDescription,
-        taskParentTaskId: obj.taskParentTaskId,
-        taskPlanStartDate: obj.taskPlanStartDate,
-        taskPlanDueDate: obj.taskPlanDueDate,
-        taskStatusColor: obj.taskStatusColor,
-        taskCreatedOn: obj.taskCreatedOn,
-        taskStatusName: obj.taskStatusName,
-        Year: Year?.[0],
-      });
-    }
-    if (D?.length !== 0) {
-      setmodules(D);
-    } else {
-      setmodules("");
-    }
-    await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item));
-    await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(List_Item_detail));
-    await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(List_attachments));
-  };
-  const Update_Task_Offline = async (value,taskId,ImageSourceviewarrayUpload) => {
-
+  const Update_Task_Offline = async (value,taskId) => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
     let json_attachments = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_attachments));
@@ -660,40 +428,51 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     if (List_attachments?.length !== 0) {
       C = [...List_attachments];
     }
+    let index = List_Item?.findIndex((p) => p.taskId === taskId)
+    let index_detail = List_Item_detail?.findIndex((p) => p.taskId === taskId)
     if(ImageSourceviewarrayUpload.length!==0){
       ImageSource=[... List_Item?.find((p) => p.taskId === taskId)?.attachments]
+
       ImageSourceviewarrayUpload?.forEach((obj) => {
         ImageSource.push({
             attachmentId:obj?.attachmentId,
-            attachmentUrl: obj?.uri,
-            attachmentName:obj?.attachmentName
+          attachmentUrl: obj?.uri,
+            attachmentName:obj?.fileName
           });
         },
       );
+      A[index] = { ...A[index], taskTitle:value?.Title,taskDescription:value?.TaskNote,attachments:ImageSource,taskUpdated:'y' };
+      List_Item = A;
+      B[index_detail] = { ...B[index_detail], taskTitle:value?.Title,taskDescription:value?.TaskNote,attachments:ImageSource };
+      List_Item_detail = B;
+    }
+    else {
+      A[index] = { ...A[index], taskTitle:value?.Title,taskDescription:value?.TaskNote,taskUpdated:'y' };
+      List_Item = A;
+      B[index_detail] = { ...B[index_detail], taskTitle:value?.Title,taskDescription:value?.TaskNote,};
+      List_Item_detail = B;
     }
 
-    let index = List_Item?.findIndex((p) => p.taskId === taskId)
-    A[index] = { ...A[index], taskTitle:value?.Title,taskDescription:value?.TaskNote,attachments:ImageSource };
-    List_Item = A;
-    let index_detail = List_Item_detail?.findIndex((p) => p.taskId === taskId)
-    B[index_detail] = { ...B[index_detail], taskTitle:value?.Title,taskDescription:value?.TaskNote,attachments:ImageSource };
-    List_Item_detail = B;
 
-    ImageSourceviewarrayUpload?.forEach((obj) => {
-      C.push({
-        taskId:taskId,
-        attachmentUrl:obj?.uri
+
+
+    if(ImageSourceviewarrayUpload.length!==0) {
+      ImageSourceviewarrayUpload?.forEach((obj) => {
+        C.push({
+          taskId: taskId,
+          attachmentUrl: obj?.uri
+        })
       })
-    })
-    List_attachments = C;
+      List_attachments = C;
+    }
+
     await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item));
     await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(List_Item_detail));
     await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(List_attachments));
+    setImageSourceviewarrayUpload([]);
     My_TaskList()
   };
-
   const Delete_Task_Offline = async (attachmentId,taskId) => {
-
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
     let json_attachments = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_attachments));
@@ -711,123 +490,27 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     if (List_Item_detail?.length !== 0) {
       B = [...List_Item_detail];
     }
-    console.log(taskId,'taskId')
     let Find_attachments=List_Item?.find((p) => p.taskId === taskId)?.attachments;
-    console.log(Find_attachments,'Find_attachments')
     let index_attachments = Find_attachments?.findIndex((p) => p.attachmentId === attachmentId)
     Find_attachments?.splice(index_attachments, 1);
     let index = List_Item?.findIndex((p) => p.taskId === taskId)
     A[index] = { ...A[index], attachments:Find_attachments };
     List_Item = A;
-    console.log(List_Item,'List_Item')
     let Find_attachments_detail=List_Item_detail?.find((p) => p.taskId === taskId)?.attachments;
     let index_attachments_detail = Find_attachments_detail?.findIndex((p) => p.attachmentId === attachmentId)
     Find_attachments_detail?.splice(index_attachments_detail, 1);
     let index_detail = List_Item_detail?.findIndex((p) => p.taskId === taskId)
     B[index_detail] = { ...B[index_detail], attachments:Find_attachments };
     List_Item_detail = B;
-    console.log(List_Item_detail,'List_Item_detail')
     let Find_attachments_List=List_attachments?.filter((p) => p.taskId === taskId);
     let index_attachments_detail_List = Find_attachments_List?.findIndex((p) => p.attachmentId === attachmentId)
     Find_attachments_List?.splice(index_attachments_detail_List, 1);
     List_attachments = [...List_attachments?.filter((p) => p.taskId !== taskId),...Find_attachments_List];
-    console.log(List_attachments,'List_attachments')
-    // await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item));
-    // await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(List_Item_detail));
-    // await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(List_attachments));
+    await AsyncStorage.setItem(GLOBAL.All_Task, JSON.stringify(List_Item));
+    await AsyncStorage.setItem(GLOBAL.Task_Detail, JSON.stringify(List_Item_detail));
+    await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(List_attachments));
     My_TaskList()
   };
-  const selectPhotoFromGallery = () => {
-
-    onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-    }).then(response => {
-
-      if (response.didCancel) {
-
-      } else if (response.error) {
-
-      } else if (response.customButton) {
-
-        alert(response.customButton);
-      } else {
-        if (ImageSourceviewarray)
-          A = [...ImageSourceviewarray];
-        B = [...ImageSourceviewarray];
-        for (let item in response) {
-          let obj = response[item];
-          var getFilename = obj.path.split("/");
-          var imgName = getFilename[getFilename.length - 1];
-          let attachmentId=0;
-          A.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            attachmentId:attachmentId,
-            taskId: GLOBAL.TaskId,
-          });
-
-
-        }
-        setImageSourceviewarray(A);
-        A = [...A];
-        B = [...B];
-      }
-    });
-
-  };
-  const selectPhoto = () => {
-
-    onClose();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
-      var getFilename = response.path.split("/");
-      var imgName = getFilename[getFilename.length - 1];
-      if (ImageSourceviewarray)
-        A = [...ImageSourceviewarray];
-      let attachmentId=0;
-      A.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        attachmentId:attachmentId,
-        taskId: GLOBAL.TaskId,
-      });
-      setImageSourceviewarray(A);
-      A = [...A];
-    });
-  };
-  const renderContent = () => (
-    <View style={Styles.BtnBox}>
-      <TouchableOpacity onPress={() => onClose()} style={Styles.CancelBtn}>
-        <View style={{ width: "80%" }}>
-          <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => {
-        selectPhoto();
-      }} style={Styles.UploadBtn}>
-        <AntDesign name={"camera"} size={17} color={"#fff"} />
-        <Text style={[Styles.TextUploadBtn]}>
-          Use Camera
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => {
-        selectPhotoFromGallery();
-      }} style={Styles.UploadBtn}>
-        <AntDesign name={"picture"} size={17} color={"#fff"} />
-        <Text style={[Styles.TextUploadBtn]}>
-          Choose From Gallery
-        </Text>
-
-      </TouchableOpacity>
-    </View>
-  );
   const DeleteImage = (uri) => {
     let List_Item = ImageSourceviewarray;
     const index = List_Item.findIndex((p) => p.uri === uri);
@@ -835,11 +518,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     markers?.splice(index, 1);
     setImageSourceviewarray(markers);
   };
-  const backhandel = () => {
-    console.log(changeScreen,'changeScreen')
-    setchangeScreen(false);
-  };
+
   const FilterFunc = (id) => {
+    setFilterName(id)
+    setShowFilter(true)
+  };
+  const FilterFunc1 = (id) => {
     let Filter = MudolList;
     if (id === 0) {
       setmodules(MudolList);
@@ -853,13 +537,36 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       A = Filter?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
       setmodules(A);
     }
+
   };
+  const FilterFuncStatus = (id,label) => {
+    let Filter = MudolList;
+    if (id === 10) {
+      setmodules(MudolList);
+    }else  {
+      A = Filter?.filter((p) => p.taskStatusName === label);
+      setmodules(A)
+    }
+    };
   const renderSectionHeader = () => (
     <>
+      {
+        modules !== ""&& <TouchableOpacity onPress={()=>setvisibleguide(!visibleguide)}>
+          <AntDesign  name={"infocirlce"} size={20} color={GLOBAL.OFFICIAL_ORANGE_COLOR} />
+        </TouchableOpacity>
+      }
       {modules !== "" ?
-        <Filter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter}
-                setShowFilter={setShowFilter} />
+        <TaskFilter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} Filtertype={Filtertype}
+                    setFiltertype={setFiltertype} setFilterName={setFilterName} />
         : null
+      }
+      { FilterName===0?
+      <TaskFilter_Item FilterFunc={FilterFunc1} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} FilterTimeList={FilterTimeList}
+              setShowFilter={setShowFilter} />:FilterName===1?
+          <TaskFilter_Item FilterFunc={FilterFuncStatus} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} FilterTimeList={Taskstatusfilter}
+                                                                               setShowFilter={setShowFilter} />:FilterName===2?
+          <TaskFilter_Item FilterFunc={FilterFunc1} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} FilterTimeList={Taskpriorityfilter}
+                           setShowFilter={setShowFilter} />:null
       }
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
@@ -961,13 +668,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     );
   };
   const DeleteAttachment =async (attachmentId,taskId) => {
-
     const formData = new FormData();
     formData.append("userId", "1");
     formData.append("attachmentId", attachmentId);
-
     writePostApi("POST", Api.DeleteAttachment, formData).then(json => {
-      console.log(json,'json')
       if (json) {
         if (json?.status === true) {
           setMessage(json?.msg);
@@ -975,7 +679,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           My_TaskList_server();
           const timerId = setInterval(() => {
             setShowMessage(false);
-
           }, 2000);
           return () => clearInterval(timerId);
         }
@@ -991,7 +694,8 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
     });
   };
-  const UpdateTask =(value,taskId)=>{
+  const UpdateTask =async (value,taskId)=>{
+    setShowButton(false)
     const formData = new FormData();
     formData.append("userId","1");
     formData.append("title",value?.Title);
@@ -1005,17 +709,19 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             type:obj?.type,
             name:obj?.fileName
         });
-
-
         })
 
         writePostApi("POST",Api.UpdateTask,formData,ImageSourceviewarrayUpload).then(json => {
-          console.log(json,'json')
+
           if (json) {
+
             if (json?.status===true) {
               setMessage(json?.msg);
               setShowMessage(true);
               setImageSourceviewarrayUpload([]);
+              setShowButton(true)
+              setShowBackBtn(true)
+              My_TaskList_server();
               const timerId = setInterval(() => {
                 setShowMessage(false);
               }, 2000);
@@ -1023,26 +729,19 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             }
           }
           else {
-            Update_Task_Offline(value,taskId,ImageSourceviewarrayUpload);
-            setMessage('Your task successfully added');
+            Update_Task_Offline(value,taskId);
+            setMessage('Your task successfully Updated');
             setShowMessage(true);
             setImageSourceviewarrayUpload([]);
+            setShowButton(true)
+            setShowBackBtn(true)
             const timerId = setInterval(() => {
               setShowMessage(false);
             }, 2000);
             return () => clearInterval(timerId);
-            // My_TaskList();
-            // setMessage("Your task successfully added");
-            // setShowMessage(true);
-            // setImageSourceviewarray([]);
-            // const timerId = setInterval(() => {
-            // setShowMessage(false);
-            // }, 2000);
-            // return () => clearInterval(timerId);
+
           }
         });
-
-
       }
       else {
         writePostApi("POST",Api.UpdateTask,formData).then(json => {
@@ -1050,6 +749,8 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             if (json?.status === true) {
               setMessage(json?.msg);
               setShowMessage(true);
+              setShowButton(true)
+              setShowBackBtn(true)
               const timerId = setInterval(() => {
                 setShowMessage(false);
 
@@ -1057,23 +758,24 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               return () => clearInterval(timerId);
             }
           } else {
-            // My_TaskList();
-            // setMessage("Your task successfully added");
-            // setShowMessage(true);
-            // const timerId = setInterval(() => {
-            //   setShowMessage(false);
-            //   setchangeScreen(false);
-            // }, 3000);
-            // return () => clearInterval(timerId);
+            Update_Task_Offline(value,taskId);
+            setMessage('Your task successfully Updated');
+            setShowMessage(true);
+            setShowButton(true)
+            setShowBackBtn(true)
+            const timerId = setInterval(() => {
+              setShowMessage(false);
+            }, 2000);
+            return () => clearInterval(timerId);
           }
         });
       }
   };
   return (
     <>
-      {changeScreen === false ?
+
         <Container style={[Styles.Backcolor]}>
-          <Header colors={["#a39898","#786b6b","#382e2e"]} StatusColor={"#a39897"} onPress={goBack} Title={"Task Management"} />
+          <Header colors={["#a39898","#786b6b","#382e2e"]} StatusColor={"#a39897"} onPress={goBack} Title={GLOBAL.TaskMenuName} />
           {
             showModalDelete &&
             <View>
@@ -1100,6 +802,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             <View style={Styles.ItemsBoxDyb}>
               <FlatList
                 showsh={false}
+
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={renderSectionHeader}
                 ListFooterComponent={renderSectionFooter}
@@ -1118,67 +821,65 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             </View>
 
           </View>
-
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visibleguide}>
+            <Content contentContainerStyle={[Styles.centeredView,
+              {flexGrow:1,backgroundColor:"rgba(0,0,0, 0.5)",justifyContent:"center"}]}>
+              <View style={[Styles.ModalLocationStyle]}>
+                <View style={[{ width: "89%", marginBottom: "4%" }]}>
+                  <TouchableOpacity onPress={() => {
+                    setvisibleguide(false);
+                  }} style={Styles.CancelBtnLeftAlign}>
+                    <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.formContainer}>
+                  <View style={Styles.guide}>
+                    <View style={Styles.guideItem}>
+                      <Text style={[Styles.txt_left]}>Status</Text>
+                    </View>
+                    <View style={Styles.guideItembox}>
+                      {
+                        Taskstatus?.map((value,index) => {
+                          return (
+                            <View key={index} style={Styles.BtnListStyle2}>
+                              <View style={[Styles.btntask,{backgroundColor:value?.statusColorCode}]}/>
+                              <Text style={[Styles.txt_left]}>{value?.label}</Text>
+                            </View>
+                          )})}
+                    </View>
+                  </View>
+                  <View style={Styles.guide}>
+                    <View style={Styles.guideItem}>
+                      <Text style={[Styles.txt_left]}>Priority</Text>
+                    </View>
+                    <View style={Styles.guideItembox}>
+                      {
+                        Taskpriority?.map((value,index) => {
+                          return (
+                            <View key={index} style={Styles.BtnListStyle2}>
+                              <View style={[Styles.triangle,{borderBottomColor:value.taskPriorityColor}]} />
+                              <Text style={Styles.txt_left}>{value?.label}</Text>
+                            </View>
+                          )})}
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </Content>
+          </Modal>
           {GLOBAL.selectItem === 1 ?
             <FloatAddBtn onPress={handleSubmit} colors={["#a39898", "#786b6b", "#382e2e"]} /> : null
           }
           <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
-        </Container> :
-        <Container style={[Styles.Backcolor]}>
-          {console.log(changeScreen,'changeScreen')}
-          <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={backhandel}
-                  Title={"Add New Task"} />
-          {ShowMessage === true ?
-            <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
-              <View style={Styles.flashMessageSuccsess}>
-                <View style={{ width: "10%" }} />
-                <View style={{ width: "80%" }}>
-                  <Text style={Styles.AlertTxt}>
-                    {Message}
-                  </Text>
-                </View>
-                <View style={{ width: "10%" }} />
-              </View>
-            </View>
-            : null}
-          <Content style={[{ backgroundColor: Colors.background }]}>
-            <View style={Styles.container}>
-              <View style={Styles.Center_margin_Bottom}>
-                {
-                  showModalDelete &&
-                  <View>
-                    {
-                      _showModalDelete()
-                    }
-                  </View>
-                }
-                <View style={[Styles.With100NoFlex]}>
-                  <TextInputI onChangeText={(value) => {
-                    AddTask(value);
-                  }} numberValue={24}
-                              ChangeChecked={(value) => ChangeChecked(value)} Cheked={Cheked}
-                              tittlebtn={"Add Task"} onOpen={onOpen} DeleteImage={DeleteImage}
-                              value={value} ImageSourceviewarray={ImageSourceviewarray}
-                              setSelectedcategory={setSelectedcategory} selectedcategory={selectedcategory}
-                              selectedrelated={selectedrelated} setSelectedrelated={setSelectedrelated}
-                              setRelatedId={setRelatedId}
-                              setdateType={setdateType} Taskcategory={Taskcategory} setCategoryId={setCategoryId}
-                              Task_RelatedList={Task_RelatedList} TaskRelated={TaskRelated} error={error}
-                  />
-                </View>
-              </View>
-            </View>
-          </Content>
-          <Modalize ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
-            {renderContent()}
-          </Modalize>
-          <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
         </Container>
 
-      }
+
+
 
     </>
-
   );
 }
 

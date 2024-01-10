@@ -164,19 +164,15 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
                 setMessage(json?.msg);
                 setMessage(json?.msg);
                 setShowMessage(true);
-                const timerId = setInterval(() => {
-                  setShowMessage(false);
-                }, 4000);
-                return () => clearInterval(timerId);
+                setTimeout(function(){ setShowMessage(false)}, 4000)
+                Navigate_Url('Project_Units')
               }}
               else   {
                 setMessage('Your BuildNotes successfully added')
                 setShowMessage(true);
 
-                const timerId = setInterval(() => {
-                  setShowMessage(false);
-                }, 4000);
-                return () => clearInterval(timerId);
+                setTimeout(function(){ setShowMessage(false)}, 4000)
+                Navigate_Url('Project_Units')
               }
             });
           }
@@ -835,6 +831,7 @@ const [ShowBackBtn, setShowBackBtn] = useState(true);
       setShowWarningMessage(true);
       scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
       setscroll(false);
+      setTimeout(function(){ setShowBackBtn(true)}, 2000)
     }
     else {
       goBack()

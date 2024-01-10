@@ -3,6 +3,7 @@ let List=[]
 const GLOBAL = require("./Global");
 export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUpload)
   {
+
   const  writeOnlineApi = async (type,Url, formdata) => {
     const requestOptions={
       method: type,
@@ -16,7 +17,7 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         }).then(json => {
 
         return json;
-      }).catch(error => console.log("Imageee", error)));
+      }).catch(error => console.warn("Imageee", error)));
     };
 
     const saveAsynStorage=async(STORAGE_KEY,STORAGE_OBJ)=> {

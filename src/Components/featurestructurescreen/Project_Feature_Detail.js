@@ -53,7 +53,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
-
+  const [ShowButton, setShowButton] = useState(true);
   useEffect(() => {
     getLocation();
     const date = new Date();
@@ -100,6 +100,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
     });
   };
   const AddFeatureImage = async () => {
+    setShowButton(false)
     let idsArray = "";
     const formData = new FormData();
     formData.append("userId", "1");
@@ -133,20 +134,16 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
               if (json.status === true) {
                 setMessage(json.msg);
                 setShowMessage(true);
-                const timerId = setInterval(() => {
-                  setShowMessage(false);
-                }, 2000);
+                setShowButton(true)
+                setTimeout(function(){ setShowMessage(false)}, 2000)
                 navigation.navigate('Project_Feature_List')
-                return () => clearInterval(timerId);
               }
             } else {
               setMessage('Your build notes successfully added');
               setShowMessage(true);
-              const timerId = setInterval(() => {
-                setShowMessage(false);
-                navigation.navigate('Project_Feature_List')
-              }, 2000);
-              return () => clearInterval(timerId);
+              setShowButton(true)
+              setTimeout(function(){ setShowMessage(false)}, 2000)
+              navigation.navigate('Project_Feature_List')
             }
           });
 
@@ -186,10 +183,9 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
               if (resp.status === 201) {
                 setMessage("Your build notes successfully added");
                 setShowMessage(true);
-                setTimeout(() => {
-                  setShowMessage(false);
-                  navigation.navigate('Project_Feature_List')
-                }, 2000)
+                setShowButton(true)
+                setTimeout(function(){ setShowMessage(false)}, 2000)
+                navigation.navigate('Project_Feature_List')
               }
 
               return resp.txt();
@@ -222,15 +218,12 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           } else {
             AllList = [...List]
           }
-
           await AsyncStorage.setItem(GLOBAL.offline_data, JSON.stringify(AllList));
           setMessage('Your build notes successfully added');
           setShowMessage(true);
-          setTimeout(() => {
-            setShowMessage(false);
-            navigation.navigate('Project_Feature_List')
-          }, 2000)
-
+          setShowButton(true)
+          setTimeout(function(){ setShowMessage(false)}, 2000)
+          navigation.navigate('Project_Feature_List')
         }
       }
 
@@ -744,7 +737,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
 
       if (ShowBackBtn===false) {
         setShowWarningMessage(true);
-
+        setTimeout(function(){ setShowBackBtn(true)}, 2000)
       }
 
     else {
@@ -838,7 +831,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                 <View style={Styles.FlexWrap}>
                 {ImageValidate&&(<Text style={Styles.TitleValidate}>Select Photos, please.</Text>)}
                 </View>
-                {Title!==''|| ImageSourceviewarrayUpload?.length!==0?
+                {Title!==''|| ImageSourceviewarrayUpload?.length!==0 &&ShowButton===true?
                   <ButtonI style={Styles.btnDYB}
                            onpress={AddFeatureImage}
                            categoriIcon={""}
@@ -857,12 +850,16 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                                               Count={Count} ImageValidate={ImageValidate} />
                   </View>
                 </View>
-                <ButtonI  style={Styles.btnDYB}
-                         onpress={AddFeatureImage}
-                         categoriIcon={""}
-                         title={"Save"}
-                         colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
-                         styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />
+                {
+                  ShowButton===true?
+                    <ButtonI  style={Styles.btnDYB}
+                              onpress={AddFeatureImage}
+                              categoriIcon={""}
+                              title={"Save"}
+                              colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
+                              styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null
+                }
+
               </View>
           }
         </View>

@@ -55,6 +55,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
+
   useEffect(() => {
     getLocation();
 
@@ -84,10 +85,11 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
       let Site_List= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
       if (Site_List?.sites) {
         Site_List?.sites?.forEach((obj) => {
+
           A.push({
             Id: obj.siteId,
             Name: obj.siteName,
-            Count: obj.unitCount,
+            Count:obj.units?.length,
             NameCount: "unit",
             task: '0',
             ListName: "Site",
@@ -292,6 +294,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
    setvalidatemsg('Please Select Your City')
  }
  else {
+    setShowButton(false)
    var formdata = new FormData();
    formdata.append("siteName", value.sitename);
    formdata.append("userId", "1");
@@ -312,7 +315,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
          setMessage(json.msg);
          setShowMessage(true);
          getAllProjectInfo();
-
+         setShowButton(true)
          setvisibleAddModal(false)
          const timerId = setInterval(() => {
            setShowMessage(false);
@@ -355,6 +358,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
        setMessage("Your site successfully added");
        setShowMessage(true);
        setmodules(List_Item);
+       setShowButton(true)
        setvisibleAddModal(false)
        AddSitesDataStorage(List_Item);
        let All_Sites = [];
@@ -376,6 +380,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
  }
   };
   const UpdateSites = (value) => {
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("siteName", value.sitename);
     formdata.append("userId", "1");
@@ -393,8 +398,9 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
           setMessage(json.msg);
           setShowWarningMessage(false)
           setShowMessageUpdate(true);
-
+          setShowButton(true)
           getAllProjectInfo();
+
         }
 
       }
@@ -409,6 +415,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         setShowWarningMessage(false)
         setMessage("Your site successfully updated");
         setShowMessageUpdate(true);
+        setShowButton(true)
       }
     });
   };
@@ -491,7 +498,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
                 setShowWarningMessage={setShowWarningMessage}
                 setShowMessage={setShowMessageUpdate} value={item}
                 CityList={CityList} CountryList={CountryList}
-                cityId={cityId} setcityId={setcityId}
+                cityId={cityId} setcityId={setcityId} ShowButton={ShowButton}
                 countryId={countryId} setcountryId={setcountryId}
                 Message={Message} onPress={UpdateSites} data={data}
                 ShowMessage={ShowMessageUpdate} tittlebtn={"Update Sites"} numberValue={4}
@@ -619,7 +626,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
                     getCity={getCity} touch={touch}
                     setvisibleAddModal={setvisibleAddModal} visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
                     onPressAdd={AddSites} tittlebtn={"Add Site"} ShowButton={ShowButton}/>
-      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
+      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}  />
     </Container>
   );
 }

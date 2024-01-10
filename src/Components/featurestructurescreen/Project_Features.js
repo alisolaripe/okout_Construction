@@ -39,6 +39,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowChangedybMessage, setShowChangedybMessage] = useState(false);
   const [route, setroute] = useState('');
+  const [ShowButton, setShowButton] = useState(true);
   useEffect(()=>{
     const unsubscribe = navigation.addListener('focus', () => {
       setroute(GLOBAL.route)
@@ -328,6 +329,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
     else {
       switchDYB='n'
     }
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("featureName", value?.FeatureName);
     formdata.append("userId", "1");
@@ -343,6 +345,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
             setMessage(json?.msg)
             setShowWarningMessage(false);
             setShowMessageUpdate(true)
+            setShowButton(true)
             getAllProjectInfo()
           }
         }
@@ -356,7 +359,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           setShowWarningMessage(false);
           setMessage('Your feature successfully updated')
           setShowMessageUpdate(true)
-
+          setShowButton(true)
         }
       });
 
@@ -459,6 +462,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
     else {
       switchDYB='n'
     }
+    setShowButton(false)
     var formdata = new FormData();
     formdata.append("projectId",GLOBAL.ProjectId);
     formdata.append("userId", "1");
@@ -473,6 +477,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           if (json?.status === true) {
             setMessage(json?.msg)
             setShowMessage(true)
+            setShowButton(true)
             getAllProjectInfo();
             setvisibleAddModal(false)
             const timerId = setInterval(() => {
@@ -509,6 +514,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           SaveFeatures(List_Item)
           setMessage('Your feature successfully added');
           setShowMessage(true);
+          setShowButton(true)
           let All_Sites = [];
           json?.forEach((obj) => {
             obj?.sites?.forEach((obj2) => {
@@ -593,7 +599,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   };
   const renderItem=({ item ,index})=>(
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} Navigate_Url={Navigate_Url} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                Message={Message} onPress={UpdateFeature} data={data} UpdateFeature_DYB={UpdateFeature_DYB}
+                Message={Message} onPress={UpdateFeature} data={data} UpdateFeature_DYB={UpdateFeature_DYB} ShowButton={ShowButton}
                 ShowMessage={ShowMessageUpdate} tittlebtn={'Update Feature'} numberValue={16} onPressDelete={DeleteFeature}
     />
   )
@@ -722,7 +728,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
           <AddModal  ShowMessage={ShowMessage} Message={Message}
                     numberValue={15}  ChangeChecked={ChangeChecked}
                     setvisibleAddModal={setvisibleAddModal}
-                    visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
+                    visibleAddModal={visibleAddModal} setShowMessage={setShowMessage} ShowButton={ShowButton}
                     onPressAdd={AddFeature} tittlebtn={'Add Feature'}  setCheked={setCheked} Cheked={Cheked}/>
 
 

@@ -54,7 +54,7 @@ function DYB_List_Item({
   return (
     <View>
       {
-        value.Count !== '0' ?
+        value.Count !== 0?
           <View  style={Styles.ItemDetailBox}>
             <View style={Styles.With90}>
               <View style={{ width: "65%" }}>
