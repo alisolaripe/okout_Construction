@@ -7,14 +7,28 @@ import { FlatList, Image, ImageBackground, Modal, Text, TouchableOpacity, View }
 import normalize from "react-native-normalize/src/index";
 import LinearGradient from "react-native-linear-gradient";
 import { removeDataStorage } from "../Get_Location";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 function Taskstructure({ navigation, navigation: { goBack } }) {
+  const [showWarning, setshowWarning] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect(() => {
-
+console.log(GLOBAL.UserInformation?.roleId,'GLOBAL.UserInformation')
   }, []);
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const logout_Url= () => {
@@ -82,7 +96,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
       }
       <ImageBackground tintColor={'rgba(77,120,165,0.16)'} source={require("../../Picture/png/Task_back.png")}
                        style={{ width: "100%",flex:1, alignSelf: "stretch"}} resizeMode="stretch">
-
+        {showWarning===true&&  <Warningmessage/>}
       <View style={Styles.container_task2}>
         <View style={Styles.FlexWrapHome}>
           <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]}  style={Styles.ModuleBox2}>
@@ -102,6 +116,26 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
 
             </TouchableOpacity>
           </LinearGradient>
+          {
+            GLOBAL.UserInformation?.roleId==='13'&&
+            <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.ModuleBox2}>
+              <TouchableOpacity onPress={()=>{
+                GLOBAL.selectItem=2;
+                GLOBAL.TaskMenuName='The Workshop'
+                navigation.navigate("Task_Management")
+              }
+              }  style={{
+                width: "100%", alignItems: "center",justifyContent:'center'
+              }}>
+                <Image tintColor={'#fff'} resizeMode={"contain"} source={require("../../Picture/png/workshop.png")}
+                       style={{ width: "35%", height: normalize(90),alignItems:"center",justifyContent:'center',marginTop:normalize(7) }}
+                />
+                <Text style={Styles.txtMenuHome2}>The Workshop</Text>
+
+
+              </TouchableOpacity>
+            </LinearGradient>
+          }
           <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.ModuleBox2}>
             <TouchableOpacity onPress={()=>{
               GLOBAL.selectItem=2;
@@ -114,7 +148,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
               <Image tintColor={'#fff'} resizeMode={"contain"} source={require("../../Picture/png/workshop.png")}
                      style={{ width: "35%", height: normalize(90),alignItems:"center",justifyContent:'center',marginTop:normalize(7) }}
               />
-                <Text style={Styles.txtMenuHome2}>The Workshop</Text>
+              <Text style={Styles.txtMenuHome2}>The Workshop</Text>
 
 
             </TouchableOpacity>

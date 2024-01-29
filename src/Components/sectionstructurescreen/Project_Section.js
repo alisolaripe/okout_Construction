@@ -14,6 +14,8 @@ import { FloatAddBtn } from "../component/FloatAddBtn";
 import { writePostApi } from "../writePostApi";
 import { readOnlineApi } from "../ReadPostApi";
 import DYB_List_Item from "../component/DYB_List_Item";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 const data = [
@@ -36,8 +38,8 @@ function Project_Section({navigation, navigation: { goBack }}) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
   useEffect(()=>{
-
       const unsubscribe = navigation.addListener('focus', () => {
         setroute(GLOBAL.route)
         if(GLOBAL.route==='structure') {
@@ -52,7 +54,6 @@ function Project_Section({navigation, navigation: { goBack }}) {
 
   }, []);
   const dateComparison_count =(a,b)=>{
-
     const date1 = a?.Count
     const date2 = b?.Count
     return date2 - date1;
@@ -208,37 +209,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
 
 
   }
-  const UpdateSection=(value)=>{
-    setShowButton(false)
-    var formdata = new FormData();
-    formdata.append("sectionName", value.SectionName);
-    formdata.append("userId", "1");
-    formdata.append("notes", value.SectionNote);
-    formdata.append("sectionId", GLOBAL.UpdateSectionID);
-    writePostApi("POST", Api.UpdateSection,formdata).then(json => {
-        if (json) {
-        if (json?.status === true) {
-          setMessage(json?.msg)
-          setShowWarningMessage(false)
-          setShowMessageUpdate(true);
-          setShowButton(true)
-          getAllProjectInfo();
-        }
-        }
-        else   {
-         let List_Item = modules;
-          let index = List_Item?.findIndex((p) => p.sectionId === GLOBAL.UpdateSectionID)
-          let markers = [...List_Item];
-          markers[index] = { ...markers?.[index], sectionName: value.SectionName };
-          setmodules(markers);
-          SaveSection(markers)
-          setShowWarningMessage(false)
-          setMessage('Your section successfully updated')
-          setShowMessageUpdate(true)
-          setShowButton(true)
-        }
-      });
-  }
+
   const AddSection =(value)=>{
     setShowButton(false)
     var formdata = new FormData();
@@ -355,6 +326,16 @@ function Project_Section({navigation, navigation: { goBack }}) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -409,13 +390,20 @@ function Project_Section({navigation, navigation: { goBack }}) {
     setshowModalDelete(true)
 
   };
+  const Update_Off=(value)=>{
+    let List_Item = modules;
+    let index = List_Item?.findIndex((p) => p.sectionId === GLOBAL.UpdateSectionID)
+    let markers = [...List_Item];
+    markers[index] = { ...markers?.[index], sectionName: value.SectionName };
+    setmodules(markers);
+    SaveSection(markers)
+  }
   const renderItem=({ item ,index})=>(
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} ShowWarningMessage={ShowWarningMessage}
-                setShowWarningMessage={setShowWarningMessage}
-                Navigate_Url={Navigate_Url} Message={Message} onPress={UpdateSection} data={data}
+                setShowWarningMessage={setShowWarningMessage} Update_Off={Update_Off}
+                Navigate_Url={Navigate_Url} Message={Message} data={data} getAllProjectInfo={getAllProjectInfo}
                 ShowMessage={ShowMessageUpdate} tittlebtn={'Update Section'} numberValue={14} onPressDelete={DeleteSection} ShowButton={ShowButton}
     />
-
   )
   const renderSectionHeader=()=>(
    <>
@@ -472,6 +460,7 @@ function Project_Section({navigation, navigation: { goBack }}) {
               }
             </View>
           }
+          {showWarning===true&&  <Warningmessage/>}
           {
             route=== 'structure' ?
               <>

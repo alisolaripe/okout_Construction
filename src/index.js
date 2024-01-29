@@ -23,13 +23,7 @@ import React, {Component} from 'react';
 //   },
 // });
 const HomeScreen = () => (
-  <View style={styles.home}>
-    {/*<App/>*/}
-    <Text>
-      Congratulations Apollo 11 🍾🍾. You had a great ride so far 🖖🏽. Will see
-      you at Mars next time 🚀.
-    </Text>
-  </View>
+    <App/>
 );
 
 const styles = StyleSheet.create({

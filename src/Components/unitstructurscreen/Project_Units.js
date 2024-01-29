@@ -18,6 +18,8 @@ import {FloatAddBtn} from "../component/FloatAddBtn";
 import {readOnlineApi} from "../ReadPostApi";
 import { geocodePosition, requestLocationPermission ,writeDataStorage,removeDataStorage} from "../Get_Location";
 import DYB_List_Item from "../component/DYB_List_Item";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 const data = [
@@ -59,6 +61,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
   useEffect(() => {
     getLocation();
 
@@ -240,45 +243,17 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     const date2 = b?.Id
     return date1 - date2;
   }
-  const UpdateUnits = (value) => {
-    setShowButton(false)
-    var formdata = new FormData();
-    formdata.append("unitName", value.Unitname);
-    formdata.append("userId", "1");
-    formdata.append("notes", value.UnitNote);
-    formdata.append("unitId", GLOBAL.UpdateUnitID);
-    formdata.append('geoLat', location.latitude);
-    formdata.append('geoLong', location.longitude);
-    formdata.append("postalCode",value.GeoAddressPostalCode);
-    formdata.append("cityId",cityId);
-    formdata.append("countryId",countryId);
-    formdata.append("street",value.GeoAddressStreet);
+  const Update_Off=(value)=>{
 
-    writePostApi("POST", Api.UpdateUnit,formdata).then(json => {
-      if (json) {
-        if (json?.status === true) {
-          setMessage(json?.msg);
-          setShowWarningMessage(false);
-          setShowMessageUpdate(true);
-          setShowButton(true)
-          getAllProjectInfo();
-
-        }
-      }
-      else  {
-        let List_Item = modules;
-        let index = List_Item?.findIndex((p) => p.unitId === GLOBAL.UpdateUnitID)
-        let markers = [...List_Item];
-        markers[index] = { ...markers[index], unitName: value.Unitname };
-        setmodules(markers);
-        SaveUnits(markers)
-        setShowWarningMessage(false);
-        setMessage('Your unit successfully updated')
-        setShowMessageUpdate(true)
-        setShowButton(true)
-      }
-    });
-  };
+    let List_Item = modules;
+    let index = List_Item?.findIndex((p) => p.unitId === GLOBAL.UpdateUnitID)
+    let markers = [...List_Item];
+    markers[index] = { ...markers[index], unitName: value.Unitname,cityName:GeoAddressCity,countryName:GeoAddressCountry,
+      street:value.GeoAddressStreet,postalCode:value.GeoAddressPostalCode,address:value.GeoAddressStreet,
+      geoLat: location.latitude,geoLong: location.longitude };
+    setmodules(markers);
+    SaveUnits(markers)
+  }
 
   const getUnits =async () => {
     let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
@@ -491,6 +466,16 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -547,14 +532,13 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   };
   const renderItem=({ item ,index})=>(
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} getCity={getCity} CityList={CityList} CountryList={CountryList}
-                Navigate_Url={Navigate_Url} Message={Message} onPress={UpdateUnits} data={data} cityId={cityId} setcityId={setcityId}
-                countryId={countryId} setcountryId={setcountryId} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Unit'} numberValue={12} onPressDelete={DeleteUnits} ShowButton={ShowButton}
+                Navigate_Url={Navigate_Url} Message={Message} Update_Off={Update_Off} data={data} getAllProjectInfo={getAllProjectInfo}
+                 ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
+                ShowMessage={ShowMessageUpdate} tittlebtn={'Update Unit'} location={location} numberValue={12} onPressDelete={DeleteUnits} ShowButton={ShowButton}
     />
   )
   const renderSectionHeader=()=>(
     <>
-
       {ShowMessageDelete === true ?
         <View style={Styles.flashMessageSuccsess}>
           <View style={{ width: "10%" }} />
@@ -596,7 +580,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack} Title={'Plots / Units'}/>
-
+      {showWarning===true&&  <Warningmessage/>}
         <View style={Styles.containerList}>
           {
             showModalDelete &&

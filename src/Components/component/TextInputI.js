@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TextInput,
   Text,
@@ -13,7 +13,17 @@ import { Styles } from "../Styles";
 import { CheckBox } from "native-base";
 import normalize from "react-native-normalize";
 import { ButtonI } from "./ButtonI";
+const { width: viewportWidth } = Dimensions.get('window');
 const GLOBAL = require("../Global");
+const SLIDER_1_FIRST_ITEM = 0;
+function wp (percentage) {
+  const value = (percentage * viewportWidth) / 100;
+  return Math.round(value);
+}
+const slideWidth = wp(83);
+const itemHorizontalMargin = wp(3);
+const  sliderWidth=viewportWidth
+const itemWidth= slideWidth + itemHorizontalMargin * 2.2
 import Feather from "react-native-vector-icons/Feather";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -22,7 +32,11 @@ import ToggleSwitch from "toggle-switch-react-native";
 import { Dropdown,MultiSelect } from "react-native-element-dropdown";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import LinearGradient from "react-native-linear-gradient";
+import { Colors } from "../Colors";
+import Carousel, { Pagination } from "react-native-snap-carousel";
+import Task_Edit_Image from "./Task_Edit_Image";
 let numOfLinesCompany = 0;
+
 function TextInputI({ GeoAddressCity,
                       GeoAddressCountry,
                       GeoAddressStreet,GeoAddressPostalCode,
@@ -34,7 +48,7 @@ function TextInputI({ GeoAddressCity,
                       Name,
                       tittlebtn,
                       ChangeChecked,
-                      Cheked,onOpen,
+                      Cheked,onOpen,Full,
                       Pinrecovery,
                       emailOnpress,DeleteImage,
                       featureName,Boolean,Btn,iconcheck,checkOrgCode,
@@ -44,11 +58,15 @@ function TextInputI({ GeoAddressCity,
                       setSelectedcategory,selectedcategory,Taskcategory,value,Taskassigned,setSelectedassigned,selectedassigned,
                       Taskpriority,selectedpriority,setSelectedpriority,setOpen,setdateType
                       ,DateFormatplanend,DateFormatplanstart,Taskstatus,selectedstatus, setSelectedstatus,
-                      selecteduser,setSelecteduser,Taskuser,setUserId,setCategoryId,setRelatedId,setParentTaskId,setPriorityId,setTaskStatusId,
-                      Task_RelatedList,TaskRelated,selectedrelated,setSelectedrelated,error,ShowButton
+                      selecteduser,setSelecteduser,Taskuser,setUserId,setCategoryId,setRelatedId,setOpenend,setPriorityId,setTaskStatusId,
+                      Task_RelatedList,TaskRelated,selectedrelated,setSelectedrelated,error,ShowButton,reasons,ShowMessage,Message,
+                      Back_navigate,setShowWarningMessage,setShowBackBtn,setchangestatus_Reopen
+
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
+  const [slider1ActiveSlide,setslider1ActiveSlide] = useState(0);
+  let _slider1Ref = useRef(null);
   const [attachmentId, setattachmentId] = useState(true);
   const [taskId, settaskId] = useState(true);
   const [iconsecuret, setIconsecuret] = useState("eye-off");
@@ -61,6 +79,15 @@ function TextInputI({ GeoAddressCity,
   const [isFocususer, setIsFocususer] = useState(false);
   const [isFocusstatus, setIsFocusstatus] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
+  const [showNewInput, setshowNewInput] = useState(false);
+  const _renderItem_Carousel = ({item, index}) => {
+
+    return (
+      <Task_Edit_Image item={item} key={index} onOpen={onOpen}
+                       colors={ ['#a39898','#786b6b','#382e2e'] }
+                       IconColor={"#786b6b"} setattachmentId={setattachmentId} settaskId={settaskId} setshowModalDelete={setshowModalDelete} />
+    );
+  }
   const validationSchema1 = Yup.object().shape({
     name: Yup.string().required(),
     email: Yup.string()
@@ -102,6 +129,24 @@ function TextInputI({ GeoAddressCity,
   const validationSchema13 = Yup.object().shape({
     SectionName: Yup.string()
       .required("SectionName ! Please?")
+
+  });
+  const validationSchema18 = Yup.object().shape({
+    TaskNote: Yup.string()
+      .required("Reject Reason ! Please?")
+
+  });
+  const validationSchema19 = Yup.object().shape({
+    CaseNote: Yup.string()
+      .required("CaseNote ! Please?"),
+    FeedbackNote: Yup.string()
+      .required("CaseNote ! Please?")
+
+  });
+  const validationSchema32 = Yup.object().shape({
+    taskNote: Yup.string()
+      .required("Reason ! Please?"),
+
 
   });
   const validationSchema15 = Yup.object().shape({
@@ -189,6 +234,99 @@ function TextInputI({ GeoAddressCity,
       </View>
     </View>
   );
+  const  string_equalityTask=(values)=>{
+    let isValid = false;
+      if (values?.Title!==value?.taskTitle) {
+        setShowBackBtn(false)
+        console.log('values?.Title===value?.taskTitle')
+        isValid=true;
+      }
+
+     else if (values?.TaskNote!==value?.taskDescription) {
+        setShowBackBtn(false)
+        console.log('values?.TaskNote===value?.taskDescription')
+        isValid=true;
+      }
+      if(isValid)
+      {
+        //setShowBackBtn(false)
+        console.log('isValid')
+        isValid=true
+        Back_navigate(false)
+
+      }
+
+      else{
+        console.log('else')
+
+        Back_navigate()
+      }
+  }
+  const  string_equalityAssignTask=(values)=>{
+    let isValid = false;
+      if (values?.Title !== value?.taskTitle) {
+        setShowBackBtn(false)
+
+        isValid=true;
+      }
+      else  if(values?.DateFormatplanend!==DateFormatplanend){
+        setShowBackBtn(false)
+        isValid=true;
+
+      }
+      else  if(values?.DateFormatplanstart!==DateFormatplanstart){
+          setShowBackBtn(false)
+          isValid=true;
+      }
+      else if (values?.TaskNote!==value?.taskFeedback) {
+        setShowBackBtn(false)
+        isValid=true;
+      }
+else if(values?.CaseNote?.split("\n")?.length>1){
+        if (values?.CaseNote?.split("\n")?.[2]!== '') {
+          setShowBackBtn(false)
+          console.log('values?.CaseNote')
+          console.log(values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes,'values?.CaseNote.split("\\n")?.[0]!== value?.taskRequestNotes')
+          console.log(values?.CaseNote==='','values?.CaseNote===\'\'')
+          console.log(values?.CaseNote.split("\n"),'values?.CaseNote.split("\\n")')
+          console.log(values?.CaseNote.split("\n")?.[2]!== '','values?.CaseNote.split("\\n")?.[3]!== \'\'')
+          isValid=true;
+
+        }
+
+      }
+else  if(values?.CaseNote?.split("\n")?.length===1){
+        if (values?.CaseNote===''||values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes) {
+          setShowBackBtn(false)
+          console.log('values?.CaseNote')
+          console.log(values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes,'values?.CaseNote.split("\\n")?.[0]!== value?.taskRequestNotes')
+          console.log(values?.CaseNote==='','values?.CaseNote===\'\'')
+          console.log(values?.CaseNote.split("\n"),'values?.CaseNote.split("\\n")')
+          console.log(values?.CaseNote.split("\n")?.[2]!== '','values?.CaseNote.split("\\n")?.[3]!== \'\'')
+          isValid=true;
+
+        }
+
+      }
+
+      console.log(isValid,'isValid')
+    if(isValid)
+    {
+      //setShowBackBtn(false)
+      console.log('isValid')
+      isValid=true
+      Back_navigate(false)
+
+    }
+
+    else{
+      console.log('else')
+
+      Back_navigate()
+    }
+
+
+  }
 
   const width = Dimensions.get("screen").width;
   const inputStyle = {
@@ -449,6 +587,19 @@ function TextInputI({ GeoAddressCity,
                 }} style={Styles.CancelBtnLeftAlign2}>
                   <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
                 </TouchableOpacity>
+              {ShowMessage === true ?
+                <View style={Styles.flashMessageSuccsess}>
+                  <View style={{ width: "10%" }} />
+                  <View style={{ width: "80%" }}>
+                    <Text style={Styles.AlertTxt}>
+                      {Message}
+                    </Text>
+                  </View>
+                  <View style={{ width: "10%" }} />
+                </View>
+                :
+                null
+              }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Project Name</Text>
               <TextInput
                 value={values.Projectname}
@@ -722,6 +873,19 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
+              {ShowMessage === true ?
+                <View style={Styles.flashMessageSuccsess}>
+                  <View style={{ width: "10%" }} />
+                  <View style={{ width: "80%" }}>
+                    <Text style={Styles.AlertTxt}>
+                      {Message}
+                    </Text>
+                  </View>
+                  <View style={{ width: "10%" }} />
+                </View>
+                :
+                null
+              }
               <Text style={[Styles.txt,{marginTop: normalize(18),}]}>Site Name</Text>
               <TextInput
                 value={values.sitename}
@@ -1138,6 +1302,19 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
+              {ShowMessage === true ?
+                <View style={Styles.flashMessageSuccsess}>
+                  <View style={{ width: "10%" }} />
+                  <View style={{ width: "80%" }}>
+                    <Text style={Styles.AlertTxt}>
+                      {Message}
+                    </Text>
+                  </View>
+                  <View style={{ width: "10%" }} />
+                </View>
+                :
+                null
+              }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Unit Name</Text>
               <TextInput
                 value={values.Unitname}
@@ -1407,6 +1584,19 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
+              {ShowMessage === true ?
+                <View style={Styles.flashMessageSuccsess}>
+                  <View style={{ width: "10%" }} />
+                  <View style={{ width: "80%" }}>
+                    <Text style={Styles.AlertTxt}>
+                      {Message}
+                    </Text>
+                  </View>
+                  <View style={{ width: "10%" }} />
+                </View>
+                :
+                null
+              }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Section Name</Text>
               <TextInput
                 value={values.SectionName}
@@ -1575,6 +1765,19 @@ function TextInputI({ GeoAddressCity,
               }} style={Styles.CancelBtnLeftAlign2}>
                 <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
               </TouchableOpacity>
+              {ShowMessage === true ?
+                <View style={Styles.flashMessageSuccsess}>
+                  <View style={{ width: "10%" }} />
+                  <View style={{ width: "80%" }}>
+                    <Text style={Styles.AlertTxt}>
+                      {Message}
+                    </Text>
+                  </View>
+                  <View style={{ width: "10%" }} />
+                </View>
+                :
+                null
+              }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Feature Name</Text>
               <TextInput
                 value={values.FeatureName}
@@ -2639,7 +2842,7 @@ function TextInputI({ GeoAddressCity,
         <Formik
           initialValues={{
             Title:value?.taskTitle,
-            TaskNote: value?.taskDescription,
+            TaskNote:value?.taskDescription
           }}
           onSubmit={values => {
             onChangeText(values);
@@ -2648,6 +2851,141 @@ function TextInputI({ GeoAddressCity,
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={[Styles.formContainer2,]}>
+              <View style={[{ width: "89%", marginBottom: "4%" }]}>
+                <TouchableOpacity onPress={() => {
+                  string_equalityTask(values)
+                }} style={Styles.CancelBtnLeftAlign}>
+                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                </TouchableOpacity>
+              </View>
+              {
+                showModalDelete &&
+                <View>
+                  {
+                    _showModalDelete()
+                  }
+                </View>
+              }
+
+              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
+
+                  <TextInput
+                    value={values.Title}
+                    style={[Styles.inputStyleTask]}
+                    onChangeText={handleChange("Title")}
+                    onFocus={() => setFieldTouched("Title")}
+                    multiline={true}
+                    placeholderTextColor={"#fff"} />
+              {touched.Title && errors.Title &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>{GLOBAL.selectItem === 1 ?'Description':'PlanFeedback'}</Text>
+                <TextInput
+                  value={values.TaskNote}
+                  style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
+                  onContentSizeChange={(e) => {
+                    numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                  }}
+                  onChangeText={handleChange("TaskNote")}
+                  onFocus={() => setFieldTouched("TaskNote")}
+                  multiline={true}
+                  placeholderTextColor={'#fff'} />
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>{GLOBAL.selectItem === 1 ?'':'CaseNote'}</Text>
+
+              {
+              GLOBAL.selectItem === 1 ?
+                null :
+                <TextInput
+                  value={values.CaseNote}
+                  style={[Styles.inputStyleTask, { paddingVertical: '4%' }]}
+                  onContentSizeChange={(e) => {
+                    numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                  }}
+                  onChangeText={handleChange("CaseNote")}
+                  onFocus={() => setFieldTouched("CaseNote")}
+                  multiline={true}
+                  placeholderTextColor={'#fff'} />
+            }
+
+              {ImageSourceviewarray?.length!==0 && (
+                <View style={Styles.With100NoFlexMarginBotoom}>
+                  <View style={[Styles.carouselBtnStyle,{marginTop:'4%'}]}>
+                    <TouchableOpacity style={Styles.carouselStyle} onPress={()=>_slider1Ref.snapToPrev()}>
+                      <AntDesign name="caretleft" size={normalize(14)} color={Colors.withe} />
+                      <Text style={Styles.skiptext}>Prev</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity  style={Styles.carouselStyle1} onPress={()=>_slider1Ref.snapToNext()}>
+                      <Text style={Styles.skiptext}>Next</Text>
+                      <AntDesign name="caretright" size={normalize(14)} color={Colors.withe} />
+                    </TouchableOpacity>
+                  </View>
+                  <Carousel
+                    ref={c => _slider1Ref = c}
+                    data={ImageSourceviewarray}
+                    renderItem={_renderItem_Carousel}
+                    sliderWidth={sliderWidth}
+                    itemWidth={itemWidth}
+                    hasParallaxImages={true}
+                    firstItem={SLIDER_1_FIRST_ITEM}
+                    inactiveSlideScale={0.94}
+                    inactiveSlideOpacity={0.4}
+                    containerCustomStyle={Styles.slider}
+                    contentContainerCustomStyle={Styles.tasksliderContentContainer}
+                    onSnapToItem={(index) => setslider1ActiveSlide(index)}
+                  />
+                </View>
+              )}
+              {
+              ShowButton===true?
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(20),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#a39898','#786b6b','#382e2e']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>:null
+              }
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+
+
+    );
+  }
+  if (numberValue === 29) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Title:value?.taskTitle,
+            TaskNote:value?.taskFeedback,
+            CaseNote:value?.taskRequestNotes,
+            switchDYB:switchDYB2,
+            DateFormatplanstart:DateFormatplanstart,
+            DateFormatplanend:DateFormatplanend
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}>
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={[Styles.formContainer2,]}>
+              <View style={[{ width: "89%", marginBottom: "4%" }]}>
+                <TouchableOpacity onPress={() => {
+                  string_equalityAssignTask(values)
+                }} style={Styles.CancelBtnLeftAlign}>
+                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                </TouchableOpacity>
+              </View>
               {
                 showModalDelete &&
                 <View>
@@ -2667,7 +3005,80 @@ function TextInputI({ GeoAddressCity,
               {touched.Title && errors.Title &&
               <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
               }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
+              <View  style={Styles.dateBox}>
+                <View  style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanStartDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Plan StartDate
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanEndDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Plan EndDate
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setOpen(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate}>
+                      {DateFormatplanstart}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setOpenend(true)}}
+                    style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate}>
+                      {DateFormatplanend}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <View style={Styles.dateBoxItemBorder}>
+
+                    {error==='PlanStartDate' && DateFormatplanstart==='' ?
+                      <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select PlanStartDate! Please?</Text>:null
+                    }
+                  </View>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanEndDate' && DateFormatplanend==='' ?
+                      <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select PlanEndDate! Please?</Text>:null
+                    }
+                  </View>
+                </View>
+                <View  style={Styles.dateBoxitems}>
+                  <View  style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                     Status
+                    </Text>
+                  </View>
+                  <View  style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                    Priority
+                    </Text>
+                  </View>
+                </View>
+                <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                  <View  style={Styles.dateBoxItem}>
+                    <Text style={[Styles.txtdate,{color:value?.taskStatusColor}]}>
+                      {value?.taskStatusName}
+                    </Text>
+                  </View>
+                  <View  style={[Styles.dateBoxItem,]}>
+                    <Text style={[Styles.txtdate,{color:value?.taskPriorityColor }]}>
+                      {value?.taskPriorityName}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>PlanFeedback</Text>
               <TextInput
                 value={values.TaskNote}
                 style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
@@ -2675,57 +3086,95 @@ function TextInputI({ GeoAddressCity,
                   numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
                 }}
                 onChangeText={handleChange("TaskNote")}
-                onFocus={() => setFieldTouched("TaskNote")}
+                onFocus={() => {
+                  setFieldTouched("TaskNote");
+                }}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
-              {touched.TaskNote && errors.TaskNote &&
-              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>CaseNote</Text>
+              {showNewInput===false&&
+              <TextInput
+                value={values.CaseNote}
+                style={[Styles.inputStyleTask, { paddingVertical: '4%' }]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                onChangeText={handleChange("CaseNote")}
+                onFocus={() => {
+                  setFieldTouched("CaseNote");
+                  values.CaseNote=value?.taskRequestNotes+`\n---${Full}---\n`;
+                }}
+                multiline={true}
+                placeholderTextColor={'#fff'} />
               }
-              <View style={Styles.FlexWrap}>
-                <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-                  <Text style={Styles.UploadImageText}>
-                    Add Photos
-                  </Text>
-                  <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
-                </TouchableOpacity>
-                {
-                  ImageSourceviewarray?.map((value,key) => {
-                    return (
-                      <View key={key} style={Styles.UnitDetailImageBoxFeatureStyle2}>
-                        <ImageBackground source={{uri:value.uri}}
-                                         imageStyle={{borderRadius:normalize(6)}}
-                                         style={Styles.UnitDetailImagestyle}
-                                         resizeMode="stretch">
-                          <TouchableOpacity onPress={()=> {
-                            setattachmentId(value.attachmentId)
-                            settaskId(value?.taskId)
-                            setshowModalDelete(true)
-                          }} style={Styles.UnitDetailAddTextBox}>
-                            <MaterialCommunityIcons name={"delete"} size={17} color={'#fff'} />
-                          </TouchableOpacity>
-                        </ImageBackground>
-                      </View>
-                    )
-                  })
-                }
-
-              </View>
+              {ImageSourceviewarray?.length!==0 && (
+                <View style={Styles.With100NoFlexMarginBotoom}>
+                  <View style={[Styles.carouselBtnStyle,{marginTop:'4%'}]}>
+                    <TouchableOpacity style={Styles.carouselStyle} onPress={()=>_slider1Ref.snapToPrev()}>
+                      <AntDesign name="caretleft" size={normalize(14)} color={Colors.withe} />
+                      <Text style={Styles.skiptext}>Prev</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity  style={Styles.carouselStyle1} onPress={()=>_slider1Ref.snapToNext()}>
+                      <Text style={Styles.skiptext}>Next</Text>
+                      <AntDesign name="caretright" size={normalize(14)} color={Colors.withe} />
+                    </TouchableOpacity>
+                  </View>
+                  <Carousel
+                    ref={c => _slider1Ref = c}
+                    data={ImageSourceviewarray}
+                    renderItem={_renderItem_Carousel}
+                    sliderWidth={sliderWidth}
+                    itemWidth={itemWidth}
+                    hasParallaxImages={true}
+                    firstItem={SLIDER_1_FIRST_ITEM}
+                    inactiveSlideScale={0.94}
+                    inactiveSlideOpacity={0.4}
+                    containerCustomStyle={Styles.slider}
+                    contentContainerCustomStyle={Styles.tasksliderContentContainer}
+                    onSnapToItem={(index) => setslider1ActiveSlide(index)}
+                  />
+                </View>
+              )}
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Task Finished</Text>
+              <ToggleSwitch
+                isOn={switchDYB2}
+                size="large"
+                style={{marginLeft:'auto'}}
+                trackOnStyle={{
+                  backgroundColor:GLOBAL.OFFICIAL_Button,
+                }}
+                trackOffStyle={{
+                  backgroundColor: "#a0a3bd",
+                }}
+                thumbOffStyle={{
+                  borderRadius: 19,
+                  borderColor: "rgb(255,255,255)",
+                }}
+                thumbOnStyle={{
+                  borderRadius: 19,
+                  borderColor: "rgb(255,255,255)", // rgb(102,134,205)
+                }}
+                onToggle={isOn => {
+                  setswitchDYB2(isOn)
+                  setCheked(isOn)
+                }}
+              />
               {
-              ShowButton===true?
-              <View style={[Styles.ViewItems_center]}>
-                <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
-                  flexDirection: "row",
-                  width: '100%',
-                  paddingVertical: 2,
-                  marginTop: normalize(30),
-                }]}//handleSubmit
-                         onpress={handleSubmit}
-                         categoriIcon={""}
-                         title={tittlebtn}
-                         colorsArray={['#a39898','#786b6b','#382e2e']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-              </View>:null
+                ShowButton===true?
+                  <View style={[Styles.ViewItems_center]}>
+                    <ButtonI style={[Styles.btn, {
+                      //margin: normalize(15),
+                      flexDirection: "row",
+                      width: '100%',
+                      paddingVertical: 2,
+                      marginTop: normalize(20),
+                    }]}//handleSubmit
+                             onpress={handleSubmit}
+                             categoriIcon={""}
+                             title={tittlebtn}
+                             colorsArray={['#a39898','#786b6b','#382e2e']}
+                             styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                  </View>:null
               }
             </View>
 
@@ -2735,6 +3184,247 @@ function TextInputI({ GeoAddressCity,
       </View>
 
 
+    );
+  }
+  if (numberValue === 27) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            TaskNote:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema18}>
+          {({values,handleChange,errors,setFieldTouched,touched,handleSubmit }) => (
+            <View style={styles.formContainer}>
+              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Reason</Text>
+              <Dropdown
+                style={[Styles.dropdowntask]}
+                placeholderStyle={Styles.placeholderStyle}
+                selectedTextStyle={Styles.selectedTextStyle}
+                inputSearchStyle={Styles.inputSearchStyle}
+                iconStyle={Styles.iconStyle}
+                itemTextStyle={Styles.itemTextStyle}
+                data={reasons}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocusrelated ? 'Select Reason' : '...'}
+                searchPlaceholder="Search..."
+                value={selectedrelated}
+                containerStyle={Styles.containerStyle}
+                renderItem={renderItem}
+                onFocus={() => setIsFocusrelated(true)}
+                onBlur={()  => setIsFocusrelated(false)}
+                onChange={item=> {
+                setSelectedrelated(item);
+                setRelatedId(item.value)
+                }}
+              />
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Reject Reason</Text>
+              <TextInput
+                value={values.TaskNote}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e)=>{
+                  numOfLinesCompany=e.nativeEvent.contentSize.height/14
+                }}
+                onChangeText={handleChange("TaskNote")}
+                onFocus={()=>setFieldTouched("TaskNote")}
+                multiline={true}
+                placeholderTextColor={'#fff'}/>
+              {touched.TaskNote && errors.TaskNote &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.TaskNote}</Text>
+              }
+              <View style={[Styles.ViewItems_center_task]}>
+                <ButtonI style={[Styles.btn,{
+                  flexDirection:"row",
+                  width:'50%',
+                  paddingVertical:2,
+                  marginTop:normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+          )}
+        </Formik>
+      </View>
+    );
+  }
+  if (numberValue === 28) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            CaseNote:"",
+            FeedbackNote:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema19}>
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={styles.formContainer}>
+              <View  style={Styles.dateBox}>
+                <View  style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanStartDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Plan StartDate
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanEndDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Plan EndDate
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanStartDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate}>
+                      {DateFormatplanstart}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanEndDate");
+                    setOpenend(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate}>
+                      {DateFormatplanend}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanStartDate' && DateFormatplanstart==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanStartDate! Please?</Text>:null
+                    }
+                  </View>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanEndDate' && DateFormatplanend==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanEndDate! Please?</Text>:null
+                    }
+                  </View>
+                </View>
+              </View>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Feedback for Request</Text>
+              <TextInput
+                value={values.FeedbackNote}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e)=>{
+                  numOfLinesCompany=e.nativeEvent.contentSize.height/14
+                }}
+                onChangeText={handleChange("FeedbackNote")}
+                onFocus={()=>setFieldTouched("FeedbackNote")}
+                multiline={true}
+                placeholderTextColor={'#fff'}/>
+              {touched.FeedbackNote && errors.FeedbackNote &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.FeedbackNote}</Text>}
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>CaseNote</Text>
+              <TextInput
+                value={values.CaseNote}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e)=>{
+                  numOfLinesCompany=e.nativeEvent.contentSize.height/14
+                }}
+                onChangeText={handleChange("CaseNote")}
+                onFocus={()=>setFieldTouched("CaseNote")}
+                multiline={true}
+                placeholderTextColor={'#fff'}/>
+              {touched.CaseNote && errors.CaseNote &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.CaseNote}</Text>
+              }
+              {/*<View style={Styles.With100Row}>*/}
+              {/*  <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>*/}
+              {/*    <TouchableOpacity onPress={()=>setshowModalReject( false)}>*/}
+              {/*      <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>No</Text>*/}
+              {/*    </TouchableOpacity>*/}
+              {/*  </LinearGradient>*/}
+              {/*  <LinearGradient  colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>*/}
+              {/*    <TouchableOpacity onPress={()=>{setshowModalReject(false)}}>*/}
+              {/*      <Text style={[Styles.txt_left2,{fontSize: normalize(14)}]}>Yes</Text>*/}
+              {/*    </TouchableOpacity>*/}
+              {/*  </LinearGradient>*/}
+              {/*</View>*/}
+              <View style={[Styles.ViewItems_center_task]}>
+                <ButtonI style={[Styles.btn,{
+                  flexDirection:"row",
+                  width:'50%',
+                  paddingVertical:2,
+                  marginTop:normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+          )}
+        </Formik>
+      </View>
+    );
+  }
+  if (numberValue === 32) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            taskNote:"",
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema32}>
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={styles.formContainer}>
+
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Reason</Text>
+              <TextInput
+                value={values.taskNote}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e)=>{
+                  numOfLinesCompany=e.nativeEvent.contentSize.height/14
+                }}
+                onChangeText={handleChange("taskNote")}
+                onFocus={()=>setFieldTouched("taskNote")}
+                multiline={true}
+                placeholderTextColor={'#fff'}/>
+              {touched.taskNote && errors.taskNote &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.taskNote}</Text>}
+
+              <View style={[Styles.ViewItems_center_task]}>
+                <ButtonI style={[Styles.btn,{
+                  flexDirection:"row",
+                  width:'50%',
+                  paddingVertical:2,
+                  marginTop:normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+
+              </View>
+            </View>
+          )}
+        </Formik>
+      </View>
     );
   }
   ///////////////////Task////////////////
@@ -3070,6 +3760,7 @@ function TextInputI({ GeoAddressCity,
   }
 
   ////////////////////Address//////////////////
+
 }
 
 

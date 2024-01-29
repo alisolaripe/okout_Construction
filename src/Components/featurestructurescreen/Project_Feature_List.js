@@ -7,8 +7,6 @@ import {
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
-const GLOBAL = require("../Global");
-const Api = require("../Api");
 import { ButtonI } from "../component/ButtonI";
 import LinearGradient from "react-native-linear-gradient";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -18,6 +16,10 @@ import { Filter } from "../component/Filter";
 import { Header } from "../component/Header";
 import {removeDataStorage } from "../Get_Location";
 import {  readOnlineApi } from "../ReadPostApi";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+const GLOBAL = require("../Global");
+const Api = require("../Api");
 function Project_Feature_List({ navigation, navigation: { goBack } }) {
   const [modules,setmodules] = useState([]);
   const [ShowFilter,setShowFilter]= useState(false);
@@ -30,6 +32,8 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
   const [DateRangeList,setDateRangeList]=useState([]);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [route, setroute] = useState('');
+  const [showWarning, setshowWarning] = useState(false);
+
   useEffect(()=>{
     const unsubscribe = navigation.addListener('focus', () => {
       setroute(GLOBAL.route)
@@ -340,6 +344,16 @@ console.log(json?.buildNotes,'json?.buildNotes')
   }
 
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -501,6 +515,7 @@ console.log(json?.buildNotes,'json?.buildNotes')
                     }
                   </View>
                 }
+                {showWarning===true&&  <Warningmessage/>}
                 {
                   modules!==''?
                     <View style={Styles.FlexWrapDyb}>
@@ -525,11 +540,9 @@ console.log(json?.buildNotes,'json?.buildNotes')
                             alignItems:"center",flexWrap:"wrap",
                             justifyContent:'space-between',alignSelf:'center',marginTop:"5%"
                           }}>
-
                             <LinearGradient   colors={['#997aff','#8663ff','#7953FAFF']} style={Styles.btnList32}>
                               <TouchableOpacity onPress={() => {
                                 GLOBAL.Feature="Note";
-
                                 navigation.navigate('Project_Feature_Detail')
                               }}>
                                 <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>Add Note</Text>

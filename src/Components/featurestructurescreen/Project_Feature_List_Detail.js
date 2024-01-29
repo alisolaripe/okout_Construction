@@ -2,13 +2,11 @@ import React, {useState,useEffect,useRef} from "react";
 import {
   Text,
   View,
-  TouchableOpacity, Dimensions, PermissionsAndroid,Modal,Image
+  TouchableOpacity, Dimensions, PermissionsAndroid,Modal
 } from "react-native";
 import Carousel , { Pagination }  from 'react-native-snap-carousel';
 import { Styles } from "../Styles";
 import {Container,Content} from "native-base";
-const GLOBAL = require("../Global");
-const Api = require("../Api");
 import normalize from "react-native-normalize/src/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
@@ -17,20 +15,27 @@ import { Header } from "../component/Header";
 import DYB_List_Details_Image_Item from '../component/DYB_List_Details_Image_Item'
 import Notes_Item from "../component/Feature_DYB_List_Detail_Notes_Item";
 import { Colors } from "../Colors";
+import { Image } from 'react-native-compressor';
+import FastImage from 'react-native-fast-image';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
-let A = [];
-let C = [];
-let Full = "";
 import LinearGradient from "react-native-linear-gradient";
-
 import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { ButtonI } from "../component/ButtonI";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+const GLOBAL = require("../Global");
+const Api = require("../Api");
 const { width: viewportWidth } = Dimensions.get('window');
+let A = [];
+let C = [];
+let Full = "";
+let List=[]
+
 const SLIDER_1_FIRST_ITEM = 0;
 function wp (percentage) {
   const value = (percentage * viewportWidth) / 100;
@@ -56,6 +61,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
   let _slider1Ref = useRef(null);
   const DeleteImageFromApi=(buildId)=>
   {
@@ -244,6 +250,16 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
     }
   }
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -265,7 +281,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
       <View style={Styles.DeleteModalStyle2}>
 
         <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
+          <FastImage  style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                  source={require("../../Picture/png/AlertImage.png")}
                  resizeMode="contain" />
           <View style={Styles.With100NoFlex}>
@@ -385,6 +401,12 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
       }
     });
   }
+  const Image_compress=async (path)=>{
+    return  await Image.compress(path, {
+      maxWidth: 1000,
+      quality: 0.8,
+    })
+  }
   const selectPhotoFromGallery = () => {
     onClose();
     ImagePicker.openPicker({
@@ -429,53 +451,65 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
 
             RealDate = Full
           }
+          Image_compress(obj.path).then(res=>{
 
-          A.push({
-            imageUrl: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: 0,
-            title: "",
-            postDate: RealDate,
-            Type: "Gallery",
-            geoLat: location.latitude,
-            geoLong:location.longitude,
-            geoAddress:GeoAddress,
-            Country:Country,
-          });
-          C.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: 0,
-            title: "",
-            Date: RealDate,
-            Type: "Gallery",
-            geoLat: location.latitude,
-            geoLong:location.longitude,
-            geoAddress: GeoAddress,
-            Country:Country,
-          });
+            A.push({
+              imageUrl:res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: 0,
+              title: "",
+              postDate: RealDate,
+              Type: "Gallery",
+              geoLat: location.latitude,
+              geoLong:location.longitude,
+              geoAddress:GeoAddress,
+              Country:Country,
+            });
+            C.push({
+              uri:res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: 0,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              geoLat: location.latitude,
+              geoLong:location.longitude,
+              geoAddress: GeoAddress,
+              Country:Country,
+            });
+            List.push({
+              Type: "Gallery",
+            });
+            if(List?.length===response?.length) {
+              let mark2 = {
+                Country:'',
+                Type:"AddImage",
+                buildId:"",
+                buildIdParent:"",
+                geoAddress:"",
+                geoLat:'',
+                geoLong:"",
+                imageUrl:"",
+                postDate:"",
+                relatedId:"",
+                title:""
+              };
+              A = [...A, mark2];
+              setFeatureSelectDetail(A);
+              setImageSourceviewarrayUpload(C);
+              setShowBackBtn(false)
+
+              List=[]
+              A = [...A];
+              C = [...C];
+
+            }
+          })
+
         }
-        let mark2 = {
-          Country:'',
-          Type:"AddImage",
-          buildId:"",
-          buildIdParent:"",
-          geoAddress:"",
-          geoLat:'',
-          geoLong:"",
-          imageUrl:"",
-          postDate:"",
-          relatedId:"",
-          title:""
-        };
-        A = [...A, mark2];
-        setFeatureSelectDetail(A);
-        setImageSourceviewarrayUpload(C);
-        setShowBackBtn(false)
-        A = [...A];
-        C = [...C];
+
 
       }
     });
@@ -501,52 +535,57 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
       }
       if(ImageSourceviewarrayUpload)
         C = [...ImageSourceviewarrayUpload];
+      Image.compress( response.path, {
+        maxWidth: 1000,
+        quality: 0.8,
+      }).then(res => {
+        A.push({
+          imageUrl:res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: 0,
+          title: "",
+          postDate: Full,
+          Type: "Camera",
+          geoLat: location.latitude,
+          geoLong:location.longitude,
+          geoAddress: GeoAddress,
+          Country:Country,
+        });
+        C.push({
+          uri:res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: 0,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          geoLat: location.latitude,
+          geoLong:location.longitude,
+          geoAddress: GeoAddress,
+          Country:Country,
+        });
+        let mark2 = {
+          Country:'',
+          Type:"AddImage",
+          buildId:"",
+          buildIdParent:"",
+          geoAddress:"",
+          geoLat:'',
+          geoLong:"",
+          imageUrl:"",
+          postDate:"",
+          relatedId:"",
+          title:""
+        };
+        A = [...A, mark2];
+        setFeatureSelectDetail(A);
+        setImageSourceviewarrayUpload(C);
+        setShowBackBtn(false)
+        A = [...A];
+        C = [...C];
+      })
 
-      A.push({
-        imageUrl: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: 0,
-        title: "",
-        postDate: Full,
-        Type: "Camera",
-        geoLat: location.latitude,
-        geoLong:location.longitude,
-        geoAddress: GeoAddress,
-        Country:Country,
-      });
-      C.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: 0,
-        title: "",
-        Date: Full,
-        Type: "Camera",
-        geoLat: location.latitude,
-        geoLong:location.longitude,
-        geoAddress: GeoAddress,
-        Country:Country,
-      });
-      let mark2 = {
-        Country:'',
-        Type:"AddImage",
-        buildId:"",
-        buildIdParent:"",
-        geoAddress:"",
-        geoLat:'',
-        geoLong:"",
-        imageUrl:"",
-        postDate:"",
-        relatedId:"",
-        title:""
-      };
-      A = [...A, mark2];
-      setFeatureSelectDetail(A);
-      setImageSourceviewarrayUpload(C);
-      setShowBackBtn(false)
-      A = [...A];
-      C = [...C];
     });
   };
  const _renderItem_Carousel = ({item, index}) => {
@@ -603,7 +642,8 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   const Back_navigate=()=>{
     if (ShowBackBtn===false) {
       setShowWarningMessage(true);
-      setTimeout(function(){ setShowBackBtn(true)}, 2000)
+      setShowBackBtn(true)
+      //setTimeout(function(){ setShowBackBtn(true)}, 2000)
     }
     else {
       goBack()
@@ -611,7 +651,8 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   }
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate} Title={GLOBAL.FeatureNameDetail}/>
+      <Header colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
+              StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate} Title={GLOBAL.FeatureNameDetail}/>
       {ShowMessage === true ?
         <View style={{width:'100%',alignItems:'center'}}>
           <View style={Styles.flashMessageSuccsess}>
@@ -625,6 +666,8 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
           </View>
         </View>
         :null}
+
+      {showWarning===true&&  <Warningmessage/>}
       <Content>
         {
           showModalDelete &&
@@ -638,26 +681,55 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
               GLOBAL.DYB_Type==='Image'?
                 <View style={Styles.container2}>
                   { ShowWarningMessage===true&&
-                  <TouchableOpacity onPress={()=>{
-                    setShowWarningMessage(false);
-                    setShowBackBtn(true)
-                  }} style={Styles.flashMessageWarning3}>
-                    <View style={{ width: "15%",alignItems:'center' }}>
-                      <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                  <View style={Styles.flashMessageWarning4}>
+                    <View style={Styles.flashMessageWarning6}>
+                      <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
+                        <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                      </View>
+                      <View style={{ width: "90%",alignItems:'flex-start' }}>
+                        <Text style={Styles.AddedtTxt}>
+                          You will lose all changes.Do you still want to leave?
+
+                        </Text>
+                      </View>
+
                     </View>
-                    <View style={{ width: "65%",alignItems:'flex-start' }}>
-                      <Text style={Styles.AddedtTxt}>
-                        You will lose all changes.
-                      </Text>
+                    <View style={Styles.With100Row2}>
+                      <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
+                        <TouchableOpacity onPress={() => {
+                          setShowBackBtn(false)
+                          setShowWarningMessage(false);
+                        }}>
+                          <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
+                        </TouchableOpacity>
+                      </LinearGradient>
+                      <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
+                        <TouchableOpacity onPress={() => {
+                          setShowWarningMessage(false);
+                          setShowBackBtn(true);
+                          navigation.navigate('Project_Feature_List')
+                        }}>
+                          <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+                        </TouchableOpacity>
+                      </LinearGradient>
                     </View>
-                    <View style={Styles.CancelBtnLeftAlignwarn}>
-                      <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
-                    </View>
-                  </TouchableOpacity>
+                    {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
+                    {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
+                    {/*</View>*/}
+                  </View>
                   }
                   {FeatureSelectDetail && (
                     <View style={Styles.With100Padding}>
-
+                      <View style={Styles.carouselBtnStyle3}>
+                        <TouchableOpacity style={Styles.carouselStyle} onPress={()=>_slider1Ref.snapToPrev()}>
+                          <AntDesign name="caretleft" size={normalize(14)} color={Colors.withe} />
+                          <Text style={Styles.skiptext}>Prev</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity  style={Styles.carouselStyle1} onPress={()=>_slider1Ref.snapToNext()}>
+                          <Text style={Styles.skiptext}>Next</Text>
+                          <AntDesign name="caretright" size={normalize(14)} color={Colors.withe} />
+                        </TouchableOpacity>
+                      </View>
                     <Carousel
                       ref={c => _slider1Ref = c}
                       data={FeatureSelectDetail}

@@ -18,6 +18,9 @@ import Geolocation from "react-native-geolocation-service";
 import {readOnlineApi } from "../ReadPostApi";
 import {requestLocationPermission ,geocodePosition,writeDataStorage,removeDataStorage} from "../Get_Location";
 import DYB_List_Item from "../component/DYB_List_Item";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+
 const data = [
   { label: "Edit", value: "2", Icon: "edit" },
   { label: "Photos", value: "3", Icon: "images" },
@@ -55,7 +58,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
-
+  const [showWarning, setshowWarning] = useState(false);
   useEffect(() => {
     getLocation();
 
@@ -149,6 +152,16 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -379,46 +392,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
    });
  }
   };
-  const UpdateSites = (value) => {
-    setShowButton(false)
-    var formdata = new FormData();
-    formdata.append("siteName", value.sitename);
-    formdata.append("userId", "1");
-    formdata.append("notes", value.siteNote);
-    formdata.append("siteId", GLOBAL.UpdateSiteID);
-    formdata.append('geoLat', location.latitude);
-    formdata.append('geoLong', location.longitude);
-    formdata.append("postalCode",value.GeoAddressPostalCode);
-    formdata.append("cityId",cityId);
-    formdata.append("countryId",countryId);
-    formdata.append("street",value.GeoAddressStreet);
-    writePostApi("POST", Api.UpdateSite,formdata).then(json => {
-      if (json) {
-        if (json?.status === true) {
-          setMessage(json.msg);
-          setShowWarningMessage(false)
-          setShowMessageUpdate(true);
-          setShowButton(true)
-          getAllProjectInfo();
 
-        }
-
-      }
-      else {
-        let List_Item = [];
-        List_Item = modules;
-        let index = List_Item?.findIndex((p) => p?.siteId === GLOBAL.UpdateSiteID);
-        let markers = [...List_Item];
-        markers[index] = { ...markers[index], siteName: value?.sitename };
-        setmodules(markers);
-        AddSitesDataStorage(markers);
-        setShowWarningMessage(false)
-        setMessage("Your site successfully updated");
-        setShowMessageUpdate(true);
-        setShowButton(true)
-      }
-    });
-  };
   const getCountry_city = async (country,adminArea) => {
       let A=[]
       GLOBAL.Country?.countries?.forEach((obj) => {
@@ -492,6 +466,19 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     });
   };
   ///////////////////////////////////////////
+
+  const Update_Off=(value,GeoAddressCity,GeoAddressCountry)=>{
+    let List_Item = [];
+    List_Item = modules;
+    let index = List_Item?.findIndex((p) => p?.siteId === GLOBAL.UpdateSiteID);
+    let markers = [...List_Item];
+    markers[index] = { ...markers[index], siteName: value?.sitename,cityName:GeoAddressCity,countryName:GeoAddressCountry,
+      street:value.GeoAddressStreet,postalCode:value.GeoAddressPostalCode,address:value.GeoAddressStreet,
+      geoLat: location.latitude,geoLong: location.longitude
+    };
+    setmodules(markers);
+    AddSitesDataStorage(markers);
+  }
   const renderItem=({ item ,index})=>(
     <List_Items key={index} getCity={getCity}
                 ShowWarningMessage={ShowWarningMessage}
@@ -500,9 +487,9 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
                 CityList={CityList} CountryList={CountryList}
                 cityId={cityId} setcityId={setcityId} ShowButton={ShowButton}
                 countryId={countryId} setcountryId={setcountryId}
-                Message={Message} onPress={UpdateSites} data={data}
+                Message={Message}  data={data}
                 ShowMessage={ShowMessageUpdate} tittlebtn={"Update Sites"} numberValue={4}
-                Navigate_Url={Navigate_Url}
+                Navigate_Url={Navigate_Url} location={location} getAllProjectInfo={getAllProjectInfo} Update_Off={Update_Off}
     />
   )
   const renderSectionHeader=()=>(
@@ -539,7 +526,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     <Container style={[Styles.Backcolor]}>
       <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack}
               Title={"Sites / Buildings"}/>
-
+      {showWarning===true&&  <Warningmessage/>}
       <View style={Styles.containerList}>
         {
           showModalDelete &&
@@ -549,6 +536,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
             }
           </View>
         }
+
         {
           route==='structure'?
         <>

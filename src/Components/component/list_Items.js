@@ -10,16 +10,17 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import {  Content } from "native-base";
 import { TextInputI } from "./TextInputI";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { removeDataStorage } from "../Get_Location";
 
+import { writePostApi } from "../writePostApi";
+const Api = require("../Api");
 const GLOBAL = require("../Global");
-function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
-                               cityId, setcityId,edit, setedit,ShowWarningMessage,setShowWarningMessage,
-                               countryId, setcountryId,ShowButton}){
+function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,numberValue,tittlebtn,onPress,onPressDelete,Navigate_Url,CityList,CountryList,getCity,UpdateFeature_DYB,
+                              edit, setedit,ShowWarningMessage,setShowWarningMessage,
+                              getAllProjectInfo,Update_Off,location}){
 
-
-  const [Name, setName] = useState(false);
+  const [cityId,setcityId] = useState('');
+  const [countryId,setcountryId] = useState('');
+   const [Name, setName] = useState(false);
   const [Cheked,setCheked] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [changeDYBbtn, setchangeDYBbtn] = useState(false);
@@ -31,6 +32,9 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
   const [GeoAddressCity, setGeoAddressCity] = useState('');
   const [visible,setvisible] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
+  const [ShowMessageUpdate,setShowMessageUpdate]=useState(false);
+  const [Message, setMessage] = useState("");
+  const [ShowButton, setShowButton] = useState(true);
   const renderItem = (item,key) => {
     return (
       <View key={key} style={Styles.renderItemStyle}>
@@ -41,6 +45,20 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
       </View>
     );
   };
+  const onChangeText_Press=(value, Cheked)=>{
+    if(tittlebtn==='Update Project'){
+      UpdateProject(value, Cheked)
+    }
+    else if(tittlebtn==='Update Sites'){
+      UpdateSites(value, Cheked)
+    } else if(tittlebtn==='Update Unit'){
+      UpdateUnits(value, Cheked)
+    }else if(tittlebtn==='Update Section'){
+      UpdateSection(value, Cheked)
+    }else if(tittlebtn==='Update Feature'){
+      UpdateFeature(value, Cheked)
+    }
+  }
   const openMaps=(latitude,longitude)=> {
     if (Platform.OS === "android") {
       if(latitude && longitude) {
@@ -192,6 +210,182 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
     </View>
   );
   ////////////////////////
+  const UpdateProject = (value) => {
+    setShowButton(false)
+    var formdata = new FormData();
+    formdata.append("projectName", value.Projectname);
+    formdata.append("userId", "1");
+    formdata.append("notes", value.ProjectNote);
+    formdata.append("projectId", GLOBAL.UpdateProjectId);
+    writePostApi("POST", Api.UpdateProject, formdata).then(json => {
+      if (json) {
+        if (json?.status === true) {
+          setMessage(json.msg);
+          setShowMessageUpdate(true);
+          setShowButton(true)
+          setShowWarningMessage(false)
+          getAllProjectInfo();
+          setvisible(false);
+          setShowMessageUpdate(false);
+        }
+      }
+      else {
+        Update_Off(value)
+        setMessage("Your project successfully updated");
+        setShowMessageUpdate(true);
+        setShowButton(true)
+        setvisible(false);
+        setShowMessageUpdate(false);
+      }
+    });
+  };
+  const UpdateSites = (value) => {
+    setShowButton(false)
+    var formdata = new FormData();
+    formdata.append("siteName", value.sitename);
+    formdata.append("userId", "1");
+    formdata.append("notes", value.siteNote);
+    formdata.append("siteId", GLOBAL.UpdateSiteID);
+    formdata.append('geoLat', location.latitude);
+    formdata.append('geoLong', location.longitude);
+    formdata.append("postalCode",value.GeoAddressPostalCode);
+    formdata.append("cityId",cityId);
+    formdata.append("countryId",countryId);
+    formdata.append("street",value.GeoAddressStreet);
+
+    writePostApi("POST", Api.UpdateSite,formdata).then(json => {
+      if (json) {
+        if (json?.status === true) {
+          setMessage(json.msg);
+          setShowWarningMessage(false)
+          setShowMessageUpdate(true);
+          setShowButton(true)
+          getAllProjectInfo();
+          setvisible(false);
+          setShowMessageUpdate(false);
+        }
+
+      }
+      else {
+        Update_Off(value,GeoAddressCity,GeoAddressCountry)
+        setShowWarningMessage(false)
+        setMessage("Your site successfully updated");
+        setShowMessageUpdate(true);
+        setShowButton(true)
+        setvisible(false);
+        setShowMessageUpdate(false);
+
+      }
+    });
+  };
+  const UpdateUnits = (value) => {
+    setShowButton(false)
+    var formdata = new FormData();
+    formdata.append("unitName", value.Unitname);
+    formdata.append("userId", "1");
+    formdata.append("notes", value.UnitNote);
+    formdata.append("unitId", GLOBAL.UpdateUnitID);
+    formdata.append('geoLat', location.latitude);
+    formdata.append('geoLong', location.longitude);
+    formdata.append("postalCode",value.GeoAddressPostalCode);
+    formdata.append("cityId",cityId);
+    formdata.append("countryId",countryId);
+    formdata.append("street",value.GeoAddressStreet);
+
+    writePostApi("POST", Api.UpdateUnit,formdata).then(json => {
+      if (json) {
+        if (json?.status === true) {
+          setMessage(json?.msg);
+          setShowWarningMessage(false);
+          setShowMessageUpdate(true);
+          setShowButton(true)
+          getAllProjectInfo();
+          setvisible(false);
+          setShowMessageUpdate(false);
+        }
+      }
+      else  {
+        Update_Off(value,GeoAddressCity,GeoAddressCountry)
+        setShowWarningMessage(false);
+        setMessage('Your unit successfully updated')
+        setShowMessageUpdate(true)
+        setShowButton(true)
+        setvisible(false);
+        setShowMessageUpdate(false);
+      }
+    });
+  };
+  const UpdateSection=(value)=>{
+    setShowButton(false)
+    var formdata = new FormData();
+    formdata.append("sectionName", value.SectionName);
+    formdata.append("userId", "1");
+    formdata.append("notes", value.SectionNote);
+    formdata.append("sectionId", GLOBAL.UpdateSectionID);
+    writePostApi("POST", Api.UpdateSection,formdata).then(json => {
+      if (json) {
+        if (json?.status === true) {
+          setMessage(json?.msg);
+          setShowWarningMessage(false);
+          setShowMessageUpdate(true);
+          setShowButton(true);
+          getAllProjectInfo();
+          setvisible(false);
+          setShowMessageUpdate(false);
+        }
+      }
+      else {
+        Update_Off(value);
+        setShowWarningMessage(false);
+        setMessage('Your section successfully updated');
+        setShowMessageUpdate(true);
+        setShowButton(true);
+        setvisible(false);
+        setShowMessageUpdate(false);
+      }
+    });
+  };
+  const UpdateFeature=(value,Cheked)=>{
+    let switchDYB=''
+    if(Cheked===true){
+      switchDYB='y'
+    }
+    else {
+      switchDYB='n'
+    }
+    setShowButton(false);
+    var formdata = new FormData();
+    formdata.append("featureName", value?.FeatureName);
+    formdata.append("userId", "1");
+    formdata.append("notes", value?.FeatureNote);
+    formdata.append("featureId",GLOBAL.UpdateFeatureID);
+    formdata.append("featureDYB",switchDYB);
+    writePostApi("POST", Api.UpdateFeature,formdata).then(json => {
+
+      if (json) {
+
+        if (json?.status === true) {
+          setMessage(json?.msg)
+          setShowWarningMessage(false);
+          setShowMessageUpdate(true)
+          setShowButton(true)
+          getAllProjectInfo()
+          setvisible(false);
+          setShowMessageUpdate(false);
+        }
+      }
+      else  {
+        Update_Off(value,switchDYB)
+        setShowWarningMessage(false);
+        setMessage('Your feature successfully updated')
+        setShowMessageUpdate(true)
+        setShowButton(true)
+        setvisible(false);
+        setShowMessageUpdate(false);
+      }
+    });
+  }
+//////////////////////////
   const _showModalDelete = () => {
     return (
       <View style={Styles.bottomModal}>
@@ -417,14 +611,12 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
           {
             _changeDYBbtn()
           }
-
         </View>
       }
       <Modal
         animationType="slide"
         transparent={true}
-        visible={visible}
-      >
+        visible={visible}>
         <Content contentContainerStyle={[Styles.ViewItems_center, {
           flexGrow: 1,
           backgroundColor: "rgba(0,0,0, 0.5)",
@@ -446,13 +638,15 @@ function List_Items({index,value,ShowMessage,Message,ChangeChecked,setShowMessag
               }
             </KeyboardAvoidingView>
             <TextInputI onChangeText={(value) => {
-              onPress(value, Cheked);
+              onChangeText_Press(value, Cheked);
             }}
+                        Message={Message}
                         numberValue={numberValue}
                         ChangeChecked={(value) => {
                         ChangeChecked(value);
-                        }} ShowButton={ShowButton}
-                        ShowMessage={ShowMessage}
+                        }}
+                        ShowButton={ShowButton}
+                        ShowMessage={ShowMessageUpdate}
                         Name={Name} setShowMessage={setShowMessage} setvisible={setvisible}
                         ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
                         GeoAddressStreet={GeoAddressStreet}

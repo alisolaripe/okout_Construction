@@ -3,6 +3,7 @@ const appDirectory = path.resolve(__dirname, './');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { presets } = require(`${appDirectory}/babel.config.js`);
+
 const babelLoaderConfiguration = {
   test: /\.js$|jsx/,
   include: [
@@ -56,7 +57,7 @@ module.exports = {
       {
         test: /\.(js|mjs|jsx|ts|tsx)$/,
         include: path.resolve(__dirname, "./src"),
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!()\/).*/,
         use: ["babel-loader"],
       },{ test: /\.txt$/, use: 'raw-loader' },{
         test: /\.js$/,
@@ -75,13 +76,18 @@ module.exports = {
             options: {
               /* ... */
             },
-          }]}
+          }]},
+
+
     ],
   },
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
+      'react-native-linear-gradient': 'react-native-web-linear-gradient',
+
     },
+
     extensions: [
       '.web.js',
       '.js',
@@ -100,6 +106,15 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: appDirectory + '/public/index.html',
     }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      __DEV__: process.env.NODE_ENV !== 'production' || true,
+    }),
+
   ],
 
 };

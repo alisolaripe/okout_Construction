@@ -3,7 +3,7 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,Modal,Image
+  TextInput,Modal
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "../Colors";
@@ -16,8 +16,9 @@ import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
-const Api = require("../Api");
-const GLOBAL = require("../Global");
+import { Image } from 'react-native-compressor';
+
+import FastImage from 'react-native-fast-image';
 import Feature_DYB_detail_Image_Item from "../component/Feature_DYB_detail_Image_Item";
 import DYB_List_Detail_NoteItem from "../component/DYB_List_Detail_NoteItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,10 +28,15 @@ import { Footer1 } from "../component/Footer";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { geocodePosition, removeDataStorage, requestLocationPermission } from "../Get_Location";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+const Api = require("../Api");
+const GLOBAL = require("../Global");
 let A = [];
 let C = [];
 let Full = "";
 let Date_Today = "";
+let List=[]
 function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const { navigate } = useNavigation();
   const modalizeRef = React.createRef();
@@ -54,6 +60,8 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
+
   useEffect(() => {
     getLocation();
     const date = new Date();
@@ -238,6 +246,12 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const onClose = () => {
     modalizeRef.current?.close();
   };
+  const Image_compress=async (path)=>{
+    return  await Image.compress(path, {
+      maxWidth: 1000,
+      quality: 0.8,
+    })
+  }
   const selectPhotoFromGallery = () => {
     onClose();
     if(GLOBAL.isConnected!==true){
@@ -281,41 +295,53 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
 
             RealDate = Full
           }
+          Image_compress(obj.path).then(res=>{
 
-          A.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: 0,
-            title: "",
-            Date: RealDate,
-            Type: "Gallery",
-            geoLat: location.latitude,
-            geoLong:location.longitude,
-            geoAddress:GeoAddress,
-            Country: Country,
-          });
-          C.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: 0,
-            title: "",
-            Date: RealDate,
-            Type: "Gallery",
-            geoLat: location.latitude,
-            geoLong:location.longitude,
-            geoAddress: GeoAddress,
-            Country: Country,
-          });
+            A.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: 0,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              geoLat: location.latitude,
+              geoLong:location.longitude,
+              geoAddress:GeoAddress,
+              Country: Country,
+            });
+            C.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: 0,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              geoLat: location.latitude,
+              geoLong:location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+            });
+
+            List.push({
+              Type: "Gallery",
+            });
+
+            if(List?.length===response?.length) {
+              setImageSourceviewarray(A);
+              setImageSourceviewarrayUpload(C);
+              setMudolList(A);
+              setImageValidate(false)
+              setShowBackBtn(false)
+              List=[]
+              A = [...A];
+              C = [...C];
+            }
+          })
+
         }
-        setImageSourceviewarray(A);
-        setImageSourceviewarrayUpload(C);
-        setMudolList(A);
-        setImageValidate(false)
-        setShowBackBtn(false)
-        A = [...A];
-        C = [...C];
+
 
       }
     });
@@ -337,40 +363,47 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
         A = [...ImageSourceviewarray];
       if(ImageSourceviewarrayUpload)
         C = [...ImageSourceviewarrayUpload];
+      Image.compress( response.path, {
+        maxWidth: 1000,
+        quality: 0.8,
+      }).then(res => {
 
-      A.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: 0,
-        title: "",
-        Date: Full,
-        Type: "Camera",
-        geoLat: location.latitude,
-        geoLong:location.longitude,
-        geoAddress: GeoAddress,
-        Country:Country,
-      });
-      C.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: 0,
-        title: "",
-        Date: Full,
-        Type: "Camera",
-        geoLat: location.latitude,
-        geoLong:location.longitude,
-        geoAddress: GeoAddress,
-        Country:Country,
-      });
-      setImageSourceviewarray(A);
-      setImageSourceviewarrayUpload(C);
-      setMudolList(A);
-      setImageValidate(false)
-      setShowBackBtn(false)
-      A = [...A];
-      C = [...C];
+
+        A.push({
+          uri: res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: 0,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          geoLat: location.latitude,
+          geoLong:location.longitude,
+          geoAddress: GeoAddress,
+          Country:Country,
+        });
+        C.push({
+          uri:res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: 0,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          geoLat: location.latitude,
+          geoLong:location.longitude,
+          geoAddress: GeoAddress,
+          Country:Country,
+        });
+        setImageSourceviewarray(A);
+        setImageSourceviewarrayUpload(C);
+        setMudolList(A);
+        setImageValidate(false)
+        setShowBackBtn(false)
+        A = [...A];
+        C = [...C];
+      })
+
     });
   };
   const  getDayOfWeek=(date)=> {
@@ -679,6 +712,16 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
     </View>
   );
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -700,7 +743,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       <View style={Styles.DeleteModalStyle2}>
 
         <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
+          <FastImage style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                  source={require("../../Picture/png/AlertImage.png")}
                  resizeMode="contain" />
           <View style={Styles.With100NoFlex}>
@@ -737,7 +780,8 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
 
       if (ShowBackBtn===false) {
         setShowWarningMessage(true);
-        setTimeout(function(){ setShowBackBtn(true)}, 2000)
+        setShowBackBtn(true)
+        //setTimeout(function(){ setShowBackBtn(true)}, 2000)
       }
 
     else {
@@ -773,27 +817,47 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
               }
             </View>
           }
+          {showWarning===true&&  <Warningmessage/>}
           {
             GLOBAL.Feature=== "Image" ?
               <View style={Styles.Center}>
                 { ShowWarningMessage===true&&
-                <TouchableOpacity onPress={()=>{
-                  setShowWarningMessage(false);
-                  setShowBackBtn(true)
+                <View style={Styles.flashMessageWarning4}>
+                  <View style={Styles.flashMessageWarning6}>
+                    <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
+                      <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                    </View>
+                    <View style={{ width: "90%",alignItems:'flex-start' }}>
+                      <Text style={Styles.AddedtTxt}>
+                        You will lose all changes.Do you still want to leave?
 
-                }} style={Styles.flashMessageWarning2}>
-                  <View style={{ width: "15%",alignItems:'center' }}>
-                    <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                      </Text>
+                    </View>
+
                   </View>
-                  <View style={{ width: "65%",alignItems:'flex-start' }}>
-                    <Text style={Styles.AddedtTxt}>
-                      You will lose all changes.
-                    </Text>
+                  <View style={Styles.With100Row2}>
+                    <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
+                      <TouchableOpacity onPress={() => {
+                        setShowBackBtn(false)
+                        setShowWarningMessage(false);
+                      }}>
+                        <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
+                      </TouchableOpacity>
+                    </LinearGradient>
+                    <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
+                      <TouchableOpacity onPress={() => {
+                        setShowWarningMessage(false);
+                        setShowBackBtn(true);
+                        navigation.navigate('Project_Feature_List')
+                      }}>
+                        <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+                      </TouchableOpacity>
+                    </LinearGradient>
                   </View>
-                  <View style={Styles.CancelBtnLeftAlignwarn}>
-                    <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
-                  </View>
-                </TouchableOpacity>
+                  {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
+                  {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
+                  {/*</View>*/}
+                </View>
                 }
                 {
                   GLOBAL.DYB=== "n" ? null :

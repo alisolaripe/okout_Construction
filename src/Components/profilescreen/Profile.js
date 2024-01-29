@@ -15,12 +15,21 @@ import LinearGradient from "react-native-linear-gradient";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { TextInputI } from "../component/TextInputI";
 import { Footer1 } from "../component/Footer";
+import { UserPermission } from "../CheckPermission";
 function Profile( { navigation, navigation: { goBack }}) {
   const [Cheked,setCheked] = useState(false);
   const [Version,setVersionCheck] = useState('');
   const [showModalDelete, setshowModalDelete] = useState(false);
+  const [showbtn, setshowbtn] = useState(true);
   useEffect( () => {
-    setVersionCheck('1.0.11')
+    setVersionCheck('1.0.14')
+    UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+      if (res.edit === "1") {
+        setshowbtn(true)
+      } else {
+        setshowbtn(false);
+      }
+    });
   }, []);
 
   const deleteAsync = async () => {
@@ -129,12 +138,15 @@ const UpdateProfileInfo=()=>{
                 }
               </View>
             }
-            <View style={Styles.mainSystemDesigner}>
-              <TextInputI onChangeText={(value)=>UpdateProfileInfo(value)}     numberValue={5}
-                          ChangeChecked={(value)=>ChangeChecked(value)}
-                          Version={Version}
-                          tittlebtn={'Update'}/>
-            </View>
+            {
+              showbtn===true&&
+              <View style={Styles.mainSystemDesigner}>
+                <TextInputI onChangeText={(value)=>UpdateProfileInfo(value)}     numberValue={5}
+                            ChangeChecked={(value)=>ChangeChecked(value)}
+                            Version={Version}
+                            tittlebtn={'Update'}/>
+              </View>
+            }
           </View>
         </Content>
       <View style={[Styles.bottomView]}>

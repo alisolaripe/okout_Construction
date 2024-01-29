@@ -1,11 +1,8 @@
 
-const GLOBAL = require("./Global");
-export async function UserPermission (UserPermissionsList,Type){
+export async function UserPermission (UserPermissionsList){
  const requestPermission = async () => {
  console.log(UserPermissionsList,'UserPermissionsList')
-  console.log(eval(Type),'Type')
-  const Filter=UserPermissionsList?.Type
-  console.log(UserPermissionsList?.eval(Type),'Filter')
+
   return(UserPermissionsList)
  };
 

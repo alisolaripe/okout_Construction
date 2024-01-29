@@ -5,8 +5,6 @@ import {
 } from "react-native";
 import { Styles } from "../Styles";
 import { Container, Content } from "native-base";
-const GLOBAL = require("../Global");
-const Api = require("../Api");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
 import { Header } from '../component/Header';
@@ -19,6 +17,11 @@ import {  readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import DYB_Item from "../component/DYB_Item";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+
+const GLOBAL = require("../Global");
+const Api = require("../Api");
 const data = [
   { label: "Edit", value: "10", Icon: "edit" },
   { label: "Delete", value: "11", Icon: "trash" },
@@ -40,6 +43,8 @@ function Project_Features({ navigation, navigation: { goBack } }) {
   const [ShowChangedybMessage, setShowChangedybMessage] = useState(false);
   const [route, setroute] = useState('');
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
+
   useEffect(()=>{
     const unsubscribe = navigation.addListener('focus', () => {
       setroute(GLOBAL.route)
@@ -321,49 +326,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
     const date2 = b?.Id
     return date1 - date2;
   }
-  const UpdateFeature=(value,Cheked)=>{
-    let switchDYB=''
-    if(Cheked===true){
-      switchDYB='y'
-    }
-    else {
-      switchDYB='n'
-    }
-    setShowButton(false)
-    var formdata = new FormData();
-    formdata.append("featureName", value?.FeatureName);
-    formdata.append("userId", "1");
-    formdata.append("notes", value?.FeatureNote);
-    formdata.append("featureId",GLOBAL.UpdateFeatureID);
-    formdata.append("featureDYB",switchDYB);
 
-    writePostApi("POST", Api.UpdateFeature,formdata).then(json => {
-
-        if (json) {
-
-          if (json?.status === true) {
-            setMessage(json?.msg)
-            setShowWarningMessage(false);
-            setShowMessageUpdate(true)
-            setShowButton(true)
-            getAllProjectInfo()
-          }
-        }
-        else  {
-         let  List_Item =modules;
-          let index = List_Item?.findIndex((p) => p.featureId === GLOBAL.UpdateFeatureID)
-          let markers = [...List_Item];
-          markers[index] ={...markers[index],featureName:value.FeatureName,Boolean:Cheked,DYB:switchDYB,};
-          SaveFeatures(markers)
-          setmodules(markers)
-          setShowWarningMessage(false);
-          setMessage('Your feature successfully updated')
-          setShowMessageUpdate(true)
-          setShowButton(true)
-        }
-      });
-
-  }
   const UpdateFeature_DYB=(FeatureName,Cheked)=>{
     let switchDYB=''
     if(Cheked===true){
@@ -543,6 +506,16 @@ function Project_Features({ navigation, navigation: { goBack } }) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -576,30 +549,39 @@ function Project_Features({ navigation, navigation: { goBack } }) {
 
         <View style={Styles.With100Row}>
           <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
+            <TouchableOpacity onPress={() => setshowModalDelete( false)}>
               <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
             </TouchableOpacity>
           </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY)
-              setshowModalDelete(false)
+          <LinearGradient  colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
+            <TouchableOpacity onPress={()=>{
+              removeDataStorage(GLOBAL.PASSWORD_KEY);
+              setshowModalDelete(false);
               navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+            }}>
+              <Text style={[Styles.txt_left2, { fontSize: normalize(14)}]}> Yes</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
       </View>
     </View>
   );
+  const Update_Off=(value,switchDYB)=>{
+    let  List_Item =modules;
+    let index = List_Item?.findIndex((p) => p.featureId === GLOBAL.UpdateFeatureID)
+    let markers = [...List_Item];
+    markers[index] ={...markers[index],featureName:value.FeatureName,Boolean:Cheked,DYB:switchDYB,};
+    SaveFeatures(markers)
+    setmodules(markers)
+  }
   const logout_Url= () => {
     setshowModalDelete(true)
-
   };
   const renderItem=({ item ,index})=>(
-    <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} Navigate_Url={Navigate_Url} ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                Message={Message} onPress={UpdateFeature} data={data} UpdateFeature_DYB={UpdateFeature_DYB} ShowButton={ShowButton}
+    <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item} Navigate_Url={Navigate_Url}
+                ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
+                Message={Message} getAllProjectInfo={getAllProjectInfo} data={data} UpdateFeature_DYB={UpdateFeature_DYB}
+                ShowButton={ShowButton} Update_Off={Update_Off}
                 ShowMessage={ShowMessageUpdate} tittlebtn={'Update Feature'} numberValue={16} onPressDelete={DeleteFeature}
     />
   )
@@ -665,6 +647,7 @@ function Project_Features({ navigation, navigation: { goBack } }) {
               }
             </View>
           }
+          {showWarning===true&&  <Warningmessage/>}
           {
             route === 'structure' ?
               <>

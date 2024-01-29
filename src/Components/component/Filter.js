@@ -5,7 +5,7 @@ import normalize from "react-native-normalize/src/index";
 import React, { useState } from "react";
 const GLOBAL = require("../Global");
 function Filter({ FilterFunc, setShowDateRange,ShowFilter,setShowFilter }) {
-  const [FilterList, setFilterList] = useState([{id:0,Filtername:'All',Icon:'calendar-month'},{id:1,Filtername:'Week',Icon:'calendar-week'},{id:2,Filtername:'Day',Icon:'calendar-today'}]);
+  const [FilterList, setFilterList] = useState([{id:0,Filtername:'All',Icon:'calendar-month'},{id:1,Filtername:'Week',Icon:'calendar-week'},{id:2,Filtername:'Today',Icon:'calendar-today'}]);
   const [SelectItem,setSelectItem]= useState(0);
 
   return(

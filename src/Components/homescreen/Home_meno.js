@@ -15,12 +15,15 @@ const Api = require("../Api");
 import LinearGradient from "react-native-linear-gradient";
 import { readOnlineApi } from "../ReadPostApi";
 import { Footer1 } from "../component/Footer";
+import {Warningmessage} from '../component/Warningmessage'
 import {UserPermission} from '../CheckPermission'
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
+  const [showWarning, setshowWarning] = useState(false);
   useEffect(() => {
+    console.log(GLOBAL.isConnected,'GLOBAL.isConnected')
     getAllProjectInfo();
     getAllProjectInfo_dyb();
     Assigned_TaskList();
@@ -38,7 +41,8 @@ function Home_meno({ navigation }) {
     }
     else {
       let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.UserPermissions))
-      GLOBAL.UserPermissionsList=json
+      console.log(json,'json')
+      GLOBAL.UserPermissionsList=json?.menu_privileges
     }
   };
   const  writeDataStorage=async(key,obj)=>{
@@ -79,32 +83,54 @@ function Home_meno({ navigation }) {
   const My_TaskList =async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        console.log(json?.tasks,'json?.tasks')
         writeDataStorage(GLOBAL.All_Task,json?.tasks)
       });
     }
   };
   const Navigate_Between_Modules = (constModule_Id) => {
     if (constModule_Id === "1") {
-        GLOBAL.route = "structure";
-        navigation.navigate("Project_structureStack");
-      // UserPermission(GLOBAL.UserPermissionsList, 'Project').then(res =>{
-      //   console.log(res,'rrrrrrrrr')
-      // })
-      // if(GLOBAL.UserPermissionsList?.menu_privileges?.Project?.view==='1') {
-      //   GLOBAL.route = "structure";
-      //   navigation.navigate("Project_structureStack");
-      // }
-      // else {
-      //
-      // }
+      UserPermission(GLOBAL.UserPermissionsList?.Project).then(res =>{
+        if(res.view==='1') {
+          GLOBAL.route = "structure";
+          navigation.navigate("Project_structureStack");
+        }
+        else {
+          setshowWarning(true)
+        }
+      })
     } else if (constModule_Id === "4") {
-      navigation.navigate("Task_managementStack");
+      UserPermission(GLOBAL.UserPermissionsList?.Task).then(res =>{
+        if(res.view==='1') {
+          navigation.navigate("Task_managementStack");
+        }
+        else {
+          setshowWarning(true)
+        }
+      })
     } else if (constModule_Id === "3") {
-      GLOBAL.route='DYB'
-      navigation.navigate("Project_structureStack",{ screenMode:'Dyb'});
+      UserPermission(GLOBAL.UserPermissionsList?.DYB).then(res =>{
+        if(res.view==='1') {
+          GLOBAL.route='DYB'
+          navigation.navigate("Project_structureStack",{ screenMode:'Dyb'});
+        }
+        else {
+          setshowWarning(true)
+        }
+      })
     }
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
  const logout_Url= () => {
@@ -184,6 +210,7 @@ function Home_meno({ navigation }) {
               }
             </View>
           }
+          {showWarning===true&&  <Warningmessage/>}
           <View style={Styles.container}>
             <View style={Styles.FlexWrapHome}>
               {

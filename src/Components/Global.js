@@ -60,6 +60,8 @@ module.exports = {
   Task_attachments:'@MySuperStore:Task_attachments',
   priorities:'@MySuperStore:priorities',
   Task_status:'@MySuperStore:Task_status',
+  Reason_Code:'@MySuperStore:Reason_Code',
+  Reason_Code_Reopen:'@MySuperStore:Reason_Code_Reopen',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",
@@ -100,6 +102,16 @@ module.exports = {
   selectItem:0,
   route:"",
   TaskMenuName:"",
-  UserPermissionsList:''
+  UserPermissionsList:'',
+  FilterTime:false,
+  FilterStatus:false,
+  FilterPriority:false,
+  FilterList:[],
+  List:[],
+  FilterTime_name:'All',
+  FilterStatus_name:'All',
+  FilterPriority_name:'Normal',
+  selectedRange:{},
+  buttonName:''
 
 };

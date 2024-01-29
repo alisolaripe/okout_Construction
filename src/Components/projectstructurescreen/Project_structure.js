@@ -14,6 +14,8 @@ import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import { writePostApi } from "../writePostApi";
 import DYB_List_Item from "../component/DYB_List_Item";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 const data = [{ label: "Edit", value: "1", Icon: "edit" }];
@@ -30,6 +32,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
   useEffect(() => {
     get_Country_City();
 
@@ -234,6 +237,16 @@ function Project_structure({navigation, navigation: { goBack }, }) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -303,11 +316,20 @@ function Project_structure({navigation, navigation: { goBack }, }) {
   )
   const renderItem=({ item ,index})=>(
     <List_Items key={index} setShowMessage={setShowMessageUpdate} value={item}
-                Message={Message} onPress={UpdateProject} data={data} edit={edit} setedit={setedit}
+                 data={data} edit={edit} setedit={setedit}
                 ShowMessage={ShowMessageUpdate} tittlebtn={"Update Project"} numberValue={3} ShowWarningMessage={ShowWarningMessage}
-                setShowWarningMessage={setShowWarningMessage}  ShowButton={ShowButton}
-                Navigate_Url={Navigate_Url}/>
+                setShowWarningMessage={setShowWarningMessage}
+                Navigate_Url={Navigate_Url} getAllProjectInfo={getAllProjectInfo} Update_Off={Update_Off}/>
   )
+  const Update_Off=(value)=>{
+    let List_Item = [];
+    List_Item = modules;
+    let index = List_Item?.findIndex((p) => p.projectId === GLOBAL.UpdateProjectId);
+    let markers = [...List_Item];
+    markers[index] = { ...markers[index], projectName: value.Projectname };
+    setmodules(markers);
+    AddProjectsDataStorage(markers);
+  }
   const renderSectionFooter=()=>(
     <View style={Styles.SectionFooter}/>
   )
@@ -338,6 +360,7 @@ function Project_structure({navigation, navigation: { goBack }, }) {
                 }
               </View>
             }
+            {showWarning===true&&  <Warningmessage/>}
             {
               route === 'structure' ?
 <>

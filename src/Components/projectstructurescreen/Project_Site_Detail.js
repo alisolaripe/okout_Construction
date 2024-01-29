@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
-  SafeAreaView, TouchableOpacity, Modal, Image, FlatList, BackHandler,
+  SafeAreaView, TouchableOpacity, Modal, FlatList, BackHandler,
 } from "react-native";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
@@ -12,6 +12,8 @@ import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
+import { Image } from 'react-native-compressor';
+import FastImage from 'react-native-fast-image';
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
 import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,13 +24,16 @@ import { Filter } from "../component/Filter";
 import { readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+
 let A = [];
 let C = [];
 let Full = "";
 let TodayDate = "";
 let Day = "";
 let Month = "";
-
+let List=[]
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 function Project_Site_Detail({ navigation, navigation: { goBack } }) {
@@ -52,6 +57,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
 
   useEffect(() => {
     getSitesDetail();
@@ -468,6 +474,12 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     setMudolList(markers);
     Save_Details(markers);
   };
+  const Image_compress=async (path)=>{
+    return  await Image.compress(path, {
+      maxWidth: 1000,
+      quality: 0.8,
+    })
+  }
   const selectPhotoFromGallery = () => {
     onClose();
     ImagePicker.openPicker({
@@ -490,6 +502,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
           var imgName = getFilename[getFilename.length - 1];
+
           let D = "";
           let B = "";
           let RealDate = "";
@@ -505,60 +518,68 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
 
             Months = Month;
           }
+          let WeekDay = getDayOfWeek(RealDate);
           if (A.length !== 0) {
             buildid = parseInt(A?.[A.length - 1]?.buildId) + 1;
           } else {
             buildid = buildid + 1;
           }
+          Image_compress(obj.path).then(res=>{
 
-          let WeekDay = getDayOfWeek(RealDate);
-          A.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: buildid,
-            title: "",
-            Date: RealDate,
-            Type: "Gallery",
-            Day: parseInt(B?.[0]),
-            Month: Months,
-            geoLat: location.latitude,
-            geoLong: location.longitude,
-            geoAddress: GeoAddress,
-            Country: Country,
-            WeekDay: WeekDay,
-          });
-          C.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            buildId: buildid,
-            title: "",
-            Type: "Gallery",
-            Date: RealDate,
-            Day: parseInt(B?.[0]),
-            Month: Months,
-            geoLat: location.latitude,
-            geoLong: location.longitude,
-            geoAddress: GeoAddress,
-            Country: Country,
-            WeekDay: WeekDay,
-          });
+            A.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: buildid,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              Day: parseInt(B?.[0]),
+              Month: Months,
+              geoLat: location.latitude,
+              geoLong: location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+              WeekDay: WeekDay,
+            });
+            C.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: buildid,
+              title: "",
+              Type: "Gallery",
+              Date: RealDate,
+              Day: parseInt(B?.[0]),
+              Month: Months,
+              geoLat: location.latitude,
+              geoLong: location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+              WeekDay: WeekDay,
+            });
+            List.push({
+              Type: "Gallery",
+            });
+            if(List?.length===response?.length) {
+
+              if (A?.length !== 0) {
+                A?.sort(dateComparison_data);
+                Make_Week_Filter_List(A);
+              }
+              setImageSourceviewarray(A);
+              setMudolList(A);
+              setImageSourceviewarrayUpload(C);
+              scrollViewRef.current.scrollToEnd({ animated: true });
+              setscroll(true);
+              setShowBackBtn(false)
+              List=[]
+              A = [...A];
+              C = [...C];
+            }
+          })
         }
-        if (A?.length !== 0) {
-          A?.sort(dateComparison_data);
-          Make_Week_Filter_List(A);
-        }
-        setImageSourceviewarray(A);
-        setMudolList(A);
-        setImageSourceviewarrayUpload(C);
-        scrollViewRef.current.scrollToEnd({ animated: true });
-        setscroll(true);
-        setShowBackBtn(false)
-        A = [...A];
-        C = [...C];
       }
-
     });
   };
   const selectPhoto = () => {
@@ -584,52 +605,59 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       }
 
       let WeekDay = getDayOfWeek(Full);
-      A.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: buildid,
-        title: "",
-        Date: Full,
+      Image.compress( response.path, {
+        maxWidth: 1000,
+        quality: 0.8,
+      }).then(res => {
 
-        Type: "Camera",
-        Day: Day,
-        Month: Month,
-        geoLat: location.latitude,
-        geoLong: location.longitude,
-        geoAddress: GeoAddress,
-        Country: Country,
-        WeekDay: WeekDay,
-      });
+        A.push({
+          uri: res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: buildid,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          Day: Day,
+          Month: Month,
+          geoLat: location.latitude,
+          geoLong: location.longitude,
+          geoAddress: GeoAddress,
+          Country: Country,
+          WeekDay: WeekDay,
+        });
 
-      C.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        buildId: buildid,
-        title: "",
-        Date: Full,
-        Type: "Camera",
-        Day: Day,
-        Month: Month,
-        geoLat: location.latitude,
-        geoLong: location.longitude,
-        geoAddress: GeoAddress,
-        Country: Country,
-        WeekDay: WeekDay,
-      });
-      if (A?.length !== 0) {
-        A?.sort(dateComparison_data);
-        Make_Week_Filter_List(A);
-      }
-      setImageSourceviewarray(A);
-      setMudolList(A);
-      setImageSourceviewarrayUpload(C);
-      scrollViewRef.current.scrollToEnd({ animated: true });
-      setscroll(true);
-      setShowBackBtn(false)
-      A = [...A];
-      C = [...C];
+        C.push({
+          uri: res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: buildid,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          Day: Day,
+          Month: Month,
+          geoLat: location.latitude,
+          geoLong: location.longitude,
+          geoAddress: GeoAddress,
+          Country: Country,
+          WeekDay: WeekDay,
+        });
+        if (A?.length !== 0) {
+          A?.sort(dateComparison_data);
+          Make_Week_Filter_List(A);
+        }
+        setImageSourceviewarray(A);
+        setMudolList(A);
+        setImageSourceviewarrayUpload(C);
+        scrollViewRef.current.scrollToEnd({ animated: true });
+        setscroll(true);
+        setShowBackBtn(false)
+        A = [...A];
+        C = [...C];
+      })
+
+
     });
   };
   //////////////////////////////
@@ -779,6 +807,16 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     </View>
   );
   const Navigate_Url = (Url) => {
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
     navigation.navigate(Url);
   };
   const _showModalDelete = () => {
@@ -800,7 +838,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       <View style={Styles.DeleteModalStyle2}>
 
         <View style={Styles.With100NoFlex}>
-          <Image style={{ width: "27%", aspectRatio: 1, marginVertical: normalize(10) }}
+          <FastImage  style={{ width: "27%", aspectRatio: 1, marginVertical: normalize(10) }}
                  source={require("../../Picture/png/AlertImage.png")}
                  resizeMode="contain" />
           <View style={Styles.With100NoFlex}>
@@ -833,11 +871,13 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     setshowModalDelete(true);
   };
   const Back_navigate=()=>{
+    console.log(ShowBackBtn,'ShowBackBtn')
     if (ShowBackBtn===false) {
       setShowWarningMessage(true);
       scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
       setscroll(false);
-      setTimeout(function(){ setShowBackBtn(true)}, 2000)
+      setShowBackBtn(true)
+      //setTimeout(function(){ setShowBackBtn(true)}, 2000)
     }
     else {
       goBack()
@@ -864,22 +904,42 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         : null}
 
       {ShowWarningMessage===true&&
-      <TouchableOpacity onPress={()=>{
-        setShowWarningMessage(false);
-        setShowBackBtn(true);
-      }} style={Styles.flashMessageWarning2}>
-        <View style={{ width: "15%",alignItems:'center' }}>
-          <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+      <View style={Styles.flashMessageWarning4}>
+        <View style={Styles.flashMessageWarning6}>
+          <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
+            <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+          </View>
+          <View style={{ width: "90%",alignItems:'flex-start' }}>
+            <Text style={Styles.AddedtTxt}>
+              You will lose all changes.Do you still want to leave?
+
+            </Text>
+          </View>
+
         </View>
-        <View style={{ width: "65%",alignItems:'flex-start' }}>
-          <Text style={Styles.AddedtTxt}>
-            You will lose all changes.
-          </Text>
+        <View style={Styles.With100Row2}>
+          <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
+            <TouchableOpacity onPress={() => {
+              setShowBackBtn(false)
+              setShowWarningMessage(false);
+            }}>
+              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+          <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
+            <TouchableOpacity onPress={() => {
+              setShowWarningMessage(false);
+              setShowBackBtn(true);
+              navigation.navigate('Project_Sites')
+            }}>
+              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
-        <View style={Styles.CancelBtnLeftAlignwarn}>
-          <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
-        </View>
-      </TouchableOpacity>
+        {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
+        {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
+        {/*</View>*/}
+      </View>
       }
       {ImageSourceviewarray?.length>1?
         <Filter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter}
@@ -935,7 +995,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             showModalCalender &&
             _showModalCalender()
           }
-
+          {showWarning===true&&  <Warningmessage/>}
           <View style={Styles.Center_margin_Bottom2}>
             {
               showModalDelete &&

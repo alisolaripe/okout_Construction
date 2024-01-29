@@ -1,11 +1,11 @@
-import React, { Component, useState,useEffect,useRef } from "react";
+import React, {  useState,useEffect } from "react";
 import {
   Text,
   View,
-  Image,
   TouchableOpacity,
-  Modal, ImageBackground, TextInput,
+  Modal,
 } from "react-native";
+import FastImage from 'react-native-fast-image'
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import LinearGradient from "react-native-linear-gradient";
@@ -15,7 +15,6 @@ import { TextInputI } from "../component/TextInputI";
 import { removeDataStorage, writeDataStorage } from "../Get_Location";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { Modalize } from "react-native-modalize";
-const GLOBAL = require("../Global");
 import { Footer1 } from "../component/Footer";
 import { Header } from "../component/Header";
 import { isNetworkConnected } from "../GlobalConnected";
@@ -23,6 +22,11 @@ import { writePostApi } from "../writePostApi";
 import ImagePicker from "react-native-image-crop-picker";
 import { readOnlineApi } from "../ReadPostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserPermission } from "../CheckPermission";
+import { Warningmessage } from "../component/Warningmessage";
+import { Image } from 'react-native-compressor';
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+const GLOBAL = require("../Global");
 const Api = require("../Api");
 let A=[];
 let B=[]
@@ -43,6 +47,9 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const [error, setErrors] = useState("");
   const [TaskRelated, setTaskRelated] = useState([]);
   const [ShowButton, setShowButton] = useState(true);
+  const [showWarning, setshowWarning] = useState(false);
+  const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [ShowBackBtn, setShowBackBtn] = useState(true);
   useEffect(()=>{
       Task_category();
   }, []);
@@ -76,7 +83,18 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     }
   };
   const Navigate_Url= (Url) => {
-    navigation.navigate(Url);
+    if(Url==='ProfileStack') {
+      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
+        if (res.view === "1") {
+          navigation.navigate(Url);
+        } else {
+          setshowWarning(true);
+        }
+      });
+    }
+    else
+
+      navigation.navigate(Url);
   };
   const _showModalDelete = () => {
     return (
@@ -95,9 +113,8 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const renderModalContent = () => (
     <View style={Styles.DeleteModalTotalStyle}>
       <View style={Styles.DeleteModalStyle2}>
-
         <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
+          <FastImage style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
                  source={require("../../Picture/png/AlertImage.png")}
                  resizeMode="contain" />
           <View style={Styles.With100NoFlex}>
@@ -128,7 +145,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const logout_Url= () => {
     setshowModalDelete(true)
   };
-
   const Task_RelatedList = (Id) => {
     isNetworkConnected().then(status => {
       if (status) {
@@ -160,15 +176,15 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const ChangeChecked = (value) => {
     setCheked(!Cheked);
   };
+  const DataStorage=async (tasks)=>{
+    await writeDataStorage(GLOBAL.All_Task,tasks);
+    navigation.navigate('Task_Management')
+  }
   const My_TaskList_server = async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.My_TaskList + `userId=1`).then(json => {
-        console.log( json?.tasks,' json?.tasks')
-        writeDataStorage(GLOBAL.All_Task, json?.tasks);
-        navigation.navigate('Task_Management')
-
+      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
+        DataStorage(json?.tasks)
       });
-    }
+
   };
   const AddTask = (value) => {
     let idsArray = "";
@@ -189,7 +205,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       formData.append("categoryId", categoryId);
       formData.append("relatedId", relatedId);
       formData.append("requestDate", TodayDate);
-      formData.append("priorityId", "1");
+      formData.append("priorityId", "2");
       formData.append("planStartDate", null);
       formData.append("planEndDate", null);
       formData.append("taskStatusId", "1");
@@ -211,11 +227,9 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
             name: idsArray.fileName,
           });
         }
-        console.log(ImageSourceviewarray.length,'ImageSourceviewarray.length')
-        console.log(formData,'formData')
+
         writePostApi("POST", Api.AddTask, formData, ImageSourceviewarray).then(json => {
           if (json) {
-            console.log(json,'json')
             if (json?.status === true) {
               My_TaskList_server();
               setMessage(json?.msg);
@@ -223,6 +237,8 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
               setImageSourceviewarray([]);
               setCategoryId(0)
               setRelatedId(0)
+              setTimeout(function(){ setShowMessage(false)}, 2000)
+              navigation.navigate('Task_Management')
             }
           }
           else {
@@ -232,14 +248,17 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
             setImageSourceviewarray([]);
             setCategoryId(0)
             setRelatedId(0)
+            setTimeout(function(){ setShowMessage(false)}, 2000)
+            navigation.navigate('Task_Management')
+
           }
         });
       }
       else {
-        console.log(formData,'formData')
+
         writePostApi("POST", Api.AddTask, formData).then(json => {
           if (json) {
-            console.log(json,'json')
+
             if (json?.status === true) {
               My_TaskList_server();
               setMessage(json?.msg);
@@ -247,8 +266,9 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
               setShowButton(true)
               setCategoryId(0)
               setRelatedId(0)
-             // setTimeout(function(){ setShowMessage(false)}, 4000)
-              //navigation.navigate('Task_Management')
+             setTimeout(function(){ setShowMessage(false)}, 2000)
+
+              navigation.navigate('Task_Management')
             }
           }
           else {
@@ -257,8 +277,8 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
             setShowButton(true)
             setCategoryId(0)
             setRelatedId(0)
-            //setTimeout(function(){ setShowMessage(false)}, 4000)
-            //navigation.navigate('Task_Management')
+            setTimeout(function(){ setShowMessage(false)}, 2000)
+            navigation.navigate('Task_Management')
           }
         });
       }
@@ -270,17 +290,20 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const onClose = () => {
     modalizeRef.current?.close();
   };
-  const selectPhotoFromGallery = () => {
-
+  const Image_compress=async (path)=>{
+   return  await Image.compress(path, {
+         maxWidth: 1000,
+         quality: 0.8,
+       })
+  }
+  const selectPhotoFromGallery = async () => {
     onClose();
     ImagePicker.openPicker({
       width: 300,
       height: 400,
       multiple: true,
     }).then(response => {
-
       if (response.didCancel) {
-
       } else if (response.error) {
 
       } else if (response.customButton) {
@@ -295,25 +318,26 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
           var getFilename = obj.path.split("/");
           var imgName = getFilename[getFilename.length - 1];
           let attachmentId=0;
-          A.push({
-            uri: obj.path,
-            type: obj.mime,
-            fileName: imgName,
-            attachmentId:attachmentId,
-            taskId: GLOBAL.TaskId,
-          });
-
-
+          Image_compress(obj.path).then(res=>{
+            A.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              attachmentId:attachmentId,
+              taskId: GLOBAL.TaskId,
+            });
+              if(A?.length===response?.length) {
+                setImageSourceviewarray(A);
+                setShowBackBtn(false)
+                A = [...A];
+                B = [...B];
+              }
+          })
         }
-        setImageSourceviewarray(A);
-        A = [...A];
-        B = [...B];
       }
     });
-
   };
-  const selectPhoto = () => {
-
+  const selectPhoto =async () => {
     onClose();
     ImagePicker.openCamera({
       width: 300,
@@ -324,18 +348,23 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       if (ImageSourceviewarray)
         A = [...ImageSourceviewarray];
       let attachmentId=0;
-      A.push({
-        uri: response.path,
-        type: response.mime,
-        fileName: imgName,
-        attachmentId:attachmentId,
-        taskId: GLOBAL.TaskId,
-      });
-      setImageSourceviewarray(A);
-      A = [...A];
+       Image.compress( response.path, {
+        maxWidth: 1000,
+        quality: 0.8,
+      }).then(res => {
+         A.push({
+           uri:res,
+           type:response.mime,
+           fileName:imgName,
+           attachmentId:attachmentId,
+           taskId:GLOBAL.TaskId,
+         });
+         setImageSourceviewarray(A);
+         setShowBackBtn(false)
+         A = [...A];
+      })
     });
   };
-
   const Add_Task_Offline = async (value, TodayDate) => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
@@ -456,9 +485,19 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     markers?.splice(index, 1);
     setImageSourceviewarray(markers)
   }
+  const Back_navigate=()=>{
+    if (ShowBackBtn===false) {
+      setShowWarningMessage(true);
+      setShowBackBtn(true)
+      //setTimeout(function(){ setShowBackBtn(true)}, 2000)
+    }
+    else {
+      goBack()
+    }
+  }
   return (
     <Container style={[Styles.Backcolor]}>
-        <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={goBack}
+        <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={Back_navigate}
                 Title={"Add New Task"} />
         {ShowMessage === true ?
           <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
@@ -473,8 +512,10 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
             </View>
           </View>
           : null}
+      {showWarning===true&&  <Warningmessage/>}
         <Content style={[{ backgroundColor: Colors.background }]}>
           <View style={Styles.container}>
+
             <View style={Styles.Center_margin_Bottom}>
               {
                 showModalDelete &&
@@ -483,6 +524,44 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                     _showModalDelete()
                   }
                 </View>
+              }
+              { ShowWarningMessage===true&&
+              <View style={Styles.flashMessageWarning4}>
+                <View style={Styles.flashMessageWarning6}>
+                  <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
+                    <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                  </View>
+                  <View style={{ width: "90%",alignItems:'flex-start' }}>
+                    <Text style={Styles.AddedtTxt}>
+                      You will lose all changes.Do you still want to leave?
+
+                    </Text>
+                  </View>
+
+                </View>
+                <View style={Styles.With100Row2}>
+                  <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
+                    <TouchableOpacity onPress={() => {
+                      setShowBackBtn(false)
+                      setShowWarningMessage(false);
+                    }}>
+                      <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                  <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
+                    <TouchableOpacity onPress={() => {
+                      setShowWarningMessage(false);
+                      setShowBackBtn(true);
+                      navigation.navigate('Task_Management')
+                    }}>
+                      <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+                {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
+                {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
+                {/*</View>*/}
+              </View>
               }
               <View style={[Styles.With100NoFlex]}>
                 <TextInputI onChangeText={(value) => {
