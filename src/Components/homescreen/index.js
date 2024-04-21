@@ -9,6 +9,8 @@ import Task_managementStack from '../taskmanagementscreen/index';
 import Home from "./Home_meno";
 import LogIn from '../loginscreen/Login'
 import ProfileStack from '../profilescreen/index';
+import DoshboardStack from '../doshboard/index'
+import CustomerStack from '../customerscreen/index'
 import {Dimensions} from "react-native";
 import Home_meno from "./Home_meno";
 const Drawer = createDrawerNavigator();
@@ -23,7 +25,7 @@ function Home_Navigation() {
         <Stack.Screen name="Task_managementStack" component={Task_managementStack} />
         <Stack.Screen name="ProfileStack" component={ProfileStack} />
         <Stack.Screen name="LogIn" component={LogIn} />
-
+        <Stack.Screen name="CustomerStack" component={CustomerStack} />
       </Stack.Navigator>
 
 
@@ -37,12 +39,14 @@ const HomeStack  = () =>{
         drawerContent={props => <DrawerCustomize {...props}/> } drawerPosition={'left'}
         screenOptions={() => ({
           drawerStyle:{
-            width:width-60},
+            width:width-150},
           headerShown:true,
-          overlayColor:"rgba(209,209,210,1)",
+          overlayColor:"rgba(209,209,210,0.78)",
           headerTintColor:"#ff0000",
+
         })}>
         <Drawer.Screen  options={{headerShown: false}}  name="HomeStack" component={Home_Navigation} initialParams={Home_Navigation}  />
+        <Drawer.Screen  options={{headerShown: false}}  name="DoshboardStack" component={DoshboardStack}   />
       </Drawer.Navigator>
     </NavigationContainer>
   );

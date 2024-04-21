@@ -1,38 +1,27 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text, Modal, Image, TouchableOpacity, FlatList,
+  Text, Modal, Image, TouchableOpacity, FlatList, ImageBackground,
 } from "react-native";
 import { Styles } from "../Styles";
 import { Container } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { writePostApi } from "../writePostApi";
-import LinearGradient from "react-native-linear-gradient";
-import normalize from "react-native-normalize/src/index";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { AddModal } from "../component/AddModal";
 import List_Items from "../component/list_Items";
 import { FloatAddBtn } from "../component/FloatAddBtn";
+import {LogOutModal} from '../component/LogOutModal'
 import Geolocation from "react-native-geolocation-service";
 import {readOnlineApi } from "../ReadPostApi";
 import {requestLocationPermission ,geocodePosition,writeDataStorage,removeDataStorage} from "../Get_Location";
 import DYB_List_Item from "../component/DYB_List_Item";
-import { UserPermission } from "../CheckPermission";
-import { Warningmessage } from "../component/Warningmessage";
-
-const data = [
-  { label: "Edit", value: "2", Icon: "edit" },
-  { label: "Photos", value: "3", Icon: "images" },
-  { label: "Location", value: "14", Icon: "location" },
-];
-const data_dyb = [
-  {label: "Photos",value: "3",Icon: "images" },
-  {label: "Location",value: "14",Icon: "location" },
-];
+import Geocoder from "react-native-geocoder";
 let City=[];
 const GLOBAL = require("../Global");
 const Api = require("../Api");
+const Photoes = require("../Photoes");
 function Project_Sites({ navigation, navigation: { goBack } }) {
   const [modules, setmodules] = useState([]);
   const [Message, setMessage] = useState("");
@@ -59,9 +48,14 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [route, setroute] = useState('');
   const [showWarning, setshowWarning] = useState(false);
+  const [CategoryId, setCategoryId] = useState(0);
+  const [Selectedcategory, setSelectedcategory] = useState(0);
+  const [TaskRelatedNameId, setTaskRelatedNameId] = useState(0);
+  const [selectedrelatedname, setselectedrelatedname] = useState(0);
+  const [marker, setmarker] = useState('');
   useEffect(() => {
+    Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
     getLocation();
-
     const unsubscribe = navigation.addListener('focus', () => {
       setroute(GLOBAL.route)
       if(GLOBAL.route==='structure') {
@@ -72,30 +66,22 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
       }
     });
     return unsubscribe;
-
   }, []);
-  const dateComparison_count =(a,b)=>{
-
-    const date1 = a?.Count
-    const date2 = b?.Count
-
-    return date2 - date1;
-  }
+  ///Get Dyb===y site Total List from AsyncStorage///
   const getSites_dyb = async () => {
     let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.AllProjectInfo_dyb))
-    let A =[];
+    let Site_dyb =[];
     if (json!==null) {
       let Site_List= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
       if (Site_List?.sites) {
         Site_List?.sites?.forEach((obj) => {
-
-          A.push({
+          Site_dyb.push({
             Id: obj.siteId,
             Name: obj.siteName,
             Count:obj.units?.length,
             NameCount: "unit",
             task: '0',
-            ListName: "Site",
+            ListName: "site",
             address: obj?.address,
             geoLat: obj?.geoLat,
             geoLong: obj?.geoLong,
@@ -106,14 +92,14 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
             units: obj?.units,
           });
         });
-        if(A?.length!==0) {
-          A?.sort(dateComparison_count)
+        if(Site_dyb?.length!==0) {
+          setmodules(Site_dyb);
         }
-        setmodules(A);
+        else
+          setmodules("");
       }
     }
   };
-
   const onOpen = () => {
     setvisibleAddModal(true);
   };
@@ -141,6 +127,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     catch (e) {
     }
   };
+  ///compare 2 array and get  Difference//
   const getDifference = (array1, array2) => {
     return array1?.filter(object1 => {
       return !array2?.some(object2 => {
@@ -152,84 +139,31 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     setCheked(!Cheked);
   };
   const Navigate_Url= (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
     navigation.navigate(Url);
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
   };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
-        <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY)
-              setshowModalDelete(false)
-              navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
+  /// Bottom menu click On LogOut button///
   const logout_Url= () => {
     setshowModalDelete(true)
-
   };
-
-  ///////////////////////////////////////////
+  /// compare 2 array by Id And sort///
   const dateComparison= (a,b)=>{
     const date1 = a?.Id
     const date2 = b?.Id
     return date1 - date2;
   }
-
+  //Get  Dyb===n site Total List from Server///
   const getAllProjectInfo = async () => {
     readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-      let A = [];
+      let Site_List = [];
       let Site= json?.projects?.find((p) => p?.projectId === GLOBAL?.ProjectId)
-
         Site?.sites?.forEach((obj) => {
-          A.push({
+          Site_List.push({
             siteId: obj.siteId,
             siteName: obj.siteName,
             unitCount: obj.unitCount,
@@ -245,26 +179,29 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
             postalCode: obj?.address?.address_Zip,
             street: obj?.address?.address_Street,
             units: obj?.units,
+            Location:{latitude:obj?.geoLat,
+              longitude:obj?.geoLong}
           });
         });
-      if(A?.length!==0)
-        setmodules(A);
+      if(Site_List?.length!==0)
+        setmodules(Site_List);
       else
         setmodules('');
       writeDataStorage(GLOBAL.All_Lists, json?.projects);
     });
   };
+  //Get  Dyb===n site Total List from AsyncStorage///
   const getSites = async () => {
     let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-    let A = [];
+    let Site_List = [];
     if (json!==null) {
       let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
       Site?.sites?.forEach((obj) => {
-        A.push({
+        Site_List.push({
           siteId: obj.siteId,
           siteName: obj.siteName,
           unitCount: obj.unitCount,
-          task: "0",
+          task: obj?.task,
           note: obj?.notes,
           address: obj?.address,
           geoLat: obj?.geoLat,
@@ -276,10 +213,12 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
           postalCode: obj?.address?.address_Zip,
           street: obj?.address?.address_Street,
           units: obj?.units,
+          Location:{latitude:obj?.geoLat,
+        longitude:obj?.geoLong}
         });
       });
-      if(A?.length!==0)
-        setmodules(A)
+      if(Site_List?.length!==0)
+        setmodules(Site_List)
       else
         setmodules('')
     }
@@ -296,11 +235,10 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         });
       });
       All_Sites?.sort(dateComparison)
-
       setAddId(All_Sites);
       }
-
   }
+  /// Add and send new Site To server///
   const AddSites = (value) => {
   if(GeoAddressCity===''){
     settouch('City')
@@ -310,19 +248,17 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
     setShowButton(false)
    var formdata = new FormData();
    formdata.append("siteName", value.sitename);
-   formdata.append("userId", "1");
+   formdata.append("userId",  GLOBAL.UserInformation?.userId);
    formdata.append("notes", value.siteNote);
    formdata.append("projectId", GLOBAL.ProjectId);
-   formdata.append("geoLat", location.latitude);
-   formdata.append("geoLong", location.longitude);
+    formdata.append("geoLat", parseInt(location?.latitude).toFixed(7));
+    formdata.append("geoLong",parseInt(location?.longitude).toFixed(7));
    formdata.append("geoAddress", GeoAddress);
    formdata.append("postalCode", GeoAddressPostalCode);
    formdata.append("cityId", cityId);
    formdata.append("countryId", countryId);
    formdata.append("street", GeoAddressStreet);
-
     writePostApi("POST", Api.CreateSite, formdata).then(json => {
-
      if (json) {
        if (json?.status === true) {
          setMessage(json.msg);
@@ -335,22 +271,20 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
          }, 4125);
          return () => clearInterval(timerId);
        }
-
      }
-
      else {
        let List_Item = [];
-       let A = [];
+       let Sites_List = [];
        let Count = 0;
        List_Item = modules;
        if (List_Item?.length !== 0) {
-         A = [...List_Item];
+         Sites_List = [...List_Item];
        }
        if(AddId.length!==0)
          Count = parseInt(AddId[AddId?.length - 1]?.Id) + 1;
        else
          Count = Count + 1;
-       A.push({
+       Sites_List.push({
          siteId: Count.toString(),
          siteName: value.sitename,
          unitCount: "0",
@@ -367,7 +301,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
          street:GeoAddressStreet,
          units:[]
        });
-       List_Item = A;
+       List_Item = Sites_List;
        setMessage("Your site successfully added");
        setShowMessage(true);
        setmodules(List_Item);
@@ -392,44 +326,45 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
    });
  }
   };
-
+ ///get Country List///
   const getCountry_city = async (country,adminArea) => {
-      let A=[]
+      let Country_List=[];
       GLOBAL.Country?.countries?.forEach((obj) => {
         if(obj?.countryName!=='') {
-          A.push({
+          Country_List.push({
             value: obj?.countryId,
             label: obj?.countryName,
           });
         }
       });
-      setCountryList(A);
+      setCountryList(Country_List);
       City=GLOBAL.City;
-     let Default_countryId=A?.find((p)=>p?.label===country)?.value
+     let Default_countryId=Country_List?.find((p)=>p?.label===country)?.value
       setcountryId(Default_countryId)
       if(Default_countryId!==''||Default_countryId!==null) {
         getCity(Default_countryId,adminArea);
       }
   };
+  ///get City List///
   const getCity = async (value,adminArea) => {
-
-    let A = [];
+    let City_List = [];
     let City_filter=City?.cities?.filter((p)=>p?.coutryId===value)
     City_filter?.forEach((obj) => {
       if(obj?.cityName!=='') {
-        A.push({
+        City_List.push({
           value: obj?.cityId,
           label: obj?.cityName,
           coutryId:obj?.coutryId
         });
       }
     });
-    setCityList(A);
+    setCityList(City_List);
     if(adminArea!==''){
-      let Default_cityId= A?.find((p)=>p.label===adminArea)?.value
+      let Default_cityId= City_List?.find((p)=>p.label===adminArea)?.value
       setcityId(Default_cityId)
     }
   };
+  //get User Location///
   const getLocation =async () => {
     requestLocationPermission().then(res => {
       if (res) {
@@ -465,8 +400,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
       }
     });
   };
-  ///////////////////////////////////////////
-
+  ///Update Site in asyncstorage When app offline///
   const Update_Off=(value,GeoAddressCity,GeoAddressCountry)=>{
     let List_Item = [];
     List_Item = modules;
@@ -482,12 +416,15 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const renderItem=({ item ,index})=>(
     <List_Items key={index} getCity={getCity}
                 ShowWarningMessage={ShowWarningMessage}
+                marker={marker} setmarker={setmarker}
                 setShowWarningMessage={setShowWarningMessage}
                 setShowMessage={setShowMessageUpdate} value={item}
                 CityList={CityList} CountryList={CountryList}
+                setCountryList={setCountryList} setCityList={setCityList} setLocation={setLocation} setGeoAddress={setGeoAddress}
                 cityId={cityId} setcityId={setcityId} ShowButton={ShowButton}
                 countryId={countryId} setcountryId={setcountryId}
-                Message={Message}  data={data}
+                Message={Message}  data={GLOBAL.Site_data}  setSelectedcategory={setSelectedcategory} setTaskRelatedNameId={setTaskRelatedNameId}
+                setselectedrelatedname={setselectedrelatedname} setCategoryId={setCategoryId}
                 ShowMessage={ShowMessageUpdate} tittlebtn={"Update Sites"} numberValue={4}
                 Navigate_Url={Navigate_Url} location={location} getAllProjectInfo={getAllProjectInfo} Update_Off={Update_Off}
     />
@@ -507,7 +444,6 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
         :
         null
       }
-
     </>
   )
   const renderSectionFooter=()=>(
@@ -516,27 +452,21 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   const SeeDetail = (Id) => {
     GLOBAL.SiteId = Id;
     navigation.navigate("Project_UnitsStack");
-
   };
   const renderItem_dyb = ({ item }) => (
-    <DYB_List_Item data={data_dyb} value={item}  SeeDetail={SeeDetail}
+    <DYB_List_Item data={GLOBAL.Site_data_dyb} value={item}  SeeDetail={SeeDetail}
                    Navigate_Url={Navigate_Url}/>
   );
   return (
     <Container style={[Styles.Backcolor]}>
       <Header colors={route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={route==='structure'?"#ffadad":'#ffc6bb'} onPress={goBack}
               Title={"Sites / Buildings"}/>
-      {showWarning===true&&  <Warningmessage/>}
+      <ImageBackground source={Photoes.SiteBack}
+                       style={{ width: "100%", flex: 1, alignSelf: "stretch" }} resizeMode="stretch">
       <View style={Styles.containerList}>
-        {
-          showModalDelete &&
-          <View>
-            {
-              _showModalDelete()
-            }
-          </View>
+        { showModalDelete &&
+        <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut}/>
         }
-
         {
           route==='structure'?
         <>
@@ -595,12 +525,12 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
       {
         route==='structure'?
       <FloatAddBtn onPress={onOpen} colors={['#ffadad','#f67070','#FF0000']}/>:null}
+      </ImageBackground>
       <AddModal
         numberValue={2}
         GeoAddressCity={GeoAddressCity}
         GeoAddressCountry={GeoAddressCountry}
-        GeoAddressStreet={GeoAddressStreet}
-        GeoAddressPostalCode={GeoAddressPostalCode}
+        GeoAddressStreet={GeoAddressStreet}  GeoAddress={GeoAddress} GeoAddressPostalCode={GeoAddressPostalCode}
         CityList={CityList} CountryList={CountryList}
         location={location}
         setGeoAddressCity={setGeoAddressCity}
@@ -609,14 +539,14 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
          setGeoAddressPostalCode={setGeoAddressPostalCode}
         setcountryId={setcountryId} setcityId={setcityId}
         ShowMessage={ShowMessage} Message={Message}
-        ChangeChecked={ChangeChecked}
-        validatemsg={validatemsg}
-                    getCity={getCity} touch={touch}
+        ChangeChecked={ChangeChecked} setCategoryId={setCategoryId}  validatemsg={validatemsg}
+        setCountryList={setCountryList} setCityList={setCityList} setLocation={setLocation} setGeoAddress={setGeoAddress}
+        setSelectedcategory={setSelectedcategory} setTaskRelatedNameId={setTaskRelatedNameId} setselectedrelatedname={setselectedrelatedname}
+                    getCity={getCity} touch={touch} marker={marker} setmarker={setmarker}
                     setvisibleAddModal={setvisibleAddModal} visibleAddModal={visibleAddModal} setShowMessage={setShowMessage}
                     onPressAdd={AddSites} tittlebtn={"Add Site"} ShowButton={ShowButton}/>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}  />
     </Container>
   );
 }
-
 export default Project_Sites;

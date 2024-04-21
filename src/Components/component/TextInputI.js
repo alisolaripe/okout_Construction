@@ -15,6 +15,9 @@ import normalize from "react-native-normalize";
 import { ButtonI } from "./ButtonI";
 const { width: viewportWidth } = Dimensions.get('window');
 const GLOBAL = require("../Global");
+const Api = require("../Api");
+const Photoes=require('../Photoes')
+let RelatedId_Info=''
 const SLIDER_1_FIRST_ITEM = 0;
 function wp (percentage) {
   const value = (percentage * viewportWidth) / 100;
@@ -33,35 +36,51 @@ import { Dropdown,MultiSelect } from "react-native-element-dropdown";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import LinearGradient from "react-native-linear-gradient";
 import { Colors } from "../Colors";
-import Carousel, { Pagination } from "react-native-snap-carousel";
+import Carousel from "react-native-snap-carousel";
 import Task_Edit_Image from "./Task_Edit_Image";
+import { isNetworkConnected } from "../GlobalConnected";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { geocodePosition, requestLocationPermission, writeDataStorage } from "../Get_Location";
+import Geolocation from "react-native-geolocation-service";
+import Geocoder from "react-native-geocoder";
+import MapView, { Marker } from "react-native-maps";
+import { writePostApi } from "../writePostApi";
 let numOfLinesCompany = 0;
-
+const screen = Dimensions.get('window');
+const ASPECT_RATIO = (screen.width / screen.height)/4;
+const LATITUDE_DELTA = 4;
+let City=[]
+const LONGITUDE_DELTA =( LATITUDE_DELTA * ASPECT_RATIO)/2;
 function TextInputI({ GeoAddressCity,
                       GeoAddressCountry,
                       GeoAddressStreet,GeoAddressPostalCode,
-                      CityList,CountryList,location,
+                      CityList,CountryList,
                       Version,
                       onChangeText,
                       setCheked,
                       numberValue,
-                      Name,
+                      Name,setshowMap,
                       tittlebtn,
                       ChangeChecked,
                       Cheked,onOpen,Full,
-                      Pinrecovery,
-                      emailOnpress,DeleteImage,
-                      featureName,Boolean,Btn,iconcheck,checkOrgCode,
-                      setGeoAddressCity,setGeoAddressCountry,
-                       setvisible,ImageSourceviewarray,
-                      setcountryId,setcityId,getCity,geoLat,geoLong,setShowMessage,
+                      Pinrecovery,location,
+                      emailOnpress,DeleteImage,marker,setErrors,setShowButton,WorkTypeId,relatedId,Add_Task_Offline2,
+                      featureName,Boolean,Btn,iconcheck,checkOrgCode,setCountryList,setCityList,showMap,
+                      setGeoAddressCity,setGeoAddressCountry,SelectedParentTask, setSelectedParentTask,ParentTaskId, setParentTaskId,
+                       setvisible,ImageSourceviewarray,modules, setselectedpriority,setmarker,setImageSourceviewarray,
+                      setcountryId,setcityId,getCity,geoLat,geoLong,setShowMessage,priorityId, setpriorityId,
                       setSelectedcategory,selectedcategory,Taskcategory,value,Taskassigned,setSelectedassigned,selectedassigned,
-                      Taskpriority,selectedpriority,setSelectedpriority,setOpen,setdateType
+                      Taskpriority,selectedpriority,setSelectedpriority,setOpen,setdateType,setGeoAddressPostalCode
                       ,DateFormatplanend,DateFormatplanstart,Taskstatus,selectedstatus, setSelectedstatus,
                       selecteduser,setSelecteduser,Taskuser,setUserId,setCategoryId,setRelatedId,setOpenend,setPriorityId,setTaskStatusId,
-                      Task_RelatedList,TaskRelated,selectedrelated,setSelectedrelated,error,ShowButton,reasons,ShowMessage,Message,
-                      Back_navigate,setShowWarningMessage,setShowBackBtn,setchangestatus_Reopen
-
+                      selectedrelated,setSelectedrelated,error,ShowButton,reasons,ShowMessage,Message,
+                      Back_navigate,setShowWarningMessage,setShowBackBtn,RelatedNameList,TaskRelatedNameId, setTaskRelatedNameId,
+                      selectedrelatedname,setselectedrelatedname,categoryId,GeoAddress,setGeoAddress,
+                     selectedTaskSiteName,setselectedTaskSiteName,dateDifferenceHours,setLocation,setGeoAddressStreet,
+                      selectedunitName,setselectedunitName,selectedsectionName,setselectedsectionName,
+                      selectedfeatureName,setselectedfeatureName,TimeRelated,TimeRelatedselct, setTimeRelatedselct,dateDifferenceDays,
+                      TaskWorkType,selectedWorkType, setselectedWorkType, setWorkTypeId,setTaskWorkType,setTaskpriority,ShowBtn, setShowBtn,
+                      My_TaskList_server2,getAllProjectInfo_dyb,getAllProjectInfo,setMessage,
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
@@ -80,6 +99,82 @@ function TextInputI({ GeoAddressCity,
   const [isFocusstatus, setIsFocusstatus] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [showNewInput, setshowNewInput] = useState(false);
+  const [TaskProjectId, setTaskProjectId] = useState('');
+  const [TaskRelated, setTaskRelated] = useState([]);
+  const [TaskSiteId, setTaskSiteId] = useState('');
+  const [TaskunitId, setTaskunitId] = useState('');
+  const [TasksectionId, setTasksectionId] = useState('');
+  const [TaskfeatureId, setTaskfeatureId] = useState('');
+  const [SiteList, setSiteList] = useState([]);
+  const [unitList, setunitList] = useState([]);
+  const [sectionList, setsectionList] = useState([]);
+  const [featureList, setfeatureList] = useState([]);
+  const [Category, setCategory] = useState('');
+
+  const getLocation =async (coordinate) => {
+    requestLocationPermission().then(res => {
+      if (res) {
+        setLocation(coordinate);
+        var NY = {
+          lat: coordinate.latitude,
+          lng: coordinate.longitude,
+        };
+        geocodePosition(NY).then(res => {
+          if (res) {
+            setGeoAddress(res?.[0]?.formattedAddress);
+            setGeoAddressCountry(res?.[0]?.country);
+            if(res?.[0]?.adminArea!==null)
+              setGeoAddressCity(res?.[0]?.adminArea);
+            if(res?.[0]?.postalCode!==null)
+              setGeoAddressPostalCode(res?.[0]?.postalCode);
+            if(res?.[0]?.streetName!==null)
+              setGeoAddressStreet(res?.[0]?.streetName);
+            getCountry_city(res?.[0]?.country, res?.[0]?.adminArea);
+          } else {
+            getCountry_city("United States", "California");
+          }
+        })
+          .catch(err => console.log(err, "errrrr"));
+      }})
+  };
+  const getCountry_city = async (country,adminArea) => {
+    let A=[]
+    GLOBAL.Country?.countries?.forEach((obj) => {
+      if(obj?.countryName!=='') {
+        A.push({
+          value: obj?.countryId,
+          label: obj?.countryName,
+        });
+      }
+    });
+    setCountryList(A);
+    City=GLOBAL.City;
+    let Default_countryId=A?.find((p)=>p?.label===country)?.value
+    setcountryId(Default_countryId)
+    if(Default_countryId!==''||Default_countryId!==null) {
+      getCity3(Default_countryId,adminArea);
+    }
+  };
+
+  const getCity3 = async (value,adminArea) => {
+
+    let A = [];
+    let City_filter=City?.cities?.filter((p)=>p?.coutryId===value)
+    City_filter?.forEach((obj) => {
+      if(obj?.cityName!=='') {
+        A.push({
+          value: obj?.cityId,
+          label: obj?.cityName,
+          coutryId:obj?.coutryId
+        });
+      }
+    });
+    setCityList(A);
+    if(adminArea!==''){
+      let Default_cityId= A?.find((p)=>p.label===adminArea)?.value
+      setcityId(Default_cityId)
+    }
+  };
   const _renderItem_Carousel = ({item, index}) => {
 
     return (
@@ -88,6 +183,16 @@ function TextInputI({ GeoAddressCity,
                        IconColor={"#786b6b"} setattachmentId={setattachmentId} settaskId={settaskId} setshowModalDelete={setshowModalDelete} />
     );
   }
+  const validationSchema30 = Yup.object().shape({
+    CompanyName: Yup.string().required("please! Company Name?"),
+    CustomerName: Yup.string().required("please! Customer Name?"),
+    TRNNo: Yup.string().required("please!  TRN Number?"),
+    Phone: Yup.string().matches(new RegExp("[0-9]{7}")).required("please! PhoneNumber?"),
+    Email: Yup.string()
+      .required("please! email?")
+      .email("well that's not an email"),
+    Street: Yup.string().required("please! Street Name?"),
+  });
   const validationSchema1 = Yup.object().shape({
     name: Yup.string().required(),
     email: Yup.string()
@@ -100,11 +205,11 @@ function TextInputI({ GeoAddressCity,
   });
   const validationSchema2 = Yup.object().shape({
     UserName: Yup.string().required(),
-    FullName: Yup.string().required(),
-    orgkey: Yup.string().matches(new RegExp("[0-9]")).required("please! Orgkey?"),
     password: Yup.string()
       .required()
-      .min(4, "pretty sure this will be hacked"),
+      .min(7, "pretty sure this will be hacked"),
+    Confirmpassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match"),
+
   });
   const validationSchema3 = Yup.object().shape({
     Projectname: Yup.string()
@@ -118,10 +223,6 @@ function TextInputI({ GeoAddressCity,
   const validationSchema14 = Yup.object().shape({
     Unitname: Yup.string()
       .required("UnitName ! Please?"),
-    GeoAddressStreet: Yup.string()
-      .required("StreetName ! Please?"),
-    GeoAddressPostalCode: Yup.string()
-      .required("PostalCode! Please?"),
     UnitNote: Yup.string()
       .required("UnitNote ! Please?")
 
@@ -157,10 +258,6 @@ function TextInputI({ GeoAddressCity,
   const validationSchema4 = Yup.object().shape({
     sitename: Yup.string()
       .required("ProjectSite Name ! Please?"),
-    GeoAddressStreet: Yup.string()
-      .required("StreetName ! Please?"),
-    GeoAddressPostalCode: Yup.string()
-      .required("PostalCode! Please?"),
   });
   const validationSchema6 = Yup.object().shape({
     username: Yup.string()
@@ -208,7 +305,7 @@ function TextInputI({ GeoAddressCity,
     <View style={Styles.DeleteModalStyle}>
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-               source={require("../../Picture/png/AlertImage.png")}
+               source={Photoes.Alert}
                resizeMode="contain" />
         <View style={Styles.With100NoFlex}>
           <Text style={Styles.txt_left2}>
@@ -238,27 +335,19 @@ function TextInputI({ GeoAddressCity,
     let isValid = false;
       if (values?.Title!==value?.taskTitle) {
         setShowBackBtn(false)
-        console.log('values?.Title===value?.taskTitle')
+
         isValid=true;
       }
-
      else if (values?.TaskNote!==value?.taskDescription) {
         setShowBackBtn(false)
-        console.log('values?.TaskNote===value?.taskDescription')
         isValid=true;
       }
       if(isValid)
       {
-        //setShowBackBtn(false)
-        console.log('isValid')
         isValid=true
         Back_navigate(false)
-
       }
-
       else{
-        console.log('else')
-
         Back_navigate()
       }
   }
@@ -266,13 +355,11 @@ function TextInputI({ GeoAddressCity,
     let isValid = false;
       if (values?.Title !== value?.taskTitle) {
         setShowBackBtn(false)
-
         isValid=true;
       }
       else  if(values?.DateFormatplanend!==DateFormatplanend){
         setShowBackBtn(false)
         isValid=true;
-
       }
       else  if(values?.DateFormatplanstart!==DateFormatplanstart){
           setShowBackBtn(false)
@@ -285,47 +372,24 @@ function TextInputI({ GeoAddressCity,
 else if(values?.CaseNote?.split("\n")?.length>1){
         if (values?.CaseNote?.split("\n")?.[2]!== '') {
           setShowBackBtn(false)
-          console.log('values?.CaseNote')
-          console.log(values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes,'values?.CaseNote.split("\\n")?.[0]!== value?.taskRequestNotes')
-          console.log(values?.CaseNote==='','values?.CaseNote===\'\'')
-          console.log(values?.CaseNote.split("\n"),'values?.CaseNote.split("\\n")')
-          console.log(values?.CaseNote.split("\n")?.[2]!== '','values?.CaseNote.split("\\n")?.[3]!== \'\'')
           isValid=true;
-
         }
-
       }
 else  if(values?.CaseNote?.split("\n")?.length===1){
         if (values?.CaseNote===''||values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes) {
           setShowBackBtn(false)
-          console.log('values?.CaseNote')
-          console.log(values?.CaseNote.split("\n")?.[0]!== value?.taskRequestNotes,'values?.CaseNote.split("\\n")?.[0]!== value?.taskRequestNotes')
-          console.log(values?.CaseNote==='','values?.CaseNote===\'\'')
-          console.log(values?.CaseNote.split("\n"),'values?.CaseNote.split("\\n")')
-          console.log(values?.CaseNote.split("\n")?.[2]!== '','values?.CaseNote.split("\\n")?.[3]!== \'\'')
           isValid=true;
-
         }
-
       }
-
-      console.log(isValid,'isValid')
     if(isValid)
     {
       //setShowBackBtn(false)
-      console.log('isValid')
       isValid=true
       Back_navigate(false)
-
     }
-
     else{
-      console.log('else')
-
       Back_navigate()
     }
-
-
   }
 
   const width = Dimensions.get("screen").width;
@@ -335,20 +399,44 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     borderRadius: normalize(6),
     padding: 12,
     marginBottom: 5,
-    width: '100%',
+    width:'100%',
     paddingVertical: 4,
-    color: '#fff',
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'TisaSansProBoldItalic',
+
   };
-  const inputStyleProfile = {
+  const inputStyleCustomer = {
     borderWidth: 1,
     borderColor:GLOBAL.OFFICIAL_Button,
     borderRadius: normalize(6),
     padding: 12,
     marginBottom: 5,
-    width: '100%',
+    width:'100%',
     paddingVertical: 4,
-    color: '#fff',
-    backgroundColor: GLOBAL.OFFICIAL_background
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'TisaSansProBoldItalic',
+    backgroundColor:GLOBAL.OFFICIAL_WITE_COLOR,
+  };
+  const inputStyleProfile = {
+
+    borderRadius: normalize(6),
+    padding:12,
+    marginBottom:5,
+    width:'100%',
+    paddingVertical:6,
+    color:Colors.button,
+    backgroundColor:GLOBAL.OFFICIAL_WITE_COLOR,
+    fontFamily:'TisaSansProBoldItalic',
+  };
+  const inputStyleProfileNumber = {
+    borderRadius: normalize(6),
+    padding:12,
+    marginBottom:5,
+    width:'100%',
+    paddingVertical:6,
+    color:Colors.button,
+    backgroundColor:GLOBAL.OFFICIAL_WITE_COLOR,
+    fontFamily:'aSignboardCpsNrBoldItalic',
   };
   const inputStyleLocation = {
     borderWidth:1,
@@ -371,11 +459,433 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       setIconsecuret("eye");
     }
   };
+  const CreateTask = (values) => {
+    console.log(values,'values')
+    let idsArray = "";
+    const date = new Date();
+    const Year = date.getFullYear();
+    const Day = date.getDate();
+    const Month = date.getMonth() + 1;
+    const Hour=date.getHours();
+    const Minute=date.getMinutes()
+    const Second=date.getSeconds()
+    const TodayDate = `${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
+    const formData = new FormData();
+    if (categoryId === 0) {
+      setErrors("selectedcategory");
+    } else {
+      setShowButton(false)
+      formData.append("userId",  GLOBAL.UserInformation?.userId);
+      formData.append("categoryId", categoryId);
+      formData.append("workTypeId", WorkTypeId);
+      if(categoryId==='1') {
+        formData.append("relatedId", relatedId);
+        formData.append("relatedName", selectedrelatedname.label);
+      }
+      formData.append("requestDate", TodayDate);
+      formData.append("priorityId", priorityId);
+      formData.append("planStartDate", null);
+      formData.append("planEndDate", null);
+      formData.append("taskStatusId", "1");
+      formData.append("title", values?.Title);
+      formData.append("description", values?.TaskNote);
+      formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
+      formData.append("requestBy", GLOBAL?.UserInformation?.userId);
+      console.log(formData,'formData')
+      if(GLOBAL.Subtask!=='')
+        formData.append("parentTaskId", GLOBAL.Subtask);
+      else
+        formData.append("parentTaskId", null);
+      formData.append("assignedTo", null);
+      if (GLOBAL.isConnected=== false) {
+        Add_Task_Offline2(values,TodayDate);
+      }
+      if (ImageSourceviewarray.length !== 0) {
+        for (let i = 0; i < ImageSourceviewarray?.length; i++) {
+          idsArray = ImageSourceviewarray[i];
+          formData.append("attachments[]", {
+            uri: idsArray.uri,
+            type: idsArray.type,
+            name: idsArray.fileName,
+          });
+        }
+        writePostApi("POST", Api.AddTask, formData, ImageSourceviewarray).then(json => {
+          if (json) {
+            if (json?.status === true) {
+              My_TaskList_server2();
+              if(GLOBAL.TaskName!==''){
+                getAllProjectInfo();
+                getAllProjectInfo_dyb();
+              }
+              values.TaskNote=''
+              values.Title=''
+              setImageSourceviewarray([])
+              setMessage(json?.msg);
+              setShowMessage(true);
+              setShowBtn(true)
+              setTimeout(function(){ setShowMessage(false)}, 4000)
+            }
+          }
+          else {
+            values.TaskNote=''
+            values.Title=''
+            setMessage("Your task successfully added");
+            setShowMessage(true);
+            setShowButton(true)
+            setImageSourceviewarray([]);
+            setShowBtn(true)
+            setTimeout(function(){ setShowMessage(false)}, 4000)
+          }
+        });
+      }
+      else {
+        writePostApi("POST", Api.AddTask, formData).then(json => {
+          if (json) {
+            if (json?.status === true) {
+              values.TaskNote=''
+              values.Title=''
+              My_TaskList_server2();
+              setMessage(json?.msg);
+              setShowMessage(true);
+              setShowButton(true)
+              setShowBtn(true)
+              setTimeout(function(){ setShowMessage(false)}, 4000)
+            }
+          }
+          else {
+            setMessage("Your task successfully added");
+            values.TaskNote=''
+            values.Title=''
+            setShowMessage(true);
+            setShowButton(true)
+            setCategoryId(0)
+            setRelatedId(0)
+            setShowBtn(true)
+             setTimeout(function(){ setShowMessage(false)}, 4000)
+            // navigation.navigate('Task_Management')
+          }
+        });
+      }
+    }
+    CreateNextTask(values)
+  };
+  const CreateNextTask=async (values)=>{
+    let Category_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.Category_Last_Info));
+    let WorkType_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.WorkType_Last_Info));
+    let PriorityId_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.priorityId_Last_Info));
+    let ProjectId =JSON.parse(await AsyncStorage.getItem(GLOBAL.projectId_Last_Info));
+    let SiteId =JSON.parse(await AsyncStorage.getItem(GLOBAL.siteId_Last_Info));
+    let UnitId =JSON.parse(await AsyncStorage.getItem(GLOBAL.unitId_Last_Info));
+    let SectionId =JSON.parse(await AsyncStorage.getItem(GLOBAL.sectionId_Last_Info));
+    let FeatureId =JSON.parse(await AsyncStorage.getItem(GLOBAL.featureId_Last_Info));
+    if(ProjectId)
+      GLOBAL.ProjectId=ProjectId
+    if(SiteId)
+      GLOBAL.SiteId=SiteId
+    if(UnitId)
+      GLOBAL.UnitId=UnitId
+      if(SectionId)
+        GLOBAL.SectionId=SectionId
+        if(FeatureId)
+          GLOBAL.UpdateFeatureID=FeatureId
+    if (Category_Info==='1') {
+      setSelectedcategory({ label: "Subcontract", value: "1", _index: 0 });
+    }
+    else if (Category_Info==='2') {
+      setSelectedcategory({ label: "Snag", value: "2", _index: 1 });
+    }
+    setCategoryId(Category_Info);
+    Task_WorkTypeList(Category_Info);
+    Task_RelatedList('1');
+    if(Category_Info==='1'||Category_Info==='2') {
+       RelatedId_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.RelatedId_Last_Info));
+      let RelatedName_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.RelatedName_Last_Info));
+      setRelatedId(RelatedId_Info)
+      if(RelatedName_Info==='project') {
+        setTaskRelatedNameId("0");
+        setselectedrelatedname({label:"Project",value:"0",_index:0})
+      }
+      else if(RelatedName_Info==='Site') {
+        setTaskRelatedNameId("1");
+        setselectedrelatedname({label:"Site",value:"1",_index:1})
+      }
+      else if(RelatedName_Info==='Unit') {
+        setTaskRelatedNameId("2");
+        setselectedrelatedname({label:"Unit",value:"2",_index:2})
+      }
+      else if(RelatedName_Info==='Section') {
+        setTaskRelatedNameId("3");
+        setselectedrelatedname({label:"Section",value:"3",_index:3})
+      }
+      else if(RelatedName_Info==='Feature') {
+        setTaskRelatedNameId("4");
+        setselectedrelatedname({label:"Feature",value:"4",_index:4})
+      }
+    }
+
+  }
+  const Task_RelatedList = (Id) => {
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let A = [];
+            for (let item in json?.relatedList) {
+              let obj = json?.relatedList?.[item];
+              A.push({
+                value: obj.relatedId,
+                label: obj.relatedName,
+              });
+            }
+
+            if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+              setSelectedrelated({
+                label: A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.label,
+                value: A?.find(p =>parseInt (p.value )=== parseInt( GLOBAL.ProjectId))?.value,
+                _index: A?.findIndex(p => parseInt (p.value )=== parseInt( GLOBAL.ProjectId)),
+              });
+              if(GLOBAL.TaskRelatedNameId==='0') {
+                setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
+              }
+              else
+                getSites();
+            }
+            setTaskRelated(A);
+          })
+          .catch(error => console.log("error", error));
+      }
+    });
+  };
+  const Task_WorkTypeList =async (Id) => {
+    let WorkType_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.WorkType_Last_Info));
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_WorkType + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let A = [];
+
+            for (let item in json?.workTypeList) {
+              let obj = json?.workTypeList?.[item];
+              A.push({
+                value: obj.workTypeId,
+                label: obj. workTypeName,
+              });
+            }
+if(WorkType_Info!==''||WorkType_Info!==null){
+  setselectedWorkType({
+    label:A?.find(p => parseInt(p.value) ===parseInt(WorkType_Info))?.label,
+    value:A?.find(p =>parseInt(p.value) ===parseInt(WorkType_Info))?.value,
+    _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(WorkType_Info)),
+  });
+  setWorkTypeId(WorkType_Info);
+}
+            setTaskWorkType(A);
+          })
+          .catch(error => console.log("error", error));
+      }
+    });
+  };
+  const getSites = async () => {
+    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
+
+    let A = [];
+    if (json!==null) {
+      let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
+      Site?.sites?.forEach((obj) => {
+        A.push({
+          value: obj.siteId,
+          label: obj.siteName,
+        });
+      });
+      setSiteList(A)
+      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+
+        setselectedTaskSiteName({
+          label:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SiteId))?.label,
+          value:A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value,
+          _index:A?.findIndex(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId)),
+        });
+        if(GLOBAL.TaskRelatedNameId==='1') {
+          setRelatedId(A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value)
+        }
+        else {
+          getUnits()
+        }
+      }
+    }
+  }
+  const getUnits =async () => {
+    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
+    if (json!==null) {
+      let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
+      let A = [];
+      Filter_units?.units?.forEach((obj) => {
+        A.push({
+          value: obj?.unitId,
+          label: obj?.unitName,
+
+        });
+      })
+      setunitList(A);
+      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+        setselectedunitName({
+          label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.UnitId))?.label,
+          value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value,
+          _index:A?.findIndex(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId)),
+        });
+        if(GLOBAL.TaskRelatedNameId==='2'){
+          setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value)
+        }
+        else
+          getSection()
+      }
+    }
+
+  };
+  const getSection = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
+    if (json!==null) {
+      let A = [];
+      let Filter_units = "";
+      let Filter_sites = "";
+      let Filter_section = "";
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
+      Filter_section?.sections?.forEach((obj) => {
+        A.push({
+          value: obj.sectionId,
+          label: obj.sectionName,
+        });
+      });
+      setsectionList(A);
+      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+        setselectedsectionName({
+          label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId))?.label,
+          value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value,
+          _index:A?.findIndex(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId)),
+        });
+        if(GLOBAL.TaskRelatedNameId==='3'){
+          setRelatedId(A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value)
+        }
+        else
+          getFeatures()
+      }
+    }
+  };
+  const getFeatures = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
+    if (json !== null) {
+      let A = [];
+      let Filter_units = "";
+      let Filter_sites = "";
+      let Filter_section = "";
+      let Filter_feature = "";
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
+      Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
+
+      if (Filter_feature?.features) {
+        Filter_feature?.features?.forEach((obj) => {
+
+          A.push({
+            value: obj.featureId,
+            label: obj.featureName,
+
+          });
+        });
+        setfeatureList(A);
+        if(GLOBAL.TaskRelatedNameId==='4'||RelatedId_Info!=='') {
+          setselectedfeatureName({
+            label:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.label,
+            value:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.value,
+            _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID)),
+          });
+          if(GLOBAL.TaskRelatedNameId==='4')
+          setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
+        }
+      }
+    }
+  }
+  const getInfo=async ()=>{
+    let Category_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.Category_Last_Info))
+    if(Category_Info||Category_Info!==null||Category_Info!==''){
+      setShowBtn(true)
+    }
+  }
   useEffect(()=>{
+
+    if(location===undefined||location?.latitude==='') {
+      if(location?.latitude==='') {
+        requestLocationPermission().then(res => {
+          if (res) {
+            Geolocation.getCurrentPosition(
+              position => {
+                setLocation(position.coords);
+              },
+              error => {
+                setLocation(false);
+              },
+              { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+            );
+          }
+        });
+      }
+    }
     if(Boolean) {
       setCheked(Boolean);
       setswitchDYB2(Boolean);
     }
+
+    if( GLOBAL.TaskRelatedNameId!==''){
+      setCategoryId(GLOBAL?.categoryId)
+      Task_WorkTypeList(GLOBAL?.categoryId)
+      Task_RelatedList('1')
+      setSelectedcategory({label:"Subcontract",value:"1",_index:0})
+      console.log(GLOBAL.TaskRelatedNameId,'GLOBAL.TaskRelatedNameId')
+      if(GLOBAL.TaskRelatedNameId==='0') {
+        setTaskRelatedNameId("0");
+        setselectedrelatedname({label:"Project",value:"0",_index:0})
+
+      }
+      else if(GLOBAL.TaskRelatedNameId==='1') {
+        setTaskRelatedNameId("1");
+        setselectedrelatedname({label:"Site",value:"1",_index:1})
+      }
+      else if(GLOBAL.TaskRelatedNameId==='2') {
+        setTaskRelatedNameId("2");
+        setselectedrelatedname({label:"Unit",value:"2",_index:2})
+
+      }
+      else if(GLOBAL.TaskRelatedNameId==='3') {
+        setTaskRelatedNameId("3");
+        setselectedrelatedname({label:"Section",value:"3",_index:3})
+
+      }
+      else if(GLOBAL.TaskRelatedNameId==='4') {
+        setTaskRelatedNameId("4");
+        setselectedrelatedname({label:"Feature",value:"4",_index:4})
+      }
+    }
+
   },[]);
   const ClearDate=()=>{
     setGeoAddressCity('')
@@ -395,81 +905,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   };
-  const openMaps=(latitude,longitude)=> {
-    if (Platform.OS === "android") {
-      if(latitude && longitude) {
-        Linking.openURL(`geo:0,0?q=${latitude},${longitude}`)
-          .catch(err => console.error("An error occurred", err));
-      }
-    }
-  };
-  // /////check Input Value change or not:project////////////////
-  //
-  // const  string_equality1=(values)=>{
-  //     if (values?.Projectname === Name) {
-  //       setvisible(false);
-  //       setShowMessage(false);
-  //     }
-  //   else {
-  //     setShowWarningMessage(true);
-  //   }
-  // }
-  // /////check Input Value change or not:site////////////////
-  // const  string_equality_site=(values)=>{
-  //   console.log(values,'values')
-  //   if(values?.sitename!==Name||values?.GeoAddressPostalCode!==GeoAddressPostalCode||values?.GeoAddressStreet!==GeoAddressStreet||
-  //     values?.GeoAddressCountry!==GeoAddressCountry||values?.GeoAddressCity!==GeoAddressCity){
-  //     setShowWarningMessage(true);
-  //   }
-  //   else {
-  //     setvisible(false);
-  //     setShowMessage(false);
-  //   }
-  // }
-  // /////check Input Value change or not:unit////////////////
-  // const  string_equality_unit=(values)=>{
-  //   console.log(values,'values')
-  //   console.log(values?.GeoAddressStreet,'values?.GeoAddressPostalCode')
-  //   console.log( GeoAddressStreet,' GeoAddressStreet')
-  //   console.log(   values?.GeoAddressCountry,'   values?.GeoAddressCountry')
-  //   console.log( GeoAddressCountry,' GeoAddressCountry')
-  //   console.log(   values?.GeoAddressCity,'   values?.GeoAddressCity')
-  //   console.log( GeoAddressCity,' GeoAddressCity')
-  //   //values?.GeoAddressPostalCode !== GeoAddressPostalCode ||
-  //     if (values?.Unitname !== Name ||  values?.GeoAddressStreet !== GeoAddressStreet ||
-  //       values?.GeoAddressCountry !== GeoAddressCountry || values?.GeoAddressCity !== GeoAddressCity) {
-  //       setShowWarningMessage(true);
-  //     }
-  //   else {
-  //     setvisible(false);
-  //     setShowMessage(false);
-  //       setShowWarningMessage(false);
-  //   }
-  // }
-  // /////check Input Value change or not:unit////////////////
-  // const  string_equality_section=(values)=>{
-  //   console.log(values,'values')
-  //   if(values?.SectionName!==Name){
-  //     setShowWarningMessage(true);
-  //   }
-  //   else {
-  //
-  //     setvisible(false);
-  //     setShowMessage(false);
-  //   }
-  // }
-  // /////check Input Value change or not:unit////////////////
-  // const  string_equality_feature=(values)=>{
-  //   console.log(values,'values')
-  //   if(values?.FeatureName!==Name||values?.switchDYB!==switchDYB2){
-  //     setShowWarningMessage(true);
-  //   }
-  //   else {
-  //
-  //     setvisible(false);
-  //     setShowMessage(false);
-  //   }
-  // }
+
   const renderItem = item => {
     return (
       <View style={Styles.item}>
@@ -488,7 +924,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
   const renderItem_status = item => {
     return (
       <View style={Styles.item_status}>
-
         <View style={{width:'80%'}}>
           <Text style={Styles.textItem}>{item.label}</Text>
         </View>
@@ -500,6 +935,15 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   };
+   const Geocoder_latlong=async (label)=>{
+     Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
+     const res = await Geocoder.geocodeAddress(label)
+     var NY = {
+       latitude: res?.[0]?.position?.lat.toFixed(7),
+       longitude: res?.[0]?.position?.lng.toFixed(7),
+     };
+     setLocation(NY)
+   }
   if (numberValue === 1) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -510,7 +954,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           }}
           onSubmit={values => {
             onChangeText(values);
-
           }}
           validationSchema={validationSchema3}
         >
@@ -522,14 +965,13 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 style={[inputStyle, { paddingVertical: 6 }]}
                 onChangeText={handleChange("Projectname")}
                 onFocus={() => setFieldTouched("Projectname")}
-                placeholderTextColor={'#fff'} />
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
               {touched.Projectname && errors.Projectname &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Projectname}</Text>
               }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Notes</Text>
               <TextInput
                 value={values.ProjectNote}
-
                 onChangeText={handleChange("ProjectNote")}
                 onFocus={() => setFieldTouched("ProjectNote")}
                 multiline={true}
@@ -537,8 +979,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 onContentSizeChange={(e) => {
                   numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
                 }}
-                placeholderTextColor={'#fff'} />
-
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
               {
                 ShowButton===true?
                   <View style={[Styles.ViewItems_center]}>
@@ -548,13 +989,12 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       width: '100%',
                       paddingVertical: 2,
                       marginTop: normalize(30),
-
                     }]}//handleSubmit
                              onpress={handleSubmit}
                              categoriIcon={""}
                              title={tittlebtn}
                              colorsArray={['#ffadad','#f67070','#FF0000']}
-                             styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                             styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
                   </View>:null
               }
 
@@ -581,11 +1021,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           {({ values, handleChange, errors,setFieldTouched, touched, handleSubmit}) => (
             <View style={{width:'90%'}}>
                 <TouchableOpacity onPress={() => {
-                  // string_equality1(values)
                   setvisible(false);
                  setShowMessage(false);
                 }} style={Styles.CancelBtnLeftAlign2}>
-                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                  <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
                 </TouchableOpacity>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
@@ -630,18 +1069,16 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 ShowButton===true?
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
                   flexDirection: "row",
                   width: '100%',
                   paddingVertical: 2,
                   marginTop: normalize(30),
-
                 }]}//handleSubmit
                          onpress={handleSubmit}
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null
               }
             </View>
@@ -654,16 +1091,16 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
   }
 
 /////////////Project////////////////
-
   else if (numberValue === 2) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+
         <Formik
           initialValues={{
             sitename: "",
             note:"",
-            GeoAddressPostalCode:'',
-            GeoAddressStreet:''
+            GeoAddressPostalCode:GeoAddressPostalCode,
+            GeoAddressStreet:GeoAddressStreet
           }}
           onSubmit={values => {
             onChangeText(values);
@@ -671,174 +1108,208 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           validationSchema={validationSchema4}>
           {({ values,handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Site Name</Text>
-              <TextInput
-                value={values.sitename}
-                style={[inputStyle ]}
-                onChangeText={handleChange("sitename")}
-                onFocus={() => setFieldTouched("sitename")}
-                placeholderTextColor={'#fff'}
-              />
-              {touched.sitename && errors.sitename &&
-              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.sitename}</Text>
-              }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Street Address</Text>
-              <TextInput
-                value={values.GeoAddressStreet}
-                style={[inputStyle,{paddingVertical:'3%'}]}
-                onContentSizeChange={(e) => {
-                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                }}
-                onChangeText={handleChange("GeoAddressStreet")}
-                onFocus={() => setFieldTouched("GeoAddressStreet")}
-                multiline={true}
-                placeholderTextColor={'#fff'} />
-              {touched.GeoAddressStreet && errors.GeoAddressStreet &&
-              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.GeoAddressStreet}</Text>
-              }
-
-              <View style={Styles.InputeRow}>
-
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocationAdd]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CountryList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCountry}
-                    value={GeoAddressCountry}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCountry(item.label);
-                      setIsFocus(false);
-                      setcountryId(item.value);
-                      getCity(item.value);
-                      ClearDate();
+              {
+                showMap === true ?
+                  <MapView
+                    style={Styles.map}
+                    initialRegion={{
+                      latitude: parseFloat(location?.latitude),
+                      longitude: parseFloat(location?.longitude),
+                      latitudeDelta: LATITUDE_DELTA,
+                      longitudeDelta: LONGITUDE_DELTA,
                     }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
-                  {GeoAddressCountry==='' &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
-                  }
-                </View>
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                  <Dropdown
-                    style={GeoAddressCity!==''?Styles.dropdownLocationAdd:Styles.dropdownLocationErrorAdd}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CityList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCity}
-                    value={GeoAddressCity}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCity(item.label);
-                      setcityId(item.value)
-                      setIsFocus(false);
+                    // onPress={(e) => setmarker({ marker: e.nativeEvent.coordinate })}
+                    onPress={(e) => {
+                      setmarker({ coordinate: e.nativeEvent.coordinate })
+                      getLocation(e.nativeEvent.coordinate)
                     }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
-                  {GeoAddressCity==='' &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
-                  }
-                </View>
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
-                  <TextInput
-                    value={values.GeoAddressPostalCode}
-                    style={Styles.inputStyleLocationAdd2}
-                    onContentSizeChange={(e) => {
-                      numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                    }}
-                    onChangeText={handleChange("GeoAddressPostalCode")}
-                    onFocus={() => setFieldTouched("GeoAddressPostalCode")}
-                    multiline={true}
-                    placeholderTextColor={'#fff'} />
-                  {touched.GeoAddressPostalCode && errors.GeoAddressPostalCode &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.GeoAddressPostalCode}</Text>
-                  }
-                </View>
-
-                <TouchableOpacity onPress={()=>openMaps(location?.latitude,location?.longitude)} style={Styles.InputeRowItems}>
-                  <View style={Styles.InputeRowLocation}>
-                    <MaterialCommunityIcons
-                      style={Styles.icon_Location}
-                      color="#fff"
-                      name="map-search-outline"
-                      size={14}
+                    mapType="standard"
+                    zoomEnabled={true}
+                    pitchEnabled={true}
+                    showsUserLocation={true}
+                    followsUserLocation={true}
+                    showsCompass={true}
+                    showsBuildings={true}
+                    showsTraffic={true}
+                    showsIndoors={true}
+                  >
+                    {marker !== '' ?
+                      <Marker coordinate={marker?.coordinate} /> : null}
+                  </MapView> :
+                  <>
+                    <Text style={[Styles.txtLightColor, { marginTop: normalize(10), }]}>Site Name</Text>
+                    <TextInput
+                      value={values.sitename}
+                      style={[inputStyle]}
+                      onChangeText={handleChange("sitename")}
+                      onFocus={() => setFieldTouched("sitename")}
+                      placeholderTextColor={'#fff'}
                     />
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                      <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                    </Text>
-                  </View>
-                  <View
-                    style={Styles.inputStyleLocationAdd2}>
-                    <Text style={Styles.txtLightColorLocation}>{location?.latitude} , {location?.longitude}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Notes</Text>
-              <TextInput
-                value={values.siteNote}
-                style={[inputStyle,{paddingVertical:'3%'}]}
-                onContentSizeChange={(e) => {
-                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                }}
-                onChangeText={handleChange("siteNote")}
-                onFocus={() => setFieldTouched("siteNote")}
-                multiline={true}
-                placeholderTextColor={'#fff'} />
-              {ShowButton===true ?
-                <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
-                  flexDirection: "row",
-                  width: '100%',
-                  paddingVertical: 2,
-                  marginTop: normalize(15),
-                }]}//handleSubmit
-                         onpress={handleSubmit}
-                         categoriIcon={""}
-                         title={tittlebtn}
-                         colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />:null
-              }
+                    {touched.sitename && errors.sitename &&
+                    <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.sitename}</Text>
+                    }
+                    <Text style={[Styles.txtLightColor, { marginTop: normalize(10), }]}>Street Address</Text>
+                    <TextInput
+                      value={values.GeoAddressStreet}
+                      style={[inputStyle, { paddingVertical: '3%' }]}
+                      onContentSizeChange={(e) => {
+                        numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                      }}
+                      onChangeText={handleChange("GeoAddressStreet")}
+                      onFocus={() => setFieldTouched("GeoAddressStreet")}
+                      multiline={true}
+                      placeholderTextColor={'#fff'} />
+                    <View style={Styles.InputeRow}>
+
+                      <View style={Styles.InputeRowItems}>
+                        <Text
+                          style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Country</Text>
+                        <Dropdown
+                          style={[Styles.dropdownLocationAdd]}
+                          placeholderStyle={Styles.placeholderStyle}
+                          selectedTextStyle={Styles.selectedTextStyle}
+                          iconStyle={Styles.iconStyle}
+                          itemTextStyle={Styles.itemTextStyle}
+                          data={CountryList}
+                          maxHeight={150}
+                          labelField="label"
+                          valueField="value"
+                          search={true}
+                          searchPlaceholder="Search..."
+                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                          placeholder={GeoAddressCountry}
+                          value={GeoAddressCountry}
+                          containerStyle={Styles.containerStyle}
+                          renderItem={renderItem_Location}
+                          onFocus={() => setIsFocus(true)}
+                          onBlur={() => setIsFocus(false)}
+                          onChange={item => {
+                            setGeoAddressCountry(item.label);
+                            setIsFocus(false);
+                            setcountryId(item.value);
+                            getCity(item.value);
+                            ClearDate();
+                          }}
+                          renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                              <View style={Styles.selectedStyle2}>
+                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                                <AntDesign color="#fff" name="delete" size={15} />
+                              </View>
+                            </TouchableOpacity>
+                          )}
+                        />
+                        {GeoAddressCountry === '' &&
+                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                        }
+                      </View>
+                      <View style={Styles.InputeRowItems}>
+                        <Text
+                          style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>City</Text>
+                        <Dropdown
+                          style={GeoAddressCity !== '' ? Styles.dropdownLocationAdd : Styles.dropdownLocationErrorAdd}
+                          placeholderStyle={Styles.placeholderStyle}
+                          selectedTextStyle={Styles.selectedTextStyle}
+                          iconStyle={Styles.iconStyle}
+                          itemTextStyle={Styles.itemTextStyle}
+                          data={CityList}
+                          maxHeight={150}
+                          labelField="label"
+                          valueField="value"
+                          search={true}
+                          searchPlaceholder="Search..."
+                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                          placeholder={GeoAddressCity}
+                          value={GeoAddressCity}
+                          containerStyle={Styles.containerStyle}
+                          renderItem={renderItem_Location}
+                          onFocus={() => setIsFocus(true)}
+                          onBlur={() => setIsFocus(false)}
+                          onChange={item => {
+                            setGeoAddressCity(item.label);
+                            setcityId(item.value)
+                            setIsFocus(false);
+                            Geocoder_latlong(item.label)
+                          }}
+                          renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                              <View style={Styles.selectedStyle2}>
+                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                                <AntDesign color="#fff" name="delete" size={15} />
+                              </View>
+                            </TouchableOpacity>
+                          )}
+                        />
+                        {GeoAddressCity === '' &&
+                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                        }
+                      </View>
+                      <View style={Styles.InputeRowItems}>
+                        <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>postal
+                          code</Text>
+                        <TextInput
+                          value={values.GeoAddressPostalCode}
+                          style={Styles.inputStyleLocationAdd2}
+                          onContentSizeChange={(e) => {
+                            numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                          }}
+                          onChangeText={handleChange("GeoAddressPostalCode")}
+                          onFocus={() => setFieldTouched("GeoAddressPostalCode")}
+                          multiline={true}
+                          placeholderTextColor={'#fff'} />
+                      </View>
+
+                      <TouchableOpacity onPress={() => setshowMap(true)} style={Styles.InputeRowItems}>
+                        <View style={Styles.InputeRowLocation}>
+                          <MaterialCommunityIcons
+                            style={Styles.icon_Location}
+                            color="#fff"
+                            name="map-search-outline"
+                            size={14}
+                          />
+                          <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Lat &
+                            Long
+                            <Text style={Styles.txtLightColor_samall}> (click here)</Text>
+                          </Text>
+                        </View>
+                        <View
+                          style={Styles.inputStyleLocationAdd2}>
+                          {
+                            location?.latitude !== '' && location?.longitude ?
+                              <Text
+                                style={Styles.txtLightColorLocation}>{parseFloat(location?.latitude).toFixed(7)} , {parseFloat(location?.longitude).toFixed(7)}</Text> :
+                              <Text style={Styles.txtLightColorLocation}></Text>
+                          }
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={[Styles.txtLightColor, { marginTop: normalize(10), }]}>Notes</Text>
+                    <TextInput
+                      value={values.siteNote}
+                      style={[inputStyle, { paddingVertical: '3%' }]}
+                      onContentSizeChange={(e) => {
+                        numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                      }}
+                      onChangeText={handleChange("siteNote")}
+                      onFocus={() => setFieldTouched("siteNote")}
+                      multiline={true}
+                      placeholderTextColor={'#fff'} />
+                    {ShowButton === true ?
+                      <ButtonI style={[Styles.btn, {
+                        //margin: normalize(15),
+                        flexDirection: "row",
+                        width: '100%',
+                        paddingVertical: 2,
+                        marginTop: normalize(15),
+                      }]}
+                               onpress={handleSubmit}
+                               categoriIcon={""}
+                               title={tittlebtn}
+                               colorsArray={['#ffadad', '#f67070', '#FF0000']}
+                               styleTxt={[Styles.txtbtn, { fontSize: normalize(16), }]} sizeIcon={27} /> : null
+                    }
+                  </>
+                      }
             </View>
           )}
         </Formik>
@@ -860,7 +1331,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           }}
           onSubmit={values => {
             onChangeText(values);
-
           }}
           validationSchema={validationSchema4}
         >
@@ -869,9 +1339,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               <TouchableOpacity onPress={() => {
                 setvisible(false);
                 setShowMessage(false);
-               //string_equality_site(values)
               }} style={Styles.CancelBtnLeftAlign2}>
-                <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
               </TouchableOpacity>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
@@ -894,7 +1363,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 onFocus={() => {
                   setFieldTouched("sitename");
                 }}
-                //placeholder="E-mail"
                 placeholderTextColor={'#fff'}
 
               />
@@ -986,6 +1454,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       setcityId(item.value)
                       setGeoAddressCity(item.label);
                       setIsFocus(false);
+                      Geocoder_latlong(item.label)
                     }}
                     renderSelectedItem={(item, unSelect) => (
                       <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
@@ -1018,25 +1487,28 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.GeoAddressPostalCode}</Text>
                   }
                 </View>
-
-                  <TouchableOpacity onPress={()=>openMaps(geoLat,geoLong)} style={Styles.InputeRowItems}>
-                    <View style={Styles.InputeRowLocation}>
-                      <MaterialCommunityIcons
-                        style={Styles.icon_Location}
-                        color="#fff"
-                        name="map-search-outline"
-                        size={14}
-                      />
-                      <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                        <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                      </Text>
-                    </View>
-                    <View
-                      style={Styles.inputStyleLocation}>
-                      <Text style={Styles.txtLightColorLocation}>{geoLat} , {geoLong}</Text>
-                    </View>
-                  </TouchableOpacity>
-
+                <TouchableOpacity onPress={()=>setshowMap(true)} style={Styles.InputeRowItems}>
+                  <View style={Styles.InputeRowLocation}>
+                    <MaterialCommunityIcons
+                      style={Styles.icon_Location}
+                      color="#fff"
+                      name="map-search-outline"
+                      size={14}
+                    />
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
+                      <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
+                    </Text>
+                  </View>
+                  <View
+                    style={Styles.inputStyleLocationAdd2}>
+                    {
+                      location?.latitude!==''&&location?.longitude?
+                      <Text style={Styles.txtLightColorLocation}>{parseFloat(location?.latitude).toFixed(7)} , {parseFloat(location?.longitude).toFixed(7)}</Text>:
+                        <Text
+                          style={Styles.txtLightColorLocation}></Text>
+                    }
+                  </View>
+                </TouchableOpacity>
               </View>
               <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Notes</Text>
               <TextInput
@@ -1051,7 +1523,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 placeholderTextColor={'#fff'} />
               {ShowButton===true?
                 <ButtonI style={[Styles.btn, {
-                  //margin: normalize(15),
                   flexDirection: "row",
                   width: '100%',
                   paddingVertical: 2,
@@ -1061,7 +1532,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />:null
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />:null
               }
 
 
@@ -1072,9 +1543,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
-
   /////////////Site////////////////
-
   if (numberValue === 11) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -1082,189 +1551,221 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           initialValues={{
             Unitname: "",
             UnitNote:"",
-            GeoAddressPostalCode:'',
-            GeoAddressStreet:''
+            GeoAddressPostalCode:GeoAddressPostalCode,
+            GeoAddressStreet:GeoAddressStreet
           }}
           onSubmit={values => {
             onChangeText(values);
-
           }}
-          validationSchema={validationSchema14}
-        >
+          validationSchema={validationSchema14}>
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Unit Name</Text>
-              <TextInput
-                value={values.Unitname}
-                style={[inputStyle, { paddingVertical: 6 }]}
-                onChangeText={handleChange("Unitname")}
-                onFocus={() => setFieldTouched("Unitname")}
-                placeholderTextColor={'#fff'} />
-              {touched.Unitname && errors.Unitname &&
-              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Unitname}</Text>
-              }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Street Address</Text>
-              <TextInput
-                value={values.GeoAddressStreet}
-                style={[inputStyle,{paddingVertical:'3%'}]}
-                onContentSizeChange={(e) => {
-                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                }}
-                onChangeText={handleChange("GeoAddressStreet")}
-                onFocus={() => setFieldTouched("GeoAddressStreet")}
-                multiline={true}
-                placeholderTextColor={'#fff'} />
-              {touched.GeoAddressStreet && errors.GeoAddressStreet &&
-              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.GeoAddressStreet}</Text>
-              }
-              <View style={Styles.InputeRow}>
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocationAdd]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CountryList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCountry}
-                    value={GeoAddressCountry}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCountry(item.label);
-                      setIsFocus(false);
-                      setcountryId(item.value);
-                      getCity(item.value);
-                      ClearDate();
-
+              {
+                showMap===true?
+                  <MapView
+                    style={Styles.map}
+                    initialRegion={{
+                      latitude:parseFloat(location?.latitude) ,
+                      longitude:parseFloat( location?.longitude),
+                      latitudeDelta: LATITUDE_DELTA,
+                      longitudeDelta: LONGITUDE_DELTA,
                     }}
+                    onPress={(e) => {
+                      setmarker({coordinate: e.nativeEvent.coordinate})
+                      getLocation(e.nativeEvent.coordinate)
+                    }}
+                    mapType="standard"
+                    zoomEnabled={true}
+                    pitchEnabled={true}
+                    showsUserLocation={true}
+                    followsUserLocation={true}
+                    showsCompass={true}
+                    showsBuildings={true}
+                    showsTraffic={true}
+                    showsIndoors={true}
+                  >
+                    {marker!=='' ?
+                      <Marker coordinate={marker?.coordinate} />:null}
+                  </MapView>:
+                  <>
+                    <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Unit Name</Text>
+                    <TextInput
+                      value={values.Unitname}
+                      style={[inputStyle, { paddingVertical: 6 }]}
+                      onChangeText={handleChange("Unitname")}
+                      onFocus={() => setFieldTouched("Unitname")}
+                      placeholderTextColor={'#fff'} />
+                    {touched.Unitname && errors.Unitname &&
+                    <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Unitname}</Text>
+                    }
+                    <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Street Address</Text>
+                    <TextInput
+                      value={values.GeoAddressStreet}
+                      style={[inputStyle,{paddingVertical:'3%'}]}
+                      onContentSizeChange={(e) => {
+                        numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                      }}
+                      onChangeText={handleChange("GeoAddressStreet")}
+                      onFocus={() => setFieldTouched("GeoAddressStreet")}
+                      multiline={true}
+                      placeholderTextColor={'#fff'} />
+                    <View style={Styles.InputeRow}>
+                      <View style={Styles.InputeRowItems}>
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
+                        <Dropdown
+                          style={[Styles.dropdownLocationAdd]}
+                          placeholderStyle={Styles.placeholderStyle}
+                          selectedTextStyle={Styles.selectedTextStyle}
+                          iconStyle={Styles.iconStyle}
+                          itemTextStyle={Styles.itemTextStyle}
+                          data={CountryList}
+                          maxHeight={150}
+                          labelField="label"
+                          valueField="value"
+                          search={true}
+                          searchPlaceholder="Search..."
+                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                          placeholder={GeoAddressCountry}
+                          value={GeoAddressCountry}
+                          containerStyle={Styles.containerStyle}
+                          renderItem={renderItem_Location}
+                          onFocus={() => setIsFocus(true)}
+                          onBlur={() => setIsFocus(false)}
+                          onChange={item => {
+                            setGeoAddressCountry(item.label);
+                            setIsFocus(false);
+                            setcountryId(item.value);
+                            getCity(item.value);
 
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
+                            ClearDate();
+                          }}
+                          renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                              <View style={Styles.selectedStyle2}>
+                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                                <AntDesign color="#fff" name="delete" size={15} />
+                              </View>
+                            </TouchableOpacity>
+                          )}
+                        />
+                        {GeoAddressCountry==='' &&
+                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                        }
+                      </View>
+                      <View style={Styles.InputeRowItems}>
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
+                        <Dropdown
+                          style={GeoAddressCity!==''?Styles.dropdownLocationAdd:Styles.dropdownLocationErrorAdd}
+                          placeholderStyle={Styles.placeholderStyle}
+                          selectedTextStyle={Styles.selectedTextStyle}
+                          iconStyle={Styles.iconStyle}
+                          itemTextStyle={Styles.itemTextStyle}
+                          data={CityList}
+                          maxHeight={150}
+                          labelField="label"
+                          valueField="value"
+                          search={true}
+                          searchPlaceholder="Search..."
+                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                          placeholder={GeoAddressCity}
+                          value={GeoAddressCity}
+                          containerStyle={Styles.containerStyle}
+                          renderItem={renderItem_Location}
+                          onFocus={() => setIsFocus(true)}
+                          onBlur={() => setIsFocus(false)}
+                          onChange={item => {
+                            setGeoAddressCity(item.label);
+                            setcityId(item.value)
+                            setIsFocus(false);
+                            Geocoder_latlong(item.label)
+                          }}
+                          renderSelectedItem={(item, unSelect) => (
+                            <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                              <View style={Styles.selectedStyle2}>
+                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                                <AntDesign color="#fff" name="delete" size={15} />
+                              </View>
+                            </TouchableOpacity>
+                          )}
+                        />
+                        {GeoAddressCity==='' &&
+                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
+                        }
+                      </View>
+                      <View style={Styles.InputeRowItems}>
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
+                        <TextInput
+                          value={values.GeoAddressPostalCode}
+                          style={Styles.inputStyleLocationAdd2}
+                          onContentSizeChange={(e) => {
+                            numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                          }}
+                          onChangeText={handleChange("GeoAddressPostalCode")}
+                          onFocus={() => setFieldTouched("GeoAddressPostalCode")}
+                          multiline={true}
+                          placeholderTextColor={'#fff'} />
+                      </View>
+                      <TouchableOpacity onPress={()=>setshowMap(true)} style={Styles.InputeRowItems}>
+                        <View style={Styles.InputeRowLocation}>
+                          <MaterialCommunityIcons
+                            style={Styles.icon_Location}
+                            color="#fff"
+                            name="map-search-outline"
+                            size={14}
+                          />
+                          <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
+                            <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
+                          </Text>
+                        </View>
+                        <View
+                          style={Styles.inputStyleLocationAdd2}>
+                          {
+                            location?.latitude !== '' && location?.longitude ?
+
+
+                              <Text
+                                style={Styles.txtLightColorLocation}>{parseFloat(location?.latitude).toFixed(7)} , {parseFloat(location?.longitude).toFixed(7)}</Text>:
+                              <Text
+                                style={Styles.txtLightColorLocation}></Text>
+                          }
                         </View>
                       </TouchableOpacity>
-                    )}
-                  />
-                  {GeoAddressCountry==='' &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
-                  }
-                </View>
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                  <Dropdown
-                    style={GeoAddressCity!==''?Styles.dropdownLocationAdd:Styles.dropdownLocationErrorAdd}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CityList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCity}
-                    value={GeoAddressCity}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCity(item.label);
-                      setcityId(item.value)
-                      setIsFocus(false);
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
-                  {GeoAddressCity==='' &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
-                  }
-                </View>
-                <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
-                  <TextInput
-                    value={values.GeoAddressPostalCode}
-                    style={Styles.inputStyleLocationAdd2}
-                    onContentSizeChange={(e) => {
-                      numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                    }}
-                    onChangeText={handleChange("GeoAddressPostalCode")}
-                    onFocus={() => setFieldTouched("GeoAddressPostalCode")}
-                    multiline={true}
-                    placeholderTextColor={'#fff'} />
-                  {touched.GeoAddressPostalCode && errors.GeoAddressPostalCode &&
-                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.GeoAddressPostalCode}</Text>
-                  }
-                </View>
-                <TouchableOpacity onPress={()=>openMaps(location?.latitude,location?.longitude)} style={Styles.InputeRowItems}>
-                  <View style={Styles.InputeRowLocation}>
+                    </View>
+                    <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Notes</Text>
+                    <TextInput
+                      value={values.UnitNote}
+                      style={[inputStyle,{paddingVertical:'4%'}]}
+                      onContentSizeChange={(e) => {
+                        numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                      }}
+                      onChangeText={handleChange("UnitNote")}
+                      onFocus={() => setFieldTouched("UnitNote")}
+                      multiline={true}
+                      placeholderTextColor={'#fff'} />
+                    {touched.UnitNote && errors.UnitNote &&
+                    <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UnitNote}</Text>
+                    }
+                    {ShowButton===true?
+                      <View style={[Styles.ViewItems_center]}>
+                        <ButtonI style={[Styles.btn, {
+                          //margin: normalize(15),
+                          flexDirection: "row",
+                          width: '100%',
+                          paddingVertical: 2,
+                          marginTop: normalize(15),
+                        }]}
+                                 onpress={handleSubmit}
+                                 categoriIcon={""}
+                                 title={tittlebtn}
+                                 colorsArray={['#ffadad','#f67070','#FF0000']}
+                                 styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+                      </View>:null
+                    }
+                  </>
 
-                    <MaterialCommunityIcons
-                      style={Styles.icon_Location}
-                      color="#fff"
-                      name="map-search-outline"
-                      size={14}
-                    />
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                    <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                    </Text>
-                  </View>
-                  <View
-                    style={Styles.inputStyleLocationAdd2}>
-                    <Text style={Styles.txtLightColorLocation}>{location?.latitude} , {location?.longitude}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Notes</Text>
-              <TextInput
-                value={values.UnitNote}
-                style={[inputStyle,{paddingVertical:'4%'}]}
-                onContentSizeChange={(e) => {
-                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
-                }}
-                onChangeText={handleChange("UnitNote")}
-                onFocus={() => setFieldTouched("UnitNote")}
-                multiline={true}
-                placeholderTextColor={'#fff'} />
-              {touched.UnitNote && errors.UnitNote &&
-              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UnitNote}</Text>
               }
-              {ShowButton===true?
-                <View style={[Styles.ViewItems_center]}>
-                  <ButtonI style={[Styles.btn, {
-                    //margin: normalize(15),
-                    flexDirection: "row",
-                    width: '100%',
-                    paddingVertical: 2,
-                    marginTop: normalize(15),
-                  }]}//handleSubmit
-                           onpress={handleSubmit}
-                           categoriIcon={""}
-                           title={tittlebtn}
-                           colorsArray={['#ffadad','#f67070','#FF0000']}
-                           styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
-                </View>:null
-              }
+
+
 
             </View>
 
@@ -1282,7 +1783,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
             Unitname: Name,
             UnitNote:"",
             GeoAddressPostalCode:GeoAddressPostalCode,
-
             GeoAddressStreet:GeoAddressStreet,
             GeoAddressCountry:GeoAddressCountry,
             GeoAddressCity:GeoAddressCity
@@ -1294,13 +1794,12 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         >
           {({ values, handleChange, errors, setFieldTouched, touched, handleSubmit }) => (
             <View style={styles.formContainer}>
-
               <TouchableOpacity onPress={() => {
                 setvisible(false);
                 setShowMessage(false);
                 //string_equality_unit(values)
               }} style={Styles.CancelBtnLeftAlign2}>
-                <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
               </TouchableOpacity>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
@@ -1408,6 +1907,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       setcityId(item.value)
                       setGeoAddressCity(item.label);
                       setIsFocus(false);
+                      Geocoder_latlong(item.label)
                     }}
                     renderSelectedItem={(item, unSelect) => (
                       <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
@@ -1439,24 +1939,28 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   }
                 </View>
 
-                  <TouchableOpacity onPress={()=>openMaps(geoLat,geoLong)} style={Styles.InputeRowItems}>
-                    <View style={Styles.InputeRowLocation}>
-                      <MaterialCommunityIcons
-                        style={Styles.icon_Location}
-                        color="#fff"
-                        name="map-search-outline"
-                        size={14}
-                      />
-                      <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                        <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                      </Text>
-                    </View>
-                    <View
-                      style={Styles.inputStyleLocation}>
-                      <Text style={Styles.txtLightColorLocation}>{geoLat} , {geoLong}</Text>
-                    </View>
-                  </TouchableOpacity>
-
+                <TouchableOpacity onPress={()=>setshowMap(true)} style={Styles.InputeRowItems}>
+                  <View style={Styles.InputeRowLocation}>
+                    <MaterialCommunityIcons
+                      style={Styles.icon_Location}
+                      color="#fff"
+                      name="map-search-outline"
+                      size={14}
+                    />
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
+                      <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
+                    </Text>
+                  </View>
+                  <View
+                    style={Styles.inputStyleLocationAdd2}>
+                    {
+                      location?.latitude!==''&&location?.longitude?
+                      <Text style={Styles.txtLightColorLocation}>{parseFloat(location?.latitude).toFixed(7)} , {parseFloat(location?.longitude).toFixed(7)}</Text>:
+                        <Text
+                          style={Styles.txtLightColorLocation}></Text>
+                    }
+                  </View>
+                </TouchableOpacity>
               </View>
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Notes</Text>
               <TextInput
@@ -1485,7 +1989,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null}
             </View>
 
@@ -1550,7 +2054,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                              categoriIcon={""}
                              title={tittlebtn}
                              colorsArray={['#ffadad','#f67070','#FF0000']}
-                             styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                             styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
                   </View>:null
               }
 
@@ -1582,7 +2086,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 setShowMessage(false);
                 //string_equality_section(values)
               }} style={Styles.CancelBtnLeftAlign2}>
-                <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
               </TouchableOpacity>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
@@ -1632,7 +2136,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null}
             </View>
 
@@ -1729,7 +2233,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null}
             </View>
 
@@ -1761,9 +2265,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               <TouchableOpacity onPress={() => {
                 setvisible(false);
                 setShowMessage(false);
-                //string_equality_feature(values)
               }} style={Styles.CancelBtnLeftAlign2}>
-                <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
               </TouchableOpacity>
               {ShowMessage === true ?
                 <View style={Styles.flashMessageSuccsess}>
@@ -1851,7 +2354,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null}
             </View>
 
@@ -1959,29 +2462,29 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 marginBottom: 5,
                 width: '100%',
                 paddingVertical: 4,
-                color: '#fff',
+                color: GLOBAL.OFFICIAL_BLUE_COLOR,
                 justifyContent: "center",
                 flexDirection: "row",
                 alignItems: "center",
               }]}>
                 <TextInput
                   value={values.orgkey}
-                  style={[ {
+                  style={[{
                     width: '97%',
-                    paddingVertical: 3, color: '#fff',
+                    paddingVertical: 3, color:GLOBAL.OFFICIAL_BLUE_COLOR,
+                    fontFamily:'OpenSansBold',
                   }]}
                   onChangeText={handleChange("orgkey")}
                   onFocus={() => setFieldTouched("orgkey")}
                   onBlur={()=>{
                     if(values?.orgkey?.length===9)
-
                       checkOrgCode(values?.orgkey)
                   }}
                   keyboardType={"numeric"}
                   placeholderTextColor={'#fff'} />
                 <View style={[{}]}>
                   <View>
-                    <Feather name={iconcheck} size={15} color={'#fff'} />
+                    <Feather name={iconcheck} size={15} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
                   </View>
                 </View>
               </View>
@@ -1997,7 +2500,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 marginBottom: 5,
                 width: '100%',
                 paddingVertical: 4,
-                color: '#fff',
+                color: GLOBAL.OFFICIAL_BLUE_COLOR,
                 justifyContent: "center",
                 alignItems: "center",
                 flexDirection: "row",
@@ -2008,7 +2511,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   width: '100%',
                   paddingVertical: 2,
                   borderRadius: normalize(6),
-                  color:'#fff',
+                  color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                  fontFamily:'TisaSansProBoldItalic',
                 }]}
                 onChangeText={handleChange("username")}
                 onFocus={() => setFieldTouched("username")}
@@ -2026,7 +2530,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 marginBottom: 5,
                 width: '100%',
                 paddingVertical: 4,
-                color: '#fff',
+                color: GLOBAL.OFFICIAL_BLUE_COLOR,
                 justifyContent: "center",
                 flexDirection: "row",
                 alignItems: "center",
@@ -2035,7 +2539,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   value={values.password}
                   style={[{
                     width: '97%',
-                    paddingVertical: 3, color: '#fff',
+                    paddingVertical: 3, color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                    fontFamily:'TisaSansProBoldItalic',
                   }]}
                   onChangeText={handleChange("password")}
                   onFocus={() => setFieldTouched("password")}
@@ -2043,7 +2548,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   placeholderTextColor={'#fff'} />
                 <View style={[{}]}>
                   <TouchableOpacity onPress={onpress}>
-                    <Feather name={iconsecuret} size={15} color={'#fff'} />
+                    <Feather name={iconsecuret} size={15} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -2057,7 +2562,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </View>
                 <TouchableOpacity style={{ width: "40%" }}
                                   onPress={Pinrecovery}>
-                  <Text style={[Styles.txt, { color:GLOBAL.OFFICIAL_Button, marginLeft: "auto" }]}>Forgot Password ?</Text>
+                  <Text style={[Styles.txt, { color:GLOBAL.OFFICIAL_BLUE_COLOR, marginLeft: "auto",  fontFamily:'TisaSansProBoldItalic', }]}>Forgot Password ?</Text>
                 </TouchableOpacity>
               </View>
               {Btn===true?
@@ -2199,13 +2704,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </Text>
                 <Text style={[Styles.txt, { color: GLOBAL.OFFICIAL_Button, marginLeft: 3 }]}>Sign Up</Text>
               </TouchableOpacity>
-              {/* <View style={[Styles.ViewItems_center,{flex:1}]}>
-                  <View style={[Styles.linearView,{}]}>
-
-                    <Text style={[Styles.txt,{ fontSize: normalize(13),}]}>{All_text.OR_Use}</Text>
-
-                  </View>
-                </View>*/}
             </View>
           )}
         </Formik>
@@ -2228,9 +2726,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
               <Text style={[Styles.txt]}>New Password</Text>
-              <View style={[, {
+              <View style={[{
                 borderWidth: 1,
-                borderColor: red,
+                borderColor: 'red',
                 borderRadius: normalize(6),
                 padding: 12,
                 marginBottom: 5,
@@ -2295,7 +2793,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     } :
                   {
                     borderWidth: 1,
-                    borderColor: red,
+                    borderColor: 'red',
                     borderRadius: normalize(6),
                     padding: 12,
                     marginBottom: 5,
@@ -2372,7 +2870,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={[styles.formContainer2,]}>
-
               <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
               <TextInput
                 value={values.Title}
@@ -2408,7 +2905,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   setSelecteduser(item);
                   setUserId(item.value)
                 }}
-               // setCategoryId,setRelatedId,setParentTaskId,setPriorityId,setTaskStatusId
                 renderSelectedItem={(item, unSelect) => (
                   <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
                     <View style={Styles.selectedStyle2}>
@@ -2434,7 +2930,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder={!isFocus ? 'Select category' : '...'}
+                placeholder={!isFocus ? 'Select categoryddddddd' : '...'}
                 searchPlaceholder="Search..."
                 value={selectedcategory}
                 containerStyle={Styles.containerStyle}
@@ -2442,6 +2938,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 onChange={item=> {
+
                   setSelectedcategory(item);
                   setCategoryId(item.value);
                   Task_RelatedList(item.value)
@@ -2702,7 +3199,44 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 {touched.Title && errors.Title &&
                 <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
                 }
+                {/*<Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>ParentTask Id</Text>*/}
+                {/*<Dropdown*/}
+                {/*  style={[Styles.dropdowntask]}*/}
+                {/*  placeholderStyle={Styles.placeholderStyle}*/}
+                {/*  selectedTextStyle={Styles.selectedTextStyle}*/}
+                {/*  inputSearchStyle={Styles.inputSearchStyle}*/}
+                {/*  iconStyle={Styles.iconStyle}*/}
+                {/*  itemTextStyle={Styles.itemTextStyle}*/}
+                {/*  data={modules}*/}
+                {/*  maxHeight={300}*/}
+                {/*  labelField="label"*/}
+                {/*  valueField="value"*/}
+                {/*  placeholder={!isFocus ? 'Select ParentTask' : '...'}*/}
+                {/*  searchPlaceholder="Search..."*/}
+                {/*  value={SelectedParentTask}*/}
+                {/*  containerStyle={Styles.containerStyle}*/}
+                {/*  renderItem={renderItem}*/}
+                {/*  onFocus={() => setIsFocus(true)}*/}
+                {/*  onBlur={() => setIsFocus(false)}*/}
+                {/*  onChange={item=> {*/}
+                {/*    setSelectedParentTask(item);*/}
+                {/*    setParentTaskId(item.value);*/}
+                {/*  }}*/}
+                {/*  renderSelectedItem={(item, unSelect) => (*/}
+                {/*    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>*/}
+                {/*      <View style={Styles.selectedStyle2}>*/}
+                {/*        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>*/}
+                {/*        <AntDesign color="#fff" name="delete" size={15} />*/}
+                {/*      </View>*/}
+                {/*    </TouchableOpacity>*/}
+                {/*  )}*/}
+                {/*/>*/}
+
+                {/*{error==='selectedcategory' && selectedcategory==='' ?*/}
+                {/*  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null*/}
+                {/*}*/}
                 <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Category</Text>
+
                 <Dropdown
                   style={[Styles.dropdowntask]}
                   placeholderStyle={Styles.placeholderStyle}
@@ -2711,7 +3245,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   iconStyle={Styles.iconStyle}
                   itemTextStyle={Styles.itemTextStyle}
                   data={Taskcategory}
-                  search
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
@@ -2725,7 +3258,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   onChange={item=> {
                     setSelectedcategory(item);
                     setCategoryId(item.value);
+                    writeDataStorage(GLOBAL.Category_Last_Info,item.value)
                     Task_RelatedList(item.value)
+                    Task_WorkTypeList(item.value)
                   }}
                   renderSelectedItem={(item, unSelect) => (
                     <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
@@ -2740,7 +3275,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 {error==='selectedcategory' && selectedcategory==='' ?
                   <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null
                 }
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>related</Text>
+
+
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Work Type</Text>
+
                 <Dropdown
                   style={[Styles.dropdowntask]}
                   placeholderStyle={Styles.placeholderStyle}
@@ -2748,26 +3286,284 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   inputSearchStyle={Styles.inputSearchStyle}
                   iconStyle={Styles.iconStyle}
                   itemTextStyle={Styles.itemTextStyle}
-                  data={TaskRelated}
-                  search
+                  data={TaskWorkType}
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder={!isFocusrelated ? 'Select related' : '...'}
+                  placeholder={!isFocus ? 'Select Work Type' : '...'}
                   searchPlaceholder="Search..."
-                  value={selectedrelated}
+                  value={selectedWorkType}
                   containerStyle={Styles.containerStyle}
                   renderItem={renderItem}
-                  onFocus={() => setIsFocusrelated(true)}
-                  onBlur={() => setIsFocusrelated(false)}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
                   onChange={item=> {
-                    setSelectedrelated(item);
-                    setRelatedId(item.value)
+                    setselectedWorkType(item);
+                    setWorkTypeId(item.value);
+                    writeDataStorage(GLOBAL.WorkType_Last_Info,item.value)
                   }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
                 />
-                {/*{error==='selectedrelated' && selectedrelated==='' ?*/}
-                {/*  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select related! Please?</Text>:null*/}
-                {/*}*/}
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Priority</Text>
+
+                <Dropdown
+                  style={[Styles.dropdowntask]}
+                  placeholderStyle={Styles.placeholderStyle}
+                  selectedTextStyle={Styles.selectedTextStyle}
+                  inputSearchStyle={Styles.inputSearchStyle}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={Taskpriority}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? 'Select Priority' : '...'}
+                  value={selectedpriority}
+                  containerStyle={Styles.containerStyle}
+                  renderItem={renderItem}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item=> {
+                    setselectedpriority(item);
+                    setpriorityId(item.value);
+                    writeDataStorage(GLOBAL.priorityId_Last_Info,item.value)
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+                {categoryId==='1'?
+                  <>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Target Entity </Text>
+                    <Dropdown
+                      style={[Styles.dropdowntask]}
+                      placeholderStyle={Styles.placeholderStyle}
+                      selectedTextStyle={Styles.selectedTextStyle}
+                      inputSearchStyle={Styles.inputSearchStyle}
+                      iconStyle={Styles.iconStyle}
+                      itemTextStyle={Styles.itemTextStyle}
+                      data={RelatedNameList}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocusrelated ? 'Select Target Entity' : '...'}
+                      searchPlaceholder="Search..."
+                      value={selectedrelatedname}
+                      containerStyle={Styles.containerStyle}
+                      renderItem={renderItem}
+                      onFocus={() => setIsFocusrelated(true)}
+                      onBlur={() => setIsFocusrelated(false)}
+                      onChange={item=> {
+                        setselectedrelatedname(item);
+                        setTaskRelatedNameId(item.value);
+                        writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label)
+                      }}
+                    />
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Project Name</Text>
+                    <Dropdown
+                      style={[Styles.dropdowntask]}
+                      placeholderStyle={Styles.placeholderStyle}
+                      selectedTextStyle={Styles.selectedTextStyle}
+                      inputSearchStyle={Styles.inputSearchStyle}
+                      iconStyle={Styles.iconStyle}
+                      itemTextStyle={Styles.itemTextStyle}
+                      data={TaskRelated}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocusrelated ? 'Select Project Name' : '...'}
+                      searchPlaceholder="Search..."
+                      value={selectedrelated}
+                      containerStyle={Styles.containerStyle}
+                      renderItem={renderItem}
+                      onFocus={() => setIsFocusrelated(true)}
+                      onBlur={() => setIsFocusrelated(false)}
+                      onChange={item=> {
+                        writeDataStorage(GLOBAL.projectId_Last_Info,item.value)
+                        GLOBAL.ProjectId=item.value;
+                        if(TaskRelatedNameId==='0') {
+                          setSelectedrelated(item);
+                          setRelatedId(item.value);
+                          writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                        }
+                        else {
+                          getSites(item.value);
+                          setSelectedrelated(item);
+                          setTaskProjectId(item.value)
+
+                        }
+                      }}
+                    />
+                  </>:null
+                }
+                {parseInt(TaskRelatedNameId)>=1&&
+                <>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Site</Text>
+                  <Dropdown
+                    style={[Styles.dropdowntask]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    inputSearchStyle={Styles.inputSearchStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={SiteList}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                    searchPlaceholder="Search..."
+                    value={selectedTaskSiteName}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem}
+                    onFocus={() => setIsFocusrelated(true)}
+                    onBlur={() => setIsFocusrelated(false)}
+                    onChange={item=> {
+                      GLOBAL.SiteId=item.value;
+                      writeDataStorage(GLOBAL.siteId_Last_Info,item.value)
+                      if(TaskRelatedNameId==='1') {
+                        setselectedTaskSiteName(item);
+                        setRelatedId(item.value)
+                        writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                      }
+                      else {
+                        getUnits(item.value);
+                        setselectedTaskSiteName(item);
+                        setTaskSiteId(item.value)
+                      }
+                    }}
+                  />
+                </>
+                }
+                {parseInt(TaskRelatedNameId)>=2&&
+                <>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>unit</Text>
+                  <Dropdown
+                    style={[Styles.dropdowntask]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    inputSearchStyle={Styles.inputSearchStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={unitList}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                    searchPlaceholder="Search..."
+                    value={selectedunitName}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem}
+                    onFocus={() => setIsFocusrelated(true)}
+                    onBlur={() => setIsFocusrelated(false)}
+                    onChange={item=> {
+                      writeDataStorage(GLOBAL.unitId_Last_Info,item.value)
+                      GLOBAL.UnitId=item.value
+                      if(TaskRelatedNameId==='2') {
+                        setselectedunitName(item);
+                        setRelatedId(item.value)
+                        writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                      }
+                      else {
+                        getSection();
+                        setselectedunitName(item);
+                        setTaskunitId(item.value)
+                      }
+                    }}
+                  />
+                </>
+                }
+                {parseInt(TaskRelatedNameId)>=3&&
+                  <>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Section</Text>
+                    <Dropdown
+                      style={[Styles.dropdowntask]}
+                      placeholderStyle={Styles.placeholderStyle}
+                      selectedTextStyle={Styles.selectedTextStyle}
+                      inputSearchStyle={Styles.inputSearchStyle}
+                      iconStyle={Styles.iconStyle}
+                      itemTextStyle={Styles.itemTextStyle}
+                      data={sectionList}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                      searchPlaceholder="Search..."
+                      value={selectedsectionName}
+                      containerStyle={Styles.containerStyle}
+                      renderItem={renderItem}
+                      onFocus={() => setIsFocusrelated(true)}
+                      onBlur={() => setIsFocusrelated(false)}
+                      onChange={item=> {
+                        writeDataStorage(GLOBAL.sectionId_Last_Info,item.value)
+                        GLOBAL.SectionId=item.value
+                        if(TaskRelatedNameId==='3') {
+                          setselectedsectionName(item);
+                          setRelatedId(item.value)
+                          writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                        }
+                        else {
+                          getFeatures();
+                          setselectedsectionName(item);
+                          setTasksectionId(item.value)
+                        }
+                      }}
+                    />
+                  </>
+                }
+                {TaskRelatedNameId==='4'&&
+                    <>
+                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Feature</Text>
+                      <Dropdown
+                        style={[Styles.dropdowntask]}
+                        placeholderStyle={Styles.placeholderStyle}
+                        selectedTextStyle={Styles.selectedTextStyle}
+                        inputSearchStyle={Styles.inputSearchStyle}
+                        iconStyle={Styles.iconStyle}
+                        itemTextStyle={Styles.itemTextStyle}
+                        data={featureList}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                        searchPlaceholder="Search..."
+                        value={selectedfeatureName}
+                        containerStyle={Styles.containerStyle}
+                        renderItem={renderItem}
+                        onFocus={() => setIsFocusrelated(true)}
+                        onBlur={() => setIsFocusrelated(false)}
+                        onChange={item=> {
+                          writeDataStorage(GLOBAL.featureId_Last_Info,item.value)
+                          if(TaskRelatedNameId==='4') {
+                            setselectedfeatureName(item);
+                            setRelatedId(item.value)
+                            writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                          }
+                          else {
+                            getFeatures();
+                            setTaskfeatureId(item);
+                            setTasksectionId(item.value)
+                          }
+                        }}
+                      />
+                    </>
+                }
                 <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
                 <TextInput
                   value={values.TaskNote}
@@ -2787,7 +3583,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     <Text style={Styles.UploadImageText}>
                       Add Photos
                     </Text>
-                    <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                    <MaterialIcons name={"add-a-photo"} size={20} color={Colors.button}  />
                   </TouchableOpacity>
                   {
                     ImageSourceviewarray.map((value,key) => {
@@ -2809,11 +3605,11 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </View>
                 {
                   ShowButton===true?
-                    <View style={[Styles.ViewItems_center]}>
+                    <View style={[Styles.ViewItems_center_row]}>
                       <ButtonI style={[Styles.btn, {
-                        //margin: normalize(15),
+                        //margin:normalize(15),
                         flexDirection: "row",
-                        width: '100%',
+                        width:'35%',
                         paddingVertical: 2,
                         marginTop: normalize(30),
                       }]}//handleSubmit
@@ -2821,12 +3617,22 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                                categoriIcon={""}
                                title={'Add Task'}
                                colorsArray={['#a39898','#786b6b','#382e2e']}
-                               styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                               styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+                        <ButtonI style={[Styles.btn, {
+                          //margin:normalize(15),
+                          flexDirection: "row",
+                          width: '60%',
+                          paddingVertical: 2,
+                          marginTop: normalize(30),
+                        }]}//handleSubmit
+                                 onpress={()=>CreateTask(values)}
+                                 categoriIcon={""}
+                                 title={'Add & Create Next Task'}
+                                 colorsArray={['#4d78a5', "#375e89", "#27405c"]}
+                                 styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
                     </View>:null
                 }
-
               </View>
-
             )}
           </Formik>
 
@@ -2851,11 +3657,11 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={[Styles.formContainer2,]}>
-              <View style={[{ width: "89%", marginBottom: "4%" }]}>
+              <View style={[{width:"89%",marginBottom:"4%" }]}>
                 <TouchableOpacity onPress={() => {
                   string_equalityTask(values)
                 }} style={Styles.CancelBtnLeftAlign}>
-                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                  <AntDesign name={"closecircleo"} size={20} color={Colors.button} />
                 </TouchableOpacity>
               </View>
               {
@@ -2866,7 +3672,86 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   }
                 </View>
               }
-
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskWorkType</Text>
+                </View>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Labels</Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={[Styles.dateBoxItem,]}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskWorkType}
+                  </Text>
+                </View>
+                <View  style={Styles.dateBoxItem}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskStatusClass}
+                  </Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskCategoryName</Text>
+                </View>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskCreatedOn</Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskCategoryName}
+                  </Text>
+                </View>
+                <View  style={[Styles.dateBoxItem,]}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskCreatedOn}
+                  </Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskRelatedName</Text>
+                </View>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskRelatedNameRef</Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={[Styles.dateBoxItem,]}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskRelatedName}
+                  </Text>
+                </View>
+                <View  style={Styles.dateBoxItem}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskRelatedNameRef}
+                  </Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Status</Text>
+                </View>
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Priority</Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+                <View  style={Styles.dateBoxItem}>
+                  <Text style={[Styles.txtdate,{color:value?.taskStatusColor}]}>
+                    {value?.taskStatusName}
+                  </Text>
+                </View>
+                <View  style={[Styles.dateBoxItem,]}>
+                  <Text style={[Styles.txtdate,{color:'#fcd274' }]}>
+                    {value?.taskPriorityName}
+                  </Text>
+                </View>
+              </View>
               <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
 
                   <TextInput
@@ -2911,12 +3796,12 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 <View style={Styles.With100NoFlexMarginBotoom}>
                   <View style={[Styles.carouselBtnStyle,{marginTop:'4%'}]}>
                     <TouchableOpacity style={Styles.carouselStyle} onPress={()=>_slider1Ref.snapToPrev()}>
-                      <AntDesign name="caretleft" size={normalize(14)} color={Colors.withe} />
+                      <AntDesign name="caretleft" size={normalize(14)} color={Colors.button} />
                       <Text style={Styles.skiptext}>Prev</Text>
                     </TouchableOpacity>
                     <TouchableOpacity  style={Styles.carouselStyle1} onPress={()=>_slider1Ref.snapToNext()}>
                       <Text style={Styles.skiptext}>Next</Text>
-                      <AntDesign name="caretright" size={normalize(14)} color={Colors.withe} />
+                      <AntDesign name="caretright" size={normalize(14)} color={Colors.button} />
                     </TouchableOpacity>
                   </View>
                   <Carousel
@@ -2949,7 +3834,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#a39898','#786b6b','#382e2e']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>:null
               }
             </View>
@@ -3267,8 +4152,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           }}
           onSubmit={values => {
             onChangeText(values);
-          }}
-          validationSchema={validationSchema19}>
+          }}>
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={styles.formContainer}>
               <View  style={Styles.dateBox}>
@@ -3295,7 +4179,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     setdateType("PlanStartDate");
                     setOpen(true)
                   }} style={Styles.dateBoxItem}>
-                    <Text style={Styles.txtdate}>
+                    <Text style={Styles.txtdate2}>
                       {DateFormatplanstart}
                     </Text>
                   </TouchableOpacity>
@@ -3303,7 +4187,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     setdateType("PlanEndDate");
                     setOpenend(true)
                   }} style={Styles.dateBoxItem}>
-                    <Text style={Styles.txtdate}>
+                    <Text style={Styles.txtdate2}>
                       {DateFormatplanend}
                     </Text>
                   </TouchableOpacity>
@@ -3348,18 +4232,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               {touched.CaseNote && errors.CaseNote &&
               <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.CaseNote}</Text>
               }
-              {/*<View style={Styles.With100Row}>*/}
-              {/*  <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>*/}
-              {/*    <TouchableOpacity onPress={()=>setshowModalReject( false)}>*/}
-              {/*      <Text style={[Styles.txt_left2,{fontSize: normalize(14) }]}>No</Text>*/}
-              {/*    </TouchableOpacity>*/}
-              {/*  </LinearGradient>*/}
-              {/*  <LinearGradient  colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>*/}
-              {/*    <TouchableOpacity onPress={()=>{setshowModalReject(false)}}>*/}
-              {/*      <Text style={[Styles.txt_left2,{fontSize: normalize(14)}]}>Yes</Text>*/}
-              {/*    </TouchableOpacity>*/}
-              {/*  </LinearGradient>*/}
-              {/*</View>*/}
               <View style={[Styles.ViewItems_center_task]}>
                 <ButtonI style={[Styles.btn,{
                   flexDirection:"row",
@@ -3371,7 +4243,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>
             </View>
           )}
@@ -3427,19 +4299,181 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
+
+  if (numberValue === 33) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            CompletedDetails:"",
+            TimeRelated:'',
+            totalTime:''
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}>
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={styles.formContainer}>
+              <View  style={Styles.dateBox}>
+                <View  style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanStartDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Task StartDate
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanEndDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Task EndDate
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanStartDate");
+                    setOpen(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate2}>
+                      {DateFormatplanstart}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setdateType("PlanEndDate");
+                    setOpenend(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate2}>
+                      {DateFormatplanend}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanStartDate' && DateFormatplanstart==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanStartDate! Please?</Text>:null
+                    }
+                  </View>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanEndDate' && DateFormatplanend==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanEndDate! Please?</Text>:null
+                    }
+                  </View>
+                </View>
+              </View>
+              <View  style={Styles.dateBox}>
+                <View  style={Styles.dateBoxitems}>
+                  <View  style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Time Related
+                    </Text>
+                  </View>
+                  <View style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                    Total Time
+                    </Text>
+                  </View>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <View style={Styles.InputeRowItems}>
+                    <Dropdown
+                      style={[Styles.dropdownLocation]}
+                      placeholderStyle={Styles.placeholderStyle}
+                      selectedTextStyle={Styles.selectedTextStyle}
+                      iconStyle={Styles.iconStyle}
+                      itemTextStyle={Styles.itemTextStyle}
+                      data={TimeRelated}
+                      maxHeight={150}
+                      labelField="label"
+                      valueField="value"
+                      inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                      placeholder={TimeRelatedselct}
+                      value={TimeRelatedselct}
+                      containerStyle={Styles.containerStyle}
+                      renderItem={renderItem_Location}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={item => {
+                        setTimeRelatedselct(item.label);
+                        setIsFocus(false);
+                      }}
+                      renderSelectedItem={(item, unSelect) => (
+                        <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                          <View style={Styles.selectedStyle2}>
+                            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                            <AntDesign color="#fff" name="delete" size={15} />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                    />
+                    {GeoAddressCountry==='' &&
+                    <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                    }
+                  </View>
+                  <View  style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate2}>
+                      {dateDifferenceHours!==0&&dateDifferenceHours}  {dateDifferenceDays!==0&&dateDifferenceDays}
+                    </Text>
+                  </View>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanStartDate' && DateFormatplanstart==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanStartDate! Please?</Text>:null
+                    }
+                  </View>
+                  <View style={Styles.dateBoxItemBorder}>
+                    {error==='PlanEndDate' && DateFormatplanend==='' ?
+                      <Text style={{fontSize:11,color:"#FF0D10",marginTop:normalize(10),fontWeight:'bold'}}>Select PlanEndDate! Please?</Text>:null
+                    }
+                  </View>
+                </View>
+              </View>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Completed Details</Text>
+              <TextInput
+                value={values.CompletedDetails}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e)=>{
+                  numOfLinesCompany=e.nativeEvent.contentSize.height/14
+                }}
+                onChangeText={handleChange("CompletedDetails")}
+                onFocus={()=>setFieldTouched("CompletedDetails")}
+                multiline={true}
+                placeholderTextColor={'#fff'}/>
+              {touched.CompletedDetails && errors.CompletedDetails &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.CompletedDetails}</Text>}
+              <View style={[Styles.ViewItems_center_task]}>
+                <ButtonI style={[Styles.btn,{
+                  flexDirection:"row",
+                  width:'50%',
+                  paddingVertical:2,
+                  marginTop:normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#ffadad','#f67070','#FF0000']}
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+          )}
+        </Formik>
+      </View>
+    );
+  }
   ///////////////////Task////////////////
 
   if (numberValue === 20) {
     return (
       <View>
         <Formik
-
           initialValues={{
             DYBName: "",
             DYBNote:"",
-
           }}
-
           onSubmit={values => {
             onChangeText(values);
           }}
@@ -3481,7 +4515,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffc2b5','#fca795','#d1583b']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>
             </View>
 
@@ -3537,7 +4571,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffc2b5','#fca795','#d1583b']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>
             </View>
 
@@ -3557,6 +4591,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           initialValues={{
             UserName:GLOBAL.UserInformation.Username,
             password:GLOBAL.PASSWORD_value,
+            Confirmpassword:GLOBAL.PASSWORD_value,
             FullName:GLOBAL.UserInformation.FullName,
             OrgKey:GLOBAL.UserInformation.OrgAppKey
           }}
@@ -3568,50 +4603,62 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         >
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={{width:'90%'}}>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Full Name</Text>
-              <TextInput
-                value={values.FullName}
-                style={[inputStyleProfile,]}
-                onChangeText={handleChange("FullName")}
-                onFocus={() => setFieldTouched("FullName")}
-                placeholderTextColor={'#fff'} />
-              {touched.FullName && errors.FullName &&
-              <Text style={{ fontSize: 12, color: "#FF0D10",fontWeight:'bold' }}>{errors.FullName}</Text>
-              }<Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>User Name</Text>
+              {/*<Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Full Name</Text>*/}
+              {/*<TextInput*/}
+              {/*  value={values.FullName}*/}
+              {/*  style={[inputStyleProfile,]}*/}
+              {/*  onChangeText={handleChange("FullName")}*/}
+              {/*  onFocus={() => setFieldTouched("FullName")}*/}
+              {/*  placeholderTextColor={'#fff'} />*/}
+              {/*{touched.FullName && errors.FullName &&*/}
+              {/*<Text style={{ fontSize: 12, color: "#FF0D10",fontWeight:'bold' }}>{errors.FullName}</Text>*/}
+              {/*}*/}
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>User Name</Text>
               <TextInput
                 value={values.UserName}
-                style={[inputStyleProfile,]}
+                style={[inputStyle,]}
                 onChangeText={handleChange("UserName")}
                 onFocus={() => setFieldTouched("UserName")}
                 placeholderTextColor={'#fff'} />
               {touched.UserName && errors.UserName &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UserName}</Text>
               }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Password</Text>
+              <TextInput
+                value={values.password}
+                style={[inputStyle,]}
+                onChangeText={handleChange("password")}
+                onFocus={() => setFieldTouched("password")}
+                placeholderTextColor={'#fff'} />
+              {touched.password && errors.password &&
+              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.password}</Text>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Confirm Password</Text>
+              <TextInput
+                value={values.Confirmpassword}
+                style={[inputStyle,]}
+                onChangeText={handleChange("Confirmpassword")}
+                onFocus={() => setFieldTouched("Confirmpassword")}
+                placeholderTextColor={'#fff'} />
+              {touched.Confirmpassword && errors.Confirmpassword &&
+              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Confirmpassword}</Text>
+              }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Org Key</Text>
               <TextInput
                 value={values.OrgKey}
-                style={[inputStyleProfile]}
+                style={[inputStyle]}
                 onChangeText={handleChange("OrgKey")}
                 onFocus={() => setFieldTouched("OrgKey")}
+                editable={false}
                 placeholderTextColor={'#fff'} />
               {touched.OrgKey && errors.OrgKey &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.OrgKey}</Text>
               }
-              {/*<Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>password</Text>*/}
-              {/*<TextInput*/}
-              {/*  value={values.password}*/}
-              {/*  style={[inputStyleProfile]}*/}
-              {/*  onChangeText={handleChange("password")}*/}
-              {/*  onFocus={() => setFieldTouched("password")}*/}
-              {/*  placeholderTextColor={'#fff'} />*/}
-              {/*{touched.password && errors.password &&*/}
-              {/*<Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.password}</Text>*/}
-              {/*}*/}
               <View style={[Styles.bottomViewFixed]}>
                 <Text style={Styles.txtGrayColor }>
                   CurrentVersion
                 </Text>
-                <Text style={Styles.txtLightColor}>
+                <Text style={Styles.txtLightColorNumber}>
                   {Version}
                 </Text>
               </View>
@@ -3625,7 +4672,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#a58cf8','#987aff','#7953FAFF']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>
             </View>
 
@@ -3707,35 +4754,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     multiline={true}
                     placeholderTextColor={'#fff'} />
                 </View>
-
-
-
-                {/*<View style={Styles.InputeRowItems}>*/}
-                {/*  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>GeoLat</Text>*/}
-                {/*  <TextInput*/}
-                {/*    value={values.Location}*/}
-                {/*    style={[inputStyleLocation,{paddingVertical:'4%'}]}*/}
-                {/*    onContentSizeChange={(e) => {*/}
-                {/*      numOfLinesCompany = e.nativeEvent.contentSize.height / 14;*/}
-                {/*    }}*/}
-                {/*    onChangeText={handleChange("ImageTitle")}*/}
-                {/*    onFocus={() => setFieldTouched("ImageTitle")}*/}
-                {/*    multiline={true}*/}
-                {/*    placeholderTextColor={'#fff'} />*/}
-                {/*</View>*/}
-                {/*<View style={Styles.InputeRowItems}>*/}
-                {/*  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>GeoLong</Text>*/}
-                {/*  <TextInput*/}
-                {/*    value={values.Location}*/}
-                {/*    style={[inputStyleLocation,{paddingVertical:'4%'}]}*/}
-                {/*    onContentSizeChange={(e) => {*/}
-                {/*      numOfLinesCompany = e.nativeEvent.contentSize.height / 14;*/}
-                {/*    }}*/}
-                {/*    onChangeText={handleChange("ImageTitle")}*/}
-                {/*    onFocus={() => setFieldTouched("ImageTitle")}*/}
-                {/*    multiline={true}*/}
-                {/*    placeholderTextColor={'#fff'} />*/}
-                {/*</View>*/}
               </View>
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn,{
@@ -3748,7 +4766,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                          categoriIcon={""}
                          title={tittlebtn}
                          colorsArray={['#ffadad','#f67070','#FF0000']}
-                         styleTxt={[Styles.txt,{fontSize: normalize(16),}]} sizeIcon={27} />
+                         styleTxt={[Styles.txtbtn2,{fontSize: normalize(16),}]} sizeIcon={27} />
               </View>
             </View>
 
@@ -3761,6 +4779,193 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
 
   ////////////////////Address//////////////////
 
+  if (numberValue === 30) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            CompanyName:'',
+            CustomerName:'',
+            TRNNo:'',
+            Phone:'',
+            Email:'',
+            Street:'',
+            GeoAddressCountry:'',
+            GeoAddressCity:''
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+
+          }}
+          validationSchema={validationSchema30}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Company Name</Text>
+              <TextInput
+                value={values.CompanyName}
+                style={[inputStyleProfile,]}
+                onChangeText={handleChange("CompanyName")}
+                onFocus={() => setFieldTouched("CompanyName")}
+                placeholderTextColor={'#fff'} />
+              {touched.CompanyName && errors.CompanyName &&
+              <Text style={{ fontSize: 12, color: "#FF0D10",fontWeight:'bold' }}>{errors.CompanyName}</Text>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Customer Name</Text>
+              <TextInput
+                value={values.CustomerName}
+                style={[inputStyleProfile,]}
+                onChangeText={handleChange("CustomerName")}
+                onFocus={() => setFieldTouched("CustomerName")}
+                placeholderTextColor={'#fff'} />
+              {touched.CustomerName && errors.CustomerName &&
+              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.CustomerName}</Text>
+              }
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>TRN No</Text>
+              <TextInput
+                value={values.TRNNo}
+                style={[inputStyleProfile]}
+                onChangeText={handleChange("TRNNo")}
+                onFocus={() => setFieldTouched("TRNNo")}
+                placeholderTextColor={'#fff'} />
+              {touched.TRNNo && errors.TRNNo &&
+              <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.TRNNo}</Text>
+              }
+
+
+            <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Phone</Text>
+            <TextInput
+            value={values.Phone}
+            style={[inputStyleProfileNumber]}
+            onChangeText={handleChange("Phone")}
+            onFocus={() => setFieldTouched("Phone")}
+            placeholderTextColor={'#fff'} />
+          {touched.Phone && errors.Phone &&
+            <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Phone}</Text>
+          }
+            <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Email</Text>
+            <TextInput
+            value={values.Email}
+            style={[inputStyleProfile]}
+            onChangeText={handleChange("Email")}
+            onFocus={() => setFieldTouched("Email")}
+            placeholderTextColor={'#fff'} />
+          {touched.Email && errors.Email &&
+            <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Email}</Text>
+          }
+              <View style={Styles.InputeRow}>
+
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
+                  <Dropdown
+                    style={[Styles.dropdownLocationCustomer]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={CountryList}
+                    maxHeight={150}
+                    labelField="label"
+                    valueField="value"
+                    search={true}
+                    searchPlaceholder="Search..."
+                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                    placeholder={GeoAddressCountry}
+                    value={GeoAddressCountry}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem_Location}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      setGeoAddressCountry(item.label);
+                      setIsFocus(false);
+                      setcountryId(item.value);
+                      getCity(item.value);
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                  {GeoAddressCountry==='' &&
+                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                  }
+
+
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
+                  <Dropdown
+                    style={GeoAddressCity!==''?Styles.dropdownLocationCustomer:Styles.dropdownLocationError}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={CityList}
+                    maxHeight={150}
+                    labelField="label"
+                    valueField="value"
+                    search={true}
+                    searchPlaceholder="Search..."
+                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                    placeholder={GeoAddressCity}
+                    value={GeoAddressCity}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem_Location}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      setcityId(item.value)
+                      setGeoAddressCity(item.label);
+                      setIsFocus(false);
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                  {GeoAddressCity==='' &&
+                  <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
+                  }
+                </View>
+
+            <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Street</Text>
+            <TextInput
+            value={values.Street}
+            style={[inputStyleProfile]}
+            onChangeText={handleChange("Street")}
+            onFocus={() => setFieldTouched("Street")}
+            placeholderTextColor={'#fff'} />
+          {touched.Street && errors.Street &&
+            <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Street}</Text>
+          }
+              <View style={[Styles.ViewItems_center_transparent]}>
+                <ButtonI style={[Styles.btnNOBackColor, {
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginVertical: normalize(20),
+                }]}
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={['#a58cf8','#987aff','#7953FAFF']}
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+
+  ///////////////////Customer////////////////
 }
 
 

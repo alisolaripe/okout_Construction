@@ -1,14 +1,14 @@
 import { Image, Modal, Text, TouchableOpacity, View,ImageBackground } from "react-native";
 import { Styles } from "../Styles";
-import FastImage from "react-native-fast-image";
 import LinearGradient from "react-native-linear-gradient";
 import normalize from "react-native-normalize/src/index";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { Colors } from "../Colors";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import React, { useState,useEffect } from "react";
+import React, { useState } from "react";
 import { Content } from "native-base";
+const Photoes=require('../Photoes')
 import Entypo from "react-native-vector-icons/Entypo";
 function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,index}) {
   const [isFocus,setIsFocus] = useState(false);
@@ -34,7 +34,7 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
 
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-               source={require("../../Picture/png/AlertImage.png")}
+               source={Photoes.Alert}
                resizeMode="contain" />
         <View style={Styles.With100NoFlex}>
           <Text style={Styles.txt_left2}>
@@ -112,10 +112,10 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
               <View style={{ alignItems: "center" }}>
                 <View style={[Styles.DYBDatteInpute2]}>
                   <Entypo name={"back-in-time"} size={18} color={IconColor} />
-                  <Text style={[Styles.txtFeature]}>{item?.postDate}</Text>
+                  <Text style={[Styles.txtFeatureNumber]}>{item?.postDate}</Text>
                 </View>
                 {
-                  item?.Country === null || item?.Country === '' ? null:
+                  item?.Country === null || item?.Country === ''|| item?.Country === undefined||typeof item?.Country==='number' ? null:
                 <View style={[Styles.DYBDatteInpute2]}>
                   <MaterialCommunityIcons name={"map-outline"} size={18} color={IconColor} />
 
@@ -127,7 +127,7 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
                 }
                 <View style={[Styles.DYBDatteInpute2, { marginBottom: "2%" }]}>
                   <MaterialCommunityIcons name={"map-marker"} size={18} color={IconColor} />
-                  <Text style={[Styles.txtFeature]}>
+                  <Text style={[Styles.txtFeatureNumber]}>
                     {item?.geoLat} , {item?.geoLong}
                   </Text>
                 </View>
@@ -151,7 +151,7 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
             <TouchableOpacity onPress={() => {
               setvisible(false);
             }} style={[Styles.CancelBtnLeft, { flexDirection: "row" }]}>
-              <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+              <AntDesign name={"closecircleo"} size={20} color={Colors.button} />
               <Text style={[Styles.txtLightcenter]}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -172,7 +172,7 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
               }
               <View style={Styles.DYBDatteInpute2}>
                 <Entypo name={"back-in-time"} size={18} color={IconColor} />
-                <Text style={[Styles.txtFeature]}>{FullImage?.postDate}</Text>
+                <Text style={[Styles.txtFeatureNumber]}>{FullImage?.postDate}</Text>
               </View>
               <View>
                 {
@@ -191,7 +191,7 @@ function DYB_List_Details_Image_Item({ item,DeleteImageFromApi,colors,IconColor,
                 <View
                   style={Styles.DYBDatteInpute2}>
                   <MaterialCommunityIcons name={"map-marker"} size={18} color={IconColor} />
-                  <Text style={[Styles.txtFeature]}>
+                  <Text style={[Styles.txtFeatureNumber]}>
                     {FullImage.geoLat} , {FullImage.geoLong}
                   </Text>
                 </View>

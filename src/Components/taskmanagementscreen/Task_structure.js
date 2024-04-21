@@ -1,166 +1,132 @@
-import { Container, Content } from "native-base";
+import { Container } from "native-base";
 import { Styles } from "../Styles";
 import { Header } from "../component/Header";
 import React, { useEffect, useState } from "react";
 import { Footer1 } from "../component/Footer";
-import { FlatList, Image, ImageBackground, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, Modal, Text, TouchableOpacity, View } from "react-native";
 import normalize from "react-native-normalize/src/index";
 import LinearGradient from "react-native-linear-gradient";
 import { removeDataStorage } from "../Get_Location";
-import { UserPermission } from "../CheckPermission";
-import { Warningmessage } from "../component/Warningmessage";
+import { LogOutModal } from "../component/LogOutModal";
+import { readOnlineApi } from "../ReadPostApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GLOBAL = require("../Global");
+const Photoes = require("../Photoes");
 const Api = require("../Api");
+
 function Taskstructure({ navigation, navigation: { goBack } }) {
-  const [showWarning, setshowWarning] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
-  useEffect(() => {
-console.log(GLOBAL.UserInformation?.roleId,'GLOBAL.UserInformation')
-  }, []);
-  const Navigate_Url= (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
+  const Navigate_Url = (Url) => {
     navigation.navigate(Url);
   };
-  const logout_Url= () => {
-    setshowModalDelete(true)
-  };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
-  };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
 
-        <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY);
-              setshowModalDelete(false)
-              navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
+  };
+  /// Bottom menu click On LogOut button///
+  const logout_Url = () => {
+    setshowModalDelete(true);
+  };
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      Assigned_TaskList();
+    });
+    return unsubscribe;
+  }, []);
+  ///get Technician task list///
+  const Assigned_TaskList = async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Assigned_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        console.log(json, "json:Assigned_TaskList");
+        writeDataStorage(GLOBAL.Assigned_TaskList, json?.tasks);
+      });
+    }
+  };
+  ///Write Data in AsyncStorage///
+  const writeDataStorage = async (key, obj) => {
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(obj));
+    } catch (e) {
+    }
+  };
 
   return (
     <Container style={[Styles.HeaderBackColor]}>
-      <Header colors={['#a39898','#786b6b','#382e2e']} StatusColor={'#a39897'} onPress={goBack} Title={'Task List'}/>
-      {
-        showModalDelete &&
-        <View>
-          {
-            _showModalDelete()
-          }
-        </View>
+      <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={goBack}
+              Title={"Task Management"} />
+      {showModalDelete &&
+      <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
       }
-      <ImageBackground tintColor={'rgba(77,120,165,0.16)'} source={require("../../Picture/png/Task_back.png")}
-                       style={{ width: "100%",flex:1, alignSelf: "stretch"}} resizeMode="stretch">
-        {showWarning===true&&  <Warningmessage/>}
-      <View style={Styles.container_task2}>
-        <View style={Styles.FlexWrapHome}>
-          <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]}  style={Styles.ModuleBox2}>
-            <TouchableOpacity onPress={()=>{
-            GLOBAL.selectItem=1;
-            GLOBAL.TaskMenuName='My Task'
-              navigation.navigate("Task_Management")
-            }
-            }  style={{
-              width: "100%", alignItems: "center",justifyContent:'center',alignSelf:'center'
-            }}>
-              <Image tintColor={'#fff'} resizeMode={"contain"} source={require("../../Picture/png/MyTasks.png")}
-                     style={{ width: "100%", height: normalize(90),alignItems:"center",justifyContent:'center',marginTop:normalize(7) }}
-              />
-              <Text style={Styles.txtMenuHome2}>My Task</Text>
+      <ImageBackground tintColor={"rgba(77,120,165,0.16)"} source={Photoes.Task_backgrung}
+                       style={{ width: "100%", flex: 1, alignSelf: "stretch" }} resizeMode="stretch">
 
-
-            </TouchableOpacity>
-          </LinearGradient>
+        <View style={Styles.container_task2}>
           {
-            GLOBAL.UserInformation?.roleId==='13'&&
-            <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.ModuleBox2}>
-              <TouchableOpacity onPress={()=>{
-                GLOBAL.selectItem=2;
-                GLOBAL.TaskMenuName='The Workshop'
-                navigation.navigate("Task_Management")
-              }
-              }  style={{
-                width: "100%", alignItems: "center",justifyContent:'center'
-              }}>
-                <Image tintColor={'#fff'} resizeMode={"contain"} source={require("../../Picture/png/workshop.png")}
-                       style={{ width: "35%", height: normalize(90),alignItems:"center",justifyContent:'center',marginTop:normalize(7) }}
-                />
-                <Text style={Styles.txtMenuHome2}>The Workshop</Text>
+            GLOBAL.Submodules?.length !== 0 ?
+              <View style={Styles.FlexWrapHome}>
+                {GLOBAL.Submodules?.map((value, key) => {
+                  return (
+                    <LinearGradient key={key} colors={["#6598cd", "#5082ba", "#4a6e8e"]} style={Styles.ModuleBox}>
+                      <TouchableOpacity onPress={() => {
+                        if (value?.constModule_Name === "My Tasks") {
+                          GLOBAL.selectItem = 1;
+                          GLOBAL.TaskMenuName = "My Tasks";
+                          GLOBAL.TaskName = "";
+                          navigation.navigate("Task_Management");
+                        } else {
+                          GLOBAL.selectItem = 2;
+                          GLOBAL.TaskMenuName = "WorkShop";
+                          GLOBAL.TaskName = "";
+                          navigation.navigate("Task_Management");
+                        }
+                      }
+                      } style={{
+                        width: "100%", alignItems: "center", justifyContent: "center", alignSelf: "center",
+                      }}>
+                        {
+                          value?.constModule_Name === "My Tasks" ?
+                            <Image tintColor={"#fff"} resizeMode={"contain"} source={Photoes.MyTasks}
+                                   style={{
+                                     width: "100%",
+                                     height: normalize(90),
+                                     alignItems: "center",
+                                     justifyContent: "center",
+                                     marginTop: normalize(7),
+                                   }}
+                            /> :
+                            <Image tintColor={"#fff"} resizeMode={"contain"} source={Photoes.workshop}
+                                   style={{
+                                     width: "35%",
+                                     height: normalize(90),
+                                     alignItems: "center",
+                                     justifyContent: "center",
+                                     marginTop: normalize(7),
+                                   }}
+                            />
+                        }
 
-
-              </TouchableOpacity>
-            </LinearGradient>
+                        <Text style={Styles.txtMenuHome2}>{value.constModule_Name}</Text>
+                      </TouchableOpacity>
+                    </LinearGradient>
+                  );
+                })}
+              </View> :
+              <View style={Styles.With90CenterVertical3}>
+                <Text style={Styles.EmptyText}>
+                  " No data found ! "
+                </Text>
+              </View>
           }
-          <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.ModuleBox2}>
-            <TouchableOpacity onPress={()=>{
-              GLOBAL.selectItem=2;
-              GLOBAL.TaskMenuName='The Workshop'
-              navigation.navigate("Task_Management")
-            }
-            }  style={{
-              width: "100%", alignItems: "center",justifyContent:'center'
-            }}>
-              <Image tintColor={'#fff'} resizeMode={"contain"} source={require("../../Picture/png/workshop.png")}
-                     style={{ width: "35%", height: normalize(90),alignItems:"center",justifyContent:'center',marginTop:normalize(7) }}
-              />
-              <Text style={Styles.txtMenuHome2}>The Workshop</Text>
 
-
-            </TouchableOpacity>
-          </LinearGradient>
         </View>
-        <Image  resizeMode={"contain"} source={require("../../Picture/png/Task_back.png")}
-                style={{ width: "100%", alignItems:"center" }}
-        />
-      </View>
       </ImageBackground>
-      <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>
+      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
     </Container>
-  )
+  );
 }
+
 export default Taskstructure;

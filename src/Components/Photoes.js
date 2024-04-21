@@ -1,0 +1,22 @@
+module.exports = {
+  Alert:require("../Picture/png/AlertImage.png"),
+  Task_backgrung:require("../Picture/png/Task_back.png"),
+  MyTasks:require("../Picture/png/MyTasks.png"),
+  workshop:require("../Picture/png/workshop.png"),
+  OkoutLogo:require("../Picture/png/OkoutLogo.png"),
+  Splash_background:require("../Picture/png/SplashBilding.png"),
+  ProfileBackground:require("../Picture/png/ProfileBg.png"),
+  Home_backgrung:require("../Picture/png/HomeBack.png"),
+  ribbon:require('../Picture/png/ribbon.png'),
+  ProjectStructure: require("../Picture/png/ProjectStructure.png"),
+  Process:require("../Picture/png/Process.png"),
+  DocumentManagement:require("../Picture/png/DocumentManagement.png"),
+  CheckInOut:require("../Picture/png/CheckInOut.png"),
+  DYB:require("../Picture/png/DYB.png"),
+  abstract:require('../Picture/png/abstract.png'),
+  buildingBck:require('../Picture/png/buildingback.png'),
+  SiteBack:require('../Picture/png/Siteback.png'),
+  unitBack:require('../Picture/png/unitBack.png'),
+  sectionBack:require('../Picture/png/sectionBack.png'),
+  featureBack:require('../Picture/png/featureBack.png')
+}

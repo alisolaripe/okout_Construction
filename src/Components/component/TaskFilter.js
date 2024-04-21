@@ -34,7 +34,6 @@ function TaskFilter({ DateItems,setDateItems,Status,setStatus,Priority,setPriori
             <TouchableOpacity key={index} onPress={() => {
               setSelectItem(value.id);
               FilterFunc1(value.id);
-              console.log(SelectItem, "SelectItem");
             }} style={[SelectItem === value.id ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
               <MaterialCommunityIcons name={value.Icon} size={20}
                                       color={SelectItem === value.id ? GLOBAL.OFFICIAL_WITE_COLOR : GLOBAL.OFFICIAL_background} />

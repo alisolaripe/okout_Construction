@@ -28,7 +28,7 @@ function Task_Edit_Image({ item,colors,onOpen,index,setattachmentId,settaskId,se
           <View index={index} style={Styles.cardContainer}>
             <View style={Styles.card}>
               <TouchableOpacity onPress={() => onOpen()} style={Styles.TaskUploadImagebox}>
-                <Text style={Styles.UploadImageText}>
+                <Text style={Styles.UploadImageText2}>
                   Add Photos
                 </Text>
                 <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
@@ -70,6 +70,12 @@ function Task_Edit_Image({ item,colors,onOpen,index,setattachmentId,settaskId,se
                                           style={[Styles.UnitDetailAddTextBox23, { marginTop: normalize(2) }]}>
                           <MaterialCommunityIcons name={"delete"} size={16} color={"#fff"} />
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setIsFocus(!isFocus)} style={[Styles.UnitDetailAddTextBox24, {
+                          marginTop: normalize(2),
+                          justifyContent: 'center'
+                        }]}>
+                          <FontAwesome size={normalize(16)} color={Colors.withe} name={'angle-double-up'} />
+                        </TouchableOpacity>
                       </View>
                     </View>
                   }
@@ -85,7 +91,7 @@ function Task_Edit_Image({ item,colors,onOpen,index,setattachmentId,settaskId,se
                   <TouchableOpacity onPress={() => {
                     setvisible(false);
                   }} style={[Styles.CancelBtnLeft, { flexDirection: "row" }]}>
-                    <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                    <AntDesign name={"closecircleo"} size={20} color={Colors.button} />
                     <Text style={[Styles.txtLightcenter]}>Close</Text>
                   </TouchableOpacity>
                 </View>

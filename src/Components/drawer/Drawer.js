@@ -1,78 +1,62 @@
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { Colors } from "../Colors";
 import Entypo from "react-native-vector-icons/Entypo";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import * as React from "react";
-import { useState } from "react";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
+import { useEffect, useState } from "react";
+import { Container, Content } from "native-base";
+const Photoes=require('../Photoes');
+const GLOBAL = require("../Global");
 function DrawerCustomize(props) {
-  const [Focuseditem1, setFocuseditem1] = useState(true);
-  const [Focuseditem2, setFocuseditem2] = useState(false);
-  const [Focuseditem3, setFocuseditem3] = useState(false);
-  const [Focuseditem4, setFocuseditem4] = useState(false);
-  const [Focuseditem5, setFocuseditem5] = useState(false);
-  const [Focuseditem6, setFocuseditem6] = useState(false);
-  const [Focuseditem7, setFocuseditem7] = useState(false);
-  const [Focuseditem8, setFocuseditem8] = useState(false);
+  useEffect( () => {
+    setPictureUrl(GLOBAL.UserInformation?.customers[0]?.picture)
+  },[]);
+  const [PictureUrl,setPictureUrl] = useState(null);
+  const Navigate_Between_Modules = (constModule_Id) => {
+    if (constModule_Id === "1") {
+      GLOBAL.TaskName = "";
+      GLOBAL.route = "structure";
+      props.navigation.navigate("Project_structureStack");
+    } else if (constModule_Id === "4") {
+      props.navigation.navigate("Task_managementStack");
+      GLOBAL.TaskName = "";
+    } else if (constModule_Id === "3") {
+      GLOBAL.route = "DYB";
+      GLOBAL.TaskName = "";
+      props.navigation.navigate("Project_structureStack", { screenMode: "Dyb" });
+    }
+  };
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors.background }}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors.withe }}>
       <View style={styles.menuContainer}>
-
         <View style={[styles.viewHeaderMeno]}>
-          <View style={[{ width:'93%',alignItems:'flex-start',paddingVertical:normalize(18)}]}>
-            <Image resizeMode={'contain'} source={require("../../Picture/png/OkoutLogo.png")}
-                   style={[Styles.littleImage]}
-            />
-          </View>
+          <ImageBackground source={Photoes.abstract}
+                           style={{ width: "100%", flex: 1,alignItems:'center'  }} resizeMode="stretch">
+          <TouchableOpacity onPress={()=>  props.navigation.navigate('ProfileStack')} style={Styles.ViewAbsoluteDrawer}>
+            {  PictureUrl === null ?
+                <EvilIcons name={"user"} size={130} color={Colors.Light} />:
+                <Image style={Styles.imageProfileDrawer} source={{uri:PictureUrl}}/>
+            }
+            <Text style={[Styles.txtMenu,{ margin: normalize(10) }]}>{GLOBAL.UserInformation?.customers[0]?.name}</Text>
 
-          <View style={[styles.viewHeaderTitle, {width:'91%',alignItems:'flex-start',paddingBottom:normalize(18)}]}>
-            <Text style={[Styles.txt, { fontWeight: "bold" }]}>Ali Karami</Text>
-            <Text style={[Styles.txt, { fontSize: normalize(14) }]}>With  since Nov 2022</Text>
-          </View>
+          </TouchableOpacity>
+          </ImageBackground>
         </View>
-
-
-
-
-
-        <TouchableOpacity
-          onPress={() => {
-            setFocuseditem1(true);
-            setFocuseditem2(false);
-            setFocuseditem3(false);
-            setFocuseditem4(false);
-            setFocuseditem5(false);
-            setFocuseditem6(false);
-            setFocuseditem7(false);
-            setFocuseditem8(false);
-            props.navigation.navigate("ProfileStack");
-          }}
-          style={[styles.circleContainer, { backgroundColor: Focuseditem1 === true ? Colors.borderButton : Colors.background,marginTop:15}]}>
-          <Entypo name={"user"} size={18} color={Colors.withe} />
-          <Text style={[Styles.txt, { margin: normalize(10) }]}>Profile</Text>
+        { GLOBAL.modules?.map((value, key) => {
+          return (
+        <TouchableOpacity key={key}  onPress={() => Navigate_Between_Modules(value.constModule_Id)}
+          style={[styles.circleContainer, {marginTop:15}]}>
+          <Image tintColor={GLOBAL.OFFICIAL_BLUE_COLOR} resizeMode={"contain"} source={{ uri: value.Image }}
+                 style={{ width: "27%", height: normalize(40) }} />
+          <Text style={[Styles.txtMenu,{ margin: normalize(8) }]}>{value.constModule_Name}</Text>
         </TouchableOpacity>
-        {/*<TouchableOpacity*/}
-        {/*  onPress={() => {*/}
-        {/*    setFocuseditem1(false);*/}
-        {/*    setFocuseditem2(true);*/}
-        {/*    setFocuseditem3(false);*/}
-        {/*    setFocuseditem4(false);*/}
-        {/*    setFocuseditem5(false);*/}
-        {/*    setFocuseditem6(false);*/}
-        {/*    setFocuseditem7(false);*/}
-        {/*    setFocuseditem8(false);*/}
-        {/*    // props.navigation.navigate('meno_index');*/}
-        {/*  }}*/}
-        {/*  style={[styles.circleContainer, {*/}
-        {/*    marginTop: normalize(20),*/}
-        {/*    backgroundColor: Focuseditem2 === true ? Colors.borderButton : Colors.background,*/}
-        {/*  }]}>*/}
-        {/*  <Entypo name={"home"} size={18} color={Colors.withe} />*/}
-        {/*  <Text style={[Styles.txt, { margin: normalize(8) }]}>Gallery</Text>*/}
-        {/*</TouchableOpacity>*/}
-      </View>
 
+        );
+        })}
+      </View>
     </DrawerContentScrollView>
   );
 }
@@ -87,6 +71,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     // justifyContent: 'space-evenly',
+
   },
   menuItemsCard: {
     flexDirection: "column",
@@ -104,9 +89,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   viewHeaderMeno: {
-
+    justifyContent: "center",
     alignItems: "center",
-    width:'100%'
+    width:'100%',
   },
   viewHeaderTitle: {
     justifyContent: "center",

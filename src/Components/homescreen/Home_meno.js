@@ -1,236 +1,218 @@
 import React, { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  ImageBackground, TouchableOpacity, StatusBar, Image, Platform, PermissionsAndroid, Modal,
-} from "react-native";
+import { Text, View, ImageBackground, TouchableOpacity, StatusBar, Image, Modal } from "react-native";
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
-import { DrawerActions } from '@react-navigation/native';
+import { LogOutModal } from "../component/LogOutModal";
+import { DrawerActions } from "@react-navigation/native";
 import normalize from "react-native-normalize/src/index";
-import { Container, Content, Body, Left, Right, Header, Button, FooterTab } from "native-base";
-import {writeDataStorage,removeDataStorage} from "../Get_Location";
+import { Container, Content, Button } from "native-base";
+import { removeDataStorage } from "../Get_Location";
+
 const GLOBAL = require("../Global");
 const Api = require("../Api");
+const Photoes = require("../Photoes");
 import LinearGradient from "react-native-linear-gradient";
 import { readOnlineApi } from "../ReadPostApi";
 import { Footer1 } from "../component/Footer";
-import {Warningmessage} from '../component/Warningmessage'
-import {UserPermission} from '../CheckPermission'
+import { UserPermission } from "../CheckPermission";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [showWarning, setshowWarning] = useState(false);
+  const [modules, setmodules] = useState([]);
   useEffect(() => {
-    console.log(GLOBAL.isConnected,'GLOBAL.isConnected')
-    getAllProjectInfo();
-    getAllProjectInfo_dyb();
-    Assigned_TaskList();
-    My_TaskList();
-    Task_category();
-    getUserPermissions()
+    const unsubscribe = navigation.addListener("focus", () => {
+      Usermodules();
+      getAllProjectInfo();
+      getAllProjectInfo_dyb();
+      Assigned_TaskList();
+      My_TaskList();
+      Task_category();
+      getmapkey();
+    });
+    return unsubscribe;
   }, []);
-  const getUserPermissions =async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.getUserPermissions+`userRoleId=1`).then(json => {
-        console.log(json,'json')
-        GLOBAL.UserPermissionsList=json?.menu_privileges
-        writeDataStorage(GLOBAL.UserPermissions,json);
+  ///get Map key from AsyncStorage///
+  const getmapkey = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.mapKey));
+    GLOBAL.mapKeyValue = json;
+  };
+  ///get Modules List////
+  const Usermodules = async () => {
+    let Icon = "";
+    let IconColor = "";
+    let List_Modules = [];
+    if(GLOBAL.isConnected===true) {
+      readOnlineApi(Api.getModulesInfoMin + `roleId=${GLOBAL.UserInformation?.roleId}&moduleType=${GLOBAL.UserInformation?.MenuType
+      }`).then(json => {
+        json?.modules?.forEach((obj) => {
+          if (obj.constModule_Id === 1 || obj.constModule_Id === "1") {
+            Icon = Photoes.ProjectStructure;
+            IconColor = ["#fdcdcd", "#fd8282", "#FF0000"];
+          } else if (obj.constModule_Id === 4 || obj.constModule_Id === "4") {
+            Icon = Photoes.Process;
+            IconColor = ["#d7b2b2", "#715a5a", "#382e2e"];
+            GLOBAL.Submodules = obj?.subModules;
+          } else if (obj.constModule_Id === 2 || obj.constModule_Id === "2") {
+            Icon = Photoes.DocumentManagement;
+            IconColor = ["#8bc3f8", "#4a7fb3", "#1c3045"];
+          } else if (obj.constModule_Id === 5 || obj.constModule_Id === "5") {
+            Icon = Photoes.DocumentManagement;
+            IconColor = ["#e3bfbf", "#927575", "#382e2e"];
+          } else if (obj.constModule_Id === 6 || obj.constModule_Id === "6") {
+            Icon = Photoes.CheckInOut;
+            IconColor = ["#8bc3f8", "#4a7fb3", "#1c3045"];
+          } else if (obj.constModule_Id === 6 || obj.constModule_Id === "3") {
+            Icon = Photoes.DYB;
+            IconColor = ["#fdcac0", "#ea9885", "#b14b33"];
+          }
+          List_Modules.push({
+            constModule_Id: obj.constModule_Id,
+            constModule_Name: obj.constModule_Name,
+            Image: Image.resolveAssetSource(Icon).uri,
+            IconColor: IconColor,
+          });
+        });
+        if (List_Modules?.length !== 0)
+          setmodules(List_Modules);
+        else
+          setmodules("");
+
+        GLOBAL.modules = List_Modules;
+        writeDataStorage(GLOBAL.Modules, List_Modules);
       });
     }
     else {
-      let json=JSON.parse(await AsyncStorage.getItem(GLOBAL.UserPermissions))
-      console.log(json,'json')
-      GLOBAL.UserPermissionsList=json?.menu_privileges
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Modules));
+      if (json?.length !== 0)
+        setmodules(List_Modules);
+      else
+        setmodules("");
+      GLOBAL.modules = json;
     }
   };
-  const  writeDataStorage=async(key,obj)=>{
+  ///Write Data in AsyncStorage///
+  const writeDataStorage = async (key, obj) => {
     try {
-      await AsyncStorage.setItem(key,JSON.stringify(obj));
-    }
-    catch (e) {
-    }
-  }
-  const Task_category =async () => {
-    if(GLOBAL.isConnected===true) {
-      readOnlineApi(Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        writeDataStorage(GLOBAL.Task_Category,json)
-      })
+      await AsyncStorage.setItem(key, JSON.stringify(obj));
+    } catch (e) {
     }
   };
+  ///get Category List for Add Task///
+  const Task_category = async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_category + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        writeDataStorage(GLOBAL.Task_Category, json);
+      });
+    }
+  };
+  //Get  Dyb===n Project Total List///
   const getAllProjectInfo = async () => {
-    if (GLOBAL.isConnected === true){
-      readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.getAllProjectInfo + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         writeDataStorage(GLOBAL.All_Lists, json?.projects);
       });
     }
   };
+  ///Get Dyb===y Project Total List///
   const getAllProjectInfo_dyb = async () => {
-    if (GLOBAL.isConnected === true){
-      readOnlineApi(Api.getAllProjectInfo_dyb+`userId=${GLOBAL.UserInformation?.userId}&dyb=y`).then(json => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.getAllProjectInfo_dyb + `userId=${GLOBAL.UserInformation?.userId}&dyb=y`).then(json => {
         writeDataStorage(GLOBAL.AllProjectInfo_dyb, json?.projects);
       });
     }
   };
-  const Assigned_TaskList =async () => {
+  ///get Technician task list///
+  const Assigned_TaskList = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Assigned_TaskList+`userId=1`).then(json => {
+      readOnlineApi(Api.Assigned_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         writeDataStorage(GLOBAL.Assigned_TaskList, json?.tasks);
       });
     }
   };
-  const My_TaskList =async () => {
+  ///get user add task list///
+  const My_TaskList = async () => {
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.My_TaskList+`userId=1`).then(json => {
-        console.log(json?.tasks,'json?.tasks')
-        writeDataStorage(GLOBAL.All_Task,json?.tasks)
+      readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        writeDataStorage(GLOBAL.All_Task, json?.tasks);
       });
     }
   };
+  ///onpress on modules///
   const Navigate_Between_Modules = (constModule_Id) => {
     if (constModule_Id === "1") {
-      UserPermission(GLOBAL.UserPermissionsList?.Project).then(res =>{
-        if(res.view==='1') {
-          GLOBAL.route = "structure";
-          navigation.navigate("Project_structureStack");
-        }
-        else {
-          setshowWarning(true)
-        }
-      })
+        GLOBAL.TaskName = "";
+        GLOBAL.route = "structure";
+        navigation.navigate("Project_structureStack");
     } else if (constModule_Id === "4") {
-      UserPermission(GLOBAL.UserPermissionsList?.Task).then(res =>{
-        if(res.view==='1') {
-          navigation.navigate("Task_managementStack");
-        }
-        else {
-          setshowWarning(true)
-        }
-      })
+      navigation.navigate("Task_managementStack");
+      GLOBAL.TaskName = "";
     } else if (constModule_Id === "3") {
-      UserPermission(GLOBAL.UserPermissionsList?.DYB).then(res =>{
-        if(res.view==='1') {
-          GLOBAL.route='DYB'
-          navigation.navigate("Project_structureStack",{ screenMode:'Dyb'});
-        }
-        else {
-          setshowWarning(true)
-        }
-      })
+      GLOBAL.route = "DYB";
+      GLOBAL.TaskName = "";
+      navigation.navigate("Project_structureStack", { screenMode: "Dyb" });
     }
   };
-  const Navigate_Url= (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
+  const Navigate_Url = (Url) => {
     navigation.navigate(Url);
   };
- const logout_Url= () => {
-   setshowModalDelete(true)
-
+  /// Bottom menu click On LogOut button///
+  const logout_Url = () => {
+    setshowModalDelete(true);
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
   };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
-
-        <View style={Styles.With100NoFlex}>
-          <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
+  return (
+    <Container style={[Styles.BackcolorHome]}>
+      <StatusBar barStyle="light-content" backgroundColor={"#fff"} />
+      <View style={Styles.HeaderStyleHome}>
+        <View style={{ width: "2%" }} />
+        <View style={{ width: "12%" }}>
+          <Button onPress={() => navigation.dispatch(DrawerActions.openDrawer())} transparent style={Styles.Backbtn}>
+            <AntDesign name={"menuunfold"} size={21} color={Colors.button} />
+          </Button>
         </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY)
-              setshowModalDelete(false)
-              navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+        <View style={{ width: "72%" }}>
+          <Text numberOfLines={1} style={[Styles.HeaderText4]}>Home</Text>
         </View>
+        <View style={{ width: "12%" }} >
+          <Image style={Styles.littleImage} source={Photoes.OkoutLogo} resizeMode={"stretch"}/>
+        </View>
+        <View style={{ width: "2%" }} />
       </View>
-    </View>
-  );
-    return (
-    <Container style={[Styles.Backcolor]}>
-      <Header style={Styles.HeaderStyle}>
-          <Left style={{flex:1,}} >
-            <Button onPress={()=>navigation.dispatch(DrawerActions.openDrawer())} transparent style={Styles.menubtn}>
-              <AntDesign name={"menuunfold"} size={21} color={'#fff'} />
-            </Button>
-          </Left>
-        <Body style={{flex: 1,alignItems:"center"}}>
-          <Text numberOfLines={1} style={Styles.HeaderText2}>Home</Text>
-        </Body>
-        <Right style={{flex:1}}/>
-      </Header>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.background} />
-      <ImageBackground source={require("../../Picture/png/HomeBack.png")}
+      <ImageBackground source={Photoes.Home_backgrung}
                        style={{ width: "100%", flex: 1, alignSelf: "stretch" }} resizeMode="stretch">
-        <Content>
-          {
-            showModalDelete &&
-            <View>
-              {
-                _showModalDelete()
-              }
+        <Content contentContainerStyle={{ alignItems: "center", justifyContent: "center" }}>
+          <View style={Styles.ViewAbsoluteHome} />
+          {showModalDelete &&
+          <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
+          }
+          {modules !== "" ?
+            <View style={Styles.FlexWrapHome2}>
+              {modules?.map((value, key) => {
+                return (
+                  <LinearGradient colors={value.IconColor} key={key} style={Styles.ModuleBox}>
+                    <TouchableOpacity onPress={() => Navigate_Between_Modules(value.constModule_Id)}
+                                      style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
+                      <Image tintColor={"#fff"} resizeMode={"contain"} source={{ uri: value.Image }}
+                             style={{ width: "45%", height: normalize(80) }} />
+                      <Text style={Styles.txtMenuHome}>{value.constModule_Name}</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                );
+              })}
+            </View> :
+            <View style={Styles.With90CenterVertical3}>
+              <Text style={Styles.EmptyText}>
+                " Access Denied....Administrative Privileges may be required "
+              </Text>
             </View>
           }
-          {showWarning===true&&  <Warningmessage/>}
-          <View style={Styles.container}>
-            <View style={Styles.FlexWrapHome}>
-              {
-                GLOBAL.modules?.map((value, key) => {
-                  return (
-                    <LinearGradient colors={value.IconColor} key={key} style={Styles.ModuleBox}>
-                      <TouchableOpacity onPress={() => Navigate_Between_Modules(value.constModule_Id)} style={{
-                        width: "100%", alignItems: "center",
-                      }}>
-                        <Image tintColor={"#fff"} resizeMode={"contain"} source={{ uri: value.Image }}
-                               style={{ width: "45%", height: normalize(80) }}
-                        />
-                        <Text style={Styles.txtMenuHome}>{value.constModule_Name}</Text>
-                      </TouchableOpacity>
-                    </LinearGradient>
-                  );
-                })
-              }
-            </View>
-          </View>
         </Content>
       </ImageBackground>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />

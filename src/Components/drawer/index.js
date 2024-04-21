@@ -3,7 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 const Stack = createNativeStackNavigator();
 
 import Drawer from './Drawer';
-import ProfileStack from '../profilescreen/index'
+import ProfileStack from '../profilescreen/index';
+import DoshboardStack from '../doshboard/index'
 import { NavigationContainer } from "@react-navigation/native";
 function DrawerCustomizeStack() {
   return (
@@ -14,6 +15,7 @@ function DrawerCustomizeStack() {
       }}>
       <Stack.Screen name="Drawer" component={Drawer} initialRouteName={Drawer} />
      <Stack.Screen name="ProfileStack" component={ProfileStack}/>
+      <Stack.Screen name="DoshboardStack" component={DoshboardStack}/>
     </Stack.Navigator>
      </NavigationContainer>
   );

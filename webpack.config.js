@@ -53,7 +53,7 @@ module.exports = {
     path: path.resolve(appDirectory, 'dist'),
   },
   module: {
-    rules: [imageLoaderConfiguration, fileLoaderConfiguration,babelLoaderConfiguration,
+    rules: [imageLoaderConfiguration,babelLoaderConfiguration,
       {
         test: /\.(js|mjs|jsx|ts|tsx)$/,
         include: path.resolve(__dirname, "./src"),

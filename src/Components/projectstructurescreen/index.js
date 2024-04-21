@@ -7,7 +7,8 @@ import Project_UnitsStack from '../unitstructurscreen/index'
 import Project_SectionStack from "../sectionstructurescreen/index";
 import Project_FeaturesStack from "../featurestructurescreen/index";
 import Project_Site_Detail from './Project_Site_Detail';
-
+import Task_managementStack2 from "../taskmanagementscreen/index2";
+import Task_managementStack3 from '../taskmanagementscreen/index3'
 function Project_structureStack() {
   return (
       <Stack.Navigator screenOptions={{headerShown:false,gesturesEnabled:false}} initialRouteName={Project_structure2}>
@@ -17,6 +18,8 @@ function Project_structureStack() {
         <Stack.Screen name="Project_UnitsStack"     component={Project_UnitsStack}/>
         <Stack.Screen name="Project_SectionStack"       component={Project_SectionStack}/>
         <Stack.Screen name="Project_FeaturesStack"  component={Project_FeaturesStack}/>
+        <Stack.Screen name="Task_managementStack2"  component={Task_managementStack2}/>
+        <Stack.Screen name="Task_managementStack3"  component={Task_managementStack3}/>
       </Stack.Navigator>
 
   );

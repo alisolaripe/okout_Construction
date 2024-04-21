@@ -9,6 +9,8 @@ import NetInfo from "@react-native-community/netinfo";
 import Splash from "./splashscreen/index";
 import {syncLocalStorageToServer} from "./syncLocalStorageToServer";
 import Geocoder from "react-native-geocoder";
+import { readOnlineApi } from "./ReadPostApi";
+import { Image } from "react-native";
 Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
 let userDetail=null;
 class App extends Component {
@@ -25,10 +27,11 @@ class App extends Component {
       GLOBAL.OrgAppLink_value = await this.readDataStorage(GLOBAL.OrgAppLink);
       GLOBAL.UserInformation=await this.readDataStorage(GLOBAL.UserInfo);
       GLOBAL.modules=JSON.parse (await AsyncStorage.getItem(GLOBAL.Modules))
-      this._interval = setInterval(() => {
-        this.setState({ timePassed: true });
-        clearInterval(this._interval);
-      }, 4115);
+      // this._interval = setInterval(() => {
+      //
+      //   clearInterval(this._interval);
+      // }, 4115);
+      this.setState({ timePassed: true });
        if(userDetail != null)
       {
         GLOBAL.PASSWORD_value=userDetail
@@ -61,13 +64,12 @@ class App extends Component {
      }
    }
     async componentDidMount() {
-    this.getCurrentUser()
+    this.getCurrentUser();
     this.check_MethodsList()
     this.intervalFunction();
     setInterval(() => {
       this.intervalFunction();
     }, 60000);
-
   }
   render() {
     if (this.state.timePassed === false) {

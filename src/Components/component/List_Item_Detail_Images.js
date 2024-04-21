@@ -17,6 +17,7 @@ import { Colors } from "../Colors";
 import LinearGradient from "react-native-linear-gradient";
 import { Content } from "native-base";
 const GLOBAL = require("../Global");
+const Photoes=require('../Photoes')
 import FastImage from 'react-native-fast-image'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Date,onOpen}) {
@@ -56,7 +57,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
     <View style={Styles.DeleteModalStyle}>
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-               source={require("../../Picture/png/AlertImage.png")}
+               source={Photoes.Alert}
                resizeMode="contain" />
         <View style={Styles.With100NoFlex}>
           <Text style={Styles.txt_left2}>
@@ -93,8 +94,6 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
       {value.uri!==''?
         <View index={index} style={Styles.UnitDetailImageBoxFeatureStyle2}>
           <ImageBackground
-            // onLoadEnd={onLoadEnd}
-            // onLoadStart={onLoadStart}
             source={{uri:value.uri,
             }}
                      style={[Styles.UnitDetailImagestyle]}
@@ -159,14 +158,11 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                            setDateFormat(Moment(date)?.format('YYYY-MM-DD H:mm:ss'))
                            Change_Gallry_Date(Moment(date)?.format('YYYY-MM-DD H:mm:ss'),value.buildId)
                          }}
-                         textColor={GLOBAL.OFFICIAL_background}
+                         textColor={GLOBAL.OFFICIAL_BLUE_COLOR}
                          onCancel={() => {
                            setOpen(false)
                          }} />
           </ImageBackground>
-          {/*{isLoading && (*/}
-          {/*  <ActivityIndicator style={Styles.loaderStyle} size={'large'} />*/}
-          {/*)}*/}
           {
             showModalDelete &&
             <View>
@@ -181,7 +177,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                 <TouchableOpacity onPress={() => setOpen(true)}
                                   style={[Styles.DYBDatteInpute2, { paddingTop: normalize(6) }]}>
                   <Entypo name={"back-in-time"} size={14} color={"#F67070FF"} />
-                  <Text style={[Styles.txtImageBox]}>
+                  <Text style={[Styles.txtImageBoxnumber]}>
                     {
                       DateFormat!==''? DateFormat:null
                     }
@@ -190,7 +186,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                 <View onPress={() => setOpen(true)}
                       style={[Styles.DYBDatteInpute2, { paddingTop: normalize(6) }]}>
                   <Entypo name={"back-in-time"} size={14} color={"#F67070FF"} />
-                  <Text style={[Styles.txtImageBox]}>
+                  <Text style={[Styles.txtImageBoxnumber]}>
                     {
                       DateFormat!==''? DateFormat:null
                     }
@@ -213,8 +209,8 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
               <View
                 style={Styles.DYBDatteInpute2}>
                 <MaterialCommunityIcons name={"map-marker"} size={14} color={"#F67070FF"} />
-                <Text style={[Styles.txtImageBox]}>
-                  {value.geoLat},{value.geoLong}
+                <Text style={[Styles.txtImageBoxnumber]}>
+                  {value.geoLat} , {value.geoLong}
                 </Text>
               </View>
             </View>
@@ -229,7 +225,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                 <TouchableOpacity onPress={()=> {
                   setvisible(false);
                 }} style={[Styles.CancelBtnLeft,{flexDirection:'row'}]}>
-                  <AntDesign name={"closecircleo"} size={20} color={"#fff"}  />
+                  <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR}  />
                   <Text style={[Styles.txtLightcenter]}>Close</Text>
                 </TouchableOpacity>
               </View>
@@ -241,7 +237,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                 <View style={Styles.TextStyleFullImage}>
                   <View style={Styles.DYBDatteInpute2}>
                     <Entypo name={"back-in-time"} size={14} color={'#F67070FF'} />
-                    <Text style={[Styles.txtImageBox]}>{FullImage.Date}</Text>
+                    <Text style={[Styles.txtImageBoxnumber]}>{FullImage.Date}</Text>
                   </View>
                   <View>
 
@@ -258,8 +254,8 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
                       <View
                         style={Styles.DYBDatteInpute2}>
                         <MaterialCommunityIcons name={"map-marker"} size={14} color={"#F67070FF"} />
-                        <Text style={[Styles.txtImageBox]}>
-                          {value.geoLat},{value.geoLong}
+                        <Text style={[Styles.txtImageBoxnumber]}>
+                          {value.geoLat} , {value.geoLong}
                         </Text>
                       </View>
                     </View>
@@ -276,7 +272,7 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
         <Text style={Styles.UploadImageText}>
         Add Photos
         </Text>
-        <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"} />
+        <MaterialIcons name={"add-a-photo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
         </TouchableOpacity>
       }
         </>

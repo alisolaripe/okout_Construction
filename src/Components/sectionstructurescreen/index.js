@@ -4,6 +4,7 @@ const Stack=createNativeStackNavigator();
 import Project_Section from "./Project_Section";
 import Project_Features2 from "../featurestructurescreen/index";
 import Project_Section_Detail from "./Project_Section_Detail";
+
 function Project_SectionStack() {
   return (
 
@@ -12,6 +13,7 @@ function Project_SectionStack() {
       <Stack.Screen name="Project_Section" component={Project_Section} initialRouteName={Project_Section}/>
         <Stack.Screen name="Project_Features2"  component={Project_Features2}/>
   <Stack.Screen name="Project_Section_Detail"  component={Project_Section_Detail}/>
+
       </Stack.Navigator>
 
   );

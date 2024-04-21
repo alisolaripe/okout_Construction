@@ -11,22 +11,24 @@ function Footer1 ({onPressHome,onPressProfile,onPressdeleteAsync}){
     <Footer style={{
       backgroundColor: GLOBAL.OFFICIAL_background
     }}>
-      <FooterTab style={Styles.FooterTab}>
+      <FooterTab style={Styles.FooterTab_Home}>
         <Button onPress={()=>onPressHome('ProfileStack')}>
-          <AntDesign name="user" size={normalize(17)} color={Colors.withe} />
-          <Text style={Styles.Footertxt}>Profile</Text>
+          <AntDesign name="user" size={normalize(17)} color={Colors.button} />
+          <Text style={Styles.Footertxt_Home}>Profile</Text>
         </Button>
-        <View
-          style={Styles.FooterFloatBtn}
-        >
+        <View style={Styles.FooterFloatBtn_home1}>
+          <View
+            style={Styles.FooterFloatBtn_home}
+          >
           <Button onPress={()=>onPressHome('Home')}>
             <AntDesign name="home" size={normalize(17)} color={Colors.withe} />
             <Text style={Styles.Footertxt}>Home</Text>
           </Button>
         </View>
+        </View>
         <Button onPress={onPressdeleteAsync}>
-          <AntDesign name="logout" size={normalize(17)} color={Colors.withe} />
-          <Text style={Styles.Footertxt}>LogOut</Text>
+          <AntDesign name="logout" size={normalize(17)} color={Colors.button} />
+          <Text style={Styles.Footertxt_Home}>LogOut</Text>
         </Button>
       </FooterTab>
     </Footer>

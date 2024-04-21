@@ -8,6 +8,7 @@ import { Styles } from "../Styles";
 import Feather from "react-native-vector-icons/Feather";
 import LinearGradient from "react-native-linear-gradient";
 let numOfLinesCompany = 0;
+import { Colors } from "../Colors";
 const GLOBAL = require("../Global");
 import normalize from "react-native-normalize/src/index";
 function Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
@@ -66,7 +67,7 @@ function Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
         }
         <TouchableOpacity style={Styles.CenterItems}
                           onPress={onpress_title}>
-          <Feather name={'edit'} size={15} color={'#fff'} />
+          <Feather name={'edit'} size={15} color={Colors.button} />
         </TouchableOpacity>
       </View>
 
@@ -99,17 +100,16 @@ function Notes_Item({value,UpdateBuildNote,ShowEditBtn}) {
   }
   <TouchableOpacity style={Styles.CenterItems}
     onPress={onpress}>
-    <Feather name={'edit'} size={15} color={'#fff'} />
+    <Feather name={'edit'} size={15} color={Colors.button} />
   </TouchableOpacity>
 </View>
-
       {
         updateText===true||updateTitle===true?
           <View style={Styles.With100Row}>
             <LinearGradient colors={['#648bfc', '#5982fa', '#4B75FCFF']}
                             style={Styles.btnUpdateNote}>
               <TouchableOpacity onPress={() => {UpdateBuildNote(FeatureNote,value.buildId,Title);setupdateText(false); setupdateTitle(false);}} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name={"send"} size={12} color={'#fff'} />
+                <Feather name={"send"} size={12} color={Colors.withe} />
                 <Text style={Styles.txtCenterPaddingHorizontal}>Confirm </Text>
               </TouchableOpacity>
             </LinearGradient>

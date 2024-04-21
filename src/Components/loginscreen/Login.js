@@ -18,7 +18,6 @@ const Api = require("../Api");
 const serialize = require("../GlobalSerialize");
 import { isNetworkConnected } from "../GlobalConnected";
 import { readOnlineApi } from "../ReadPostApi";
-import { writeDataStorage } from "../Get_Location";
 function LogIn({ navigation }) {
   const [verification, setVerification] = useState(null);
   const [value, setValue] = useState("");
@@ -44,70 +43,31 @@ function LogIn({ navigation }) {
 
   useEffect( ()=>{
     GetOrgAppLink();
-
-    const date=new Date() ;
+    const date=new Date();
     const Day=date.getDate();
     const Month=date.getMonth()+1;
     const Year=date.getFullYear();
     const Hour=date.getHours();
-    const Minute=date.getMinutes()
-    const Second=date.getSeconds()
+    const Minute=date.getMinutes();
+    const Second=date.getSeconds();
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
-    setShowDate(Full)
-    setVersionCheck('1.0.14')
+    setShowDate(Full);
+    setVersionCheck('1.0.24');
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
-    return () => {
+    return ()=> {
       BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
     };
-  }, []);
+  },[]);
   const writeDataStorage=async (key,obj)=>{
     try {
-      await AsyncStorage.setItem(key, JSON.stringify(obj));
+      await AsyncStorage.setItem(key,JSON.stringify(obj));
     }
     catch (e) {
     }
-
   }
   const handleBackButtonClick=()=>{
     BackHandler.exitApp()
   }
-  const Usermodules = async () => {
-    let Icon = "";
-    let IconColor = "";
-    let A = [];
-      readOnlineApi(Api.getModulesInfoMin).then(json => {
-        json?.modules?.forEach((obj) => {
-          if (obj.constModule_Id === 1 || obj.constModule_Id === "1") {
-            Icon = require("../../Picture/png/ProjectStructure.png");
-            IconColor = ["#ffadad", "#f67070", "#FF0000"];
-          } else if (obj.constModule_Id === 4 || obj.constModule_Id === "4") {
-            Icon = require("../../Picture/png/Process.png");
-            IconColor = ["#a39898", "#786b6b", "#382e2e"];
-          } else if (obj.constModule_Id === 2 || obj.constModule_Id === "2") {
-            Icon = require("../../Picture/png/DocumentManagement.png");
-            IconColor = ["#79aad9", "#4e81b4", "#1f364e"];
-          } else if (obj.constModule_Id === 5 || obj.constModule_Id === "5") {
-            Icon = require("../../Picture/png/DocumentManagement.png");
-            IconColor = ["#685858", "#4c3f3f", "#382e2e"];
-          } else if (obj.constModule_Id === 6 || obj.constModule_Id === "6") {
-            Icon = require("../../Picture/png/CheckInOut.png");
-            IconColor = ["#4d78a5", "#375e89", "#27405c"];
-          } else if (obj.constModule_Id === 6 || obj.constModule_Id === "3") {
-            Icon = require("../../Picture/png/DYB.png");
-            IconColor = ["#ffc2b5", "#fca795", "#d1583b"];
-          }
-          A.push({
-            constModule_Id: obj.constModule_Id,
-            constModule_Name: obj.constModule_Name,
-            Image: Image.resolveAssetSource(Icon).uri,
-            IconColor: IconColor,
-          });
-        });
-        GLOBAL.modules=A;
-        writeDataStorage(GLOBAL.Modules,A);
-      });
-
-  };
   const checkOrgCode = (value) => {
       var myHeaders = new Headers();
       const formData = new FormData();
@@ -132,8 +92,8 @@ function LogIn({ navigation }) {
               seticoncheck('user-check')
                 GLOBAL.BASE_URL_User = json;
                 GLOBAL.OrgAppLink_value=json.OrgAppLink;
-                Usermodules()
                 writeDataStorage(GLOBAL.OrgAppLink,json?.OrgAppLink)
+                writeDataStorage(GLOBAL.mapKey,json?.mapKey)
                 readOnlineApi(Api.getCountry).then(json => {
                   writeDataStorage(GLOBAL.All_Country,json)
                 });
@@ -166,12 +126,10 @@ function LogIn({ navigation }) {
             IpAddress:GLOBAL.BASE_URL_User.OrgAppLink,
             dateTime: ShowDate,
           }),
-        }) .then(resp => {
+        }).then(resp => {
           setBtn(false)
           return resp.json();
-        })
-          .then(json => {
-
+        }).then(json => {
             if (json?.status===true) {
               GLOBAL.UserInformation=json;
               setBtn(true)
@@ -197,7 +155,6 @@ function LogIn({ navigation }) {
   const Pinrecovery =()=> {
     navigation.navigate("ForgotPassword");
   };
-
   return (
     <Container style={[Styles.Backcolor]}>
       <Header style={Styles.HeaderBackColor}>
@@ -209,8 +166,9 @@ function LogIn({ navigation }) {
           flex: 1, alignItems: "center",
         }}>
           <Text style={{
-            color: "#fff",
+            color:GLOBAL.OFFICIAL_BLUE_COLOR,
             fontSize: normalize(23),
+            fontFamily:'TisaSansProBoldItalic',
           }}>
             Log In
           </Text>

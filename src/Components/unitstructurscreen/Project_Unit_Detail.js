@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
-  TouchableOpacity,SafeAreaView,Modal, FlatList,
+  TouchableOpacity, SafeAreaView, Modal, FlatList,
 } from "react-native";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
@@ -21,23 +21,21 @@ import { Header } from "../component/Header";
 import { Filter } from "../component/Filter";
 import { Footer1 } from "../component/Footer";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
-import {readOnlineApi } from "../ReadPostApi";
+import { readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
-import { UserPermission } from "../CheckPermission";
-import { Warningmessage } from "../component/Warningmessage";
-import { Image } from 'react-native-compressor';
-import FastImage from 'react-native-fast-image';
-const GLOBAL = require("../Global");
-let A = [];
-let C = [];
-let Full=''
-let TodayDate=''
-let Day=''
-let Month=''
-let List=[]
+import { LogOutModal } from "../component/LogOutModal";
+import { Image } from "react-native-compressor";
 
+const GLOBAL = require("../Global");
+let ImageList = [];
+let ImageListUpload = [];
+let Full = "";
+let TodayDate = "";
+let Day = "";
+let Month = "";
+let List = [];
 const Api = require("../Api");
-Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
+
 function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
   const modalizeRef = React.createRef();
   const scrollViewRef = useRef();
@@ -50,67 +48,72 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
   const [ShowFilter, setShowFilter] = useState(false);
-  const [ShowDateRange,setShowDateRange]=useState(false);
+  const [ShowDateRange, setShowDateRange] = useState(false);
   const [MudolList, setMudolList] = useState([]);
   const [showModalCalender, setshowModalCalender] = useState(false);
   const [selectedRange, setRange] = useState({});
-  const [DateRangeList,setDateRangeList]=useState([]);
+  const [DateRangeList, setDateRangeList] = useState([]);
   const [scroll, setscroll] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
-  const [showWarning, setshowWarning] = useState(false);
+
   useEffect(() => {
+    Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
     getUnitDetail();
     getLocation();
-    const date=new Date();
-    Day=date.getDate();
-    Month=date.getMonth()+1;
-    const Year=date.getFullYear();
-    const Hour=date.getHours();
-    const Minute=date.getMinutes();
-    const Second=date.getSeconds();
-    TodayDate=`${Year}-${Month}-${Day}`;
-    Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
+    const date = new Date();
+    Day = date.getDate();
+    Month = date.getMonth() + 1;
+    const Year = date.getFullYear();
+    const Hour = date.getHours();
+    const Minute = date.getMinutes();
+    const Second = date.getSeconds();
+    TodayDate = `${Year}-${Month}-${Day}`;
+    Full = `${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
   }, []);
-  const dateComparison_data =(a,b)=>{
+  ///compare 2 array by date and sort///
+  const dateComparison_data = (a, b) => {
     const date1 = new Date(a?.Date);
     const date2 = new Date(b?.Date);
     return date1 - date2;
-  }
-  const  compareTwoArrayOfObjects = (
+  };
+  ///compare 2 array and return they are same or not///
+  const compareTwoArrayOfObjects = (
     first_array_of_objects,
-    second_array_of_objects
+    second_array_of_objects,
   ) => {
     return (
       first_array_of_objects.length === second_array_of_objects.length &&
       first_array_of_objects.every((element_1) =>
         second_array_of_objects.some((element_2) =>
-          Object.keys(element_1).every((key) => element_1[key] === element_2[key])
-        )
+          Object.keys(element_1).every((key) => element_1[key] === element_2[key]),
+        ),
       )
     );
-  }
-  const getDifference=(array1, array2)=> {
+  };
+  ///compare 2 array and get  Difference///
+  const getDifference = (array1, array2) => {
     return array1?.filter(object1 => {
       return !array2?.some(object2 => {
-        return object1.buildId === object2.buildId &&object1.fileName === object2.fileName;
+        return object1.buildId === object2.buildId && object1.fileName === object2.fileName;
       });
     });
-  }
-  const Save_Details_Online=async (A)=>{
-    let AllList=[]
-    let Filter=[];
-    let SiteDetailList=JSON.parse(await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY));
-    Filter=SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateUnitID))
-    if(SiteDetailList!==null&&Filter!==null) {
+  };
+  ///save unit detail information in asyncStorage.to use when app offline///
+  const Save_Details_Online = async (A) => {
+    let AllList = [];
+    let Filter = [];
+    let SiteDetailList = JSON.parse(await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY));
+    Filter = SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateUnitID));
+    if (SiteDetailList !== null && Filter !== null) {
       AllList = [...Filter, ...A];
-    }
-    else {
-      AllList =A
+    } else {
+      AllList = A;
     }
     await AsyncStorage.setItem(GLOBAL.UnitDetail_KEY, JSON.stringify(AllList));
-  }
+  };
+  ///get user loction ///
   const getLocation = async () => {
     requestLocationPermission().then(res => {
       if (res) {
@@ -119,80 +122,84 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
             setLocation(position.coords);
             var NY = {
               lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
+              lng: position.coords.longitude,
+            };
             geocodePosition(NY).then(res => {
-              if(res) {
+              if (res) {
                 setGeoAddress(res?.[0]?.formattedAddress);
                 setCountry(res?.[0]?.country + " " + res?.[0]?.adminArea);
-              }
-              else {
+              } else {
                 setGeoAddress("");
                 setCountry("");
               }
             })
               .catch(err => {
-              })
+              });
           },
           error => {
             // See error code charts below.
             setLocation(false);
           },
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
         );
       }
     });
   };
+  ///Add new Photos for unit and sent to server////
   const AddUnitesImage = () => {
-        let idsArray = "";
-        const formData = new FormData();
-        formData.append("userId", "1");
-        formData.append("relatedName", "unit");
-        formData.append("relatedId", GLOBAL.UpdateUnitID);
-        formData.append("geoLat", location.latitude);
-        formData.append("geoLong", location.longitude);
-        formData.append("geoAddress",GeoAddress);
-        formData.append("buildType", "general");
-        if (ImageSourceviewarrayUpload.length !== 0) {
-          for (let i = 0; i < ImageSourceviewarrayUpload.length; i++) {
-            idsArray = ImageSourceviewarrayUpload[i];
-            formData.append("attachment", {
-              uri: idsArray.uri,
-              type: idsArray.type,
-              name: idsArray.fileName,
-            });
-            formData.append("postDate", idsArray.Date);
-            writePostApi("POST", Api.AddBuildNotes, formData,ImageSourceviewarrayUpload).then(json => {
-              if (json) {
-              if (json?.status === true) {
-                setMessage(json?.msg);
-                setMessage(json?.msg);
-                setShowMessage(true);
-                setTimeout(function(){ setShowMessage(false)}, 4000)
-                Navigate_Url('Project_Units')
-              }}
-              else   {
-                setMessage('Your BuildNotes successfully added')
-                setShowMessage(true);
+    let idsArray = "";
+    const formData = new FormData();
+    formData.append("userId", GLOBAL.UserInformation?.userId);
+    formData.append("relatedName", "unit");
+    formData.append("relatedId", GLOBAL.UpdateUnitID);
+    formData.append("geoLat", location.latitude);
+    formData.append("geoLong", location.longitude);
+    formData.append("geoAddress", GeoAddress);
+    formData.append("buildType", "general");
+    if (ImageSourceviewarrayUpload.length !== 0) {
+      for (let i = 0; i < ImageSourceviewarrayUpload.length; i++) {
+        idsArray = ImageSourceviewarrayUpload[i];
+        formData.append("attachment", {
+          uri: idsArray.uri,
+          type: idsArray.type,
+          name: idsArray.fileName,
+        });
+        formData.append("postDate", idsArray.Date);
+        writePostApi("POST", Api.AddBuildNotes, formData, ImageSourceviewarrayUpload).then(json => {
+          if (json) {
+            if (json?.status === true) {
+              setMessage(json?.msg);
+              setMessage(json?.msg);
+              setShowMessage(true);
+              setTimeout(function() {
+                setShowMessage(false);
+              }, 4000);
+              Navigate_Url("Project_Units");
+            }
+          } else {
+            setMessage("Your BuildNotes successfully added");
+            setShowMessage(true);
 
-                setTimeout(function(){ setShowMessage(false)}, 4000)
-                Navigate_Url('Project_Units')
-              }
-            });
+            setTimeout(function() {
+              setShowMessage(false);
+            }, 4000);
+            Navigate_Url("Project_Units");
           }
-          AddImageOffline()
-        }
+        });
+      }
+      AddImageOffline();
+    }
   };
-  //////////////////////////////////
-  const Make_Week_Filter_List=(A)=>{
-    let B = [];
-    let endDate_Format=''
-    let today =''
-    let tomorrow = ''
+  /// sort date and make list by week by week///
+  const Make_Week_Filter_List = (UnitDetail_List) => {
+    let Date_List = [];
+    let endDate_Format = "";
+    let today = "";
+    let tomorrow = "";
     let endDate = "";
-    let Exist=''
-    A?.forEach((obj) => {
-      if(obj?.Date!=='') {
+    let Exist = "";
+    UnitDetail_List?.forEach((obj) => {
+      if (obj?.Date !== "") {
         today = new Date(obj?.Date);
         tomorrow = new Date(today);
         if (obj?.WeekDay === "Sunday") {
@@ -220,62 +227,62 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
           tomorrow?.setDate(today?.getDate() + 2);
           endDate = tomorrow?.toLocaleDateString();
         }
-        let newString = endDate.split('/')
-        endDate_Format = newString?.[2] + '-' + newString?.[1] + '-' + newString?.[0]
-        Exist = B?.findIndex((p) => p.endDate === endDate_Format);
+        let newString = endDate.split("/");
+        endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
+        Exist = Date_List?.findIndex((p) => p.endDate === endDate_Format);
         if (Exist === -1) {
-          B.push({
+          Date_List.push({
             startDate: obj?.Date?.split(" ")?.[0],
             endDate: endDate_Format,
           });
         }
       }
     });
-    setDateRangeList(B)
-  }
-  const  getDayOfWeek=(date)=> {
+    setDateRangeList(Date_List);
+  };
+  ///calculate Names of the days of the week///
+  const getDayOfWeek = (date) => {
     const dayOfWeek = new Date(date).getDay();
     return isNaN(dayOfWeek) ? null :
-      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek];
-  }
+      ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+  };
+  ///get unit detail from serve///
   const getUnitDetail = async () => {
-    if(GLOBAL.isConnected===true) {
-      readOnlineApi(Api.getBuildNotes+`userId=${GLOBAL.UserInformation?.userId}&relatedId=${GLOBAL.UpdateUnitID}&relatedName=unit`).then(json => {
-        let A = [];
-        let Country='';
-        let Address='';
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.getBuildNotes + `userId=${GLOBAL.UserInformation?.userId}&relatedId=${GLOBAL.UpdateUnitID}&relatedName=unit`).then(json => {
+        let UnitDetail_List = [];
+        let Country = "";
+        let Address = "";
         let mark2 = {
           uri: "",
-          type:'',
-          fileName: '',
-          buildId:'',
+          type: "",
+          fileName: "",
+          buildId: "",
           Type: "",
-          Day:'',
-          Date:'',
-          Month:'',
-          WeekDay:'',
-          relatedId:'',
-          buildIdAttachmentId: '',
-          geoLat:'',
-          geoLong: '',
-          geoAddress: '',
-          Country:'',
+          Day: "",
+          Date: "",
+          Month: "",
+          WeekDay: "",
+          relatedId: "",
+          buildIdAttachmentId: "",
+          geoLat: "",
+          geoLong: "",
+          geoAddress: "",
+          Country: "",
         };
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements?.forEach((obj2) => {
-            const Day = obj2?.postDate?.split('-')
-            const W = Day?.[2]?.split(' ');
-            if(obj2?.geoAddress!== "false") {
+            const Day = obj2?.postDate?.split("-");
+            const W = Day?.[2]?.split(" ");
+            if (obj2?.geoAddress !== "false") {
               Address = obj2?.geoAddress?.split(",");
-              Country=Address?.[3]+Address?.[1]
+              Country = Address?.[3] + Address?.[1];
+            } else {
+              Country = "";
             }
-            else {
-              Country= "";
-            }
-
-            if(obj2?.imageUrl!==null) {
-              let WeekDay=getDayOfWeek( obj2?.postDate);
-              A.push({
+            if (obj2?.imageUrl !== null) {
+              let WeekDay = getDayOfWeek(obj2?.postDate);
+              UnitDetail_List.push({
                 uri: GLOBAL?.OrgAppLink_value + "/" + obj2?.imageUrl,
                 type: obj2?.imageName.split(".")?.[1],
                 fileName: obj2?.imageName,
@@ -286,82 +293,74 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
                 relatedId: obj?.buildIdRelatedId,
                 buildIdAttachmentId: obj2?.buildIdAttachmentId,
                 Show: "Yes",
-                WeekDay:WeekDay,
+                WeekDay: WeekDay,
                 Date: obj2?.postDate,
                 geoLat: obj2?.geoLat,
                 geoLong: obj2?.geoLong,
                 geoAddress: obj2?.geoAddress,
-                Country:Country,
+                Country: Country,
               });
             }
-          })
-        })
-        if(GLOBAL.route==='structure') {
-          if(A?.length!==0) {
-            A = [mark2,...A];
-            A?.sort(dateComparison_data)
-            setImageSourceviewarray(A);
-            setMudolList(A);
-            Make_Week_Filter_List(A)
-            Save_Details_Online(A)
+          });
+        });
+        if (GLOBAL.route === "structure") {
+          if (UnitDetail_List?.length !== 0) {
+            UnitDetail_List = [mark2, ...UnitDetail_List];
+            UnitDetail_List?.sort(dateComparison_data);
+            setImageSourceviewarray(UnitDetail_List);
+            setMudolList(UnitDetail_List);
+            Make_Week_Filter_List(UnitDetail_List);
+            Save_Details_Online(UnitDetail_List);
+          } else {
+            UnitDetail_List = [mark2];
+            setImageSourceviewarray(UnitDetail_List);
           }
-          else {
-            A=[mark2];
-            setImageSourceviewarray(A);
-          }
-        }
-        else {
-          if (A?.length !== 0) {
-            A?.sort(dateComparison_data)
-            setImageSourceviewarray(A);
-            setMudolList(A);
-            Make_Week_Filter_List(A)
-            Save_Details_Online(A)
-          }
-          else {
-            setImageSourceviewarray('')
+        } else {
+          if (UnitDetail_List?.length !== 0) {
+            UnitDetail_List?.sort(dateComparison_data);
+            setImageSourceviewarray(UnitDetail_List);
+            setMudolList(UnitDetail_List);
+            Make_Week_Filter_List(UnitDetail_List);
+            Save_Details_Online(UnitDetail_List);
+          } else {
+            setImageSourceviewarray("");
           }
         }
-
       });
-    }
-    else {
-      let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY))
+    } else {
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY));
       let mark2 = {
         uri: "",
-        type:'',
-        fileName: '',
-        buildId:'',
+        type: "",
+        fileName: "",
+        buildId: "",
         Type: "",
-        Day:'',
-        Date:'',
-        Month:'',
-        WeekDay:'',
-        relatedId:'',
-        buildIdAttachmentId: '',
-        geoLat:'',
-        geoLong: '',
-        geoAddress: '',
-        Country:'',
+        Day: "",
+        Date: "",
+        Month: "",
+        WeekDay: "",
+        relatedId: "",
+        buildIdAttachmentId: "",
+        geoLat: "",
+        geoLong: "",
+        geoAddress: "",
+        Country: "",
       };
-      if (json!==null) {
-        let B=[]
-        let Filter = json?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateUnitID))
+      if (json !== null) {
+        let UnitDetail_List = [];
+        let Filter = json?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateUnitID));
         if (Filter) {
-
-          if(GLOBAL.route==='structure') {
-            B = [mark2,...Filter];
-
-            B?.sort(dateComparison_data)
-            Make_Week_Filter_List(B)
-            setImageSourceviewarray(B);
-            setMudolList(B)
-          }
-          else {
-            Filter?.sort(dateComparison_data)
-            Make_Week_Filter_List(Filter)
+          if (GLOBAL.route === "structure") {
+            UnitDetail_List = [mark2, ...Filter];
+            UnitDetail_List?.sort(dateComparison_data);
+            Make_Week_Filter_List(UnitDetail_List);
+            setImageSourceviewarray(UnitDetail_List);
+            setMudolList(UnitDetail_List);
+          } else {
+            Filter?.sort(dateComparison_data);
+            Make_Week_Filter_List(Filter);
             setImageSourceviewarray(Filter);
-            setMudolList(Filter)
+            setMudolList(Filter);
           }
         }
         setGeoAddress("");
@@ -369,12 +368,13 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
       }
     }
   };
-  const Image_compress=async (path)=>{
-    return  await Image.compress(path, {
+  ///Reduce the size of the photo///
+  const Image_compress = async (path) => {
+    return await Image.compress(path, {
       maxWidth: 1000,
       quality: 0.8,
-    })
-  }
+    });
+  };
   const selectPhotoFromGallery = () => {
     onClose();
     ImagePicker.openPicker({
@@ -388,12 +388,11 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
       } else if (response.error) {
       } else if (response.customButton) {
         alert(response.customButton);
-      }
-      else {
-        if(ImageSourceviewarray)
-          A = [...ImageSourceviewarray];
-        if(ImageSourceviewarrayUpload)
-          C = [...ImageSourceviewarrayUpload];
+      } else {
+        if (ImageSourceviewarray)
+          ImageList = [...ImageSourceviewarray];
+        if (ImageSourceviewarrayUpload)
+          ImageListUpload = [...ImageSourceviewarrayUpload];
         for (let item in response) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
@@ -402,79 +401,77 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
           let B = "";
           let RealDate = "";
           let Months = "";
-          let buildid=0;
-          if (obj?.exif?.DateTimeDigitized!== null) {
+          let buildid = 0;
+          if (obj?.exif?.DateTimeDigitized !== null) {
             D = obj?.exif?.DateTimeDigitized?.split(":");
             B = D?.[2]?.split(" ");
             RealDate = `${D?.[0]}-${D?.[1]}-${B?.[0]} ${B?.[1]}:${D?.[3]}:${D?.[4]}`;
             Months = D?.[1];
-          }
-          else {
+          } else {
             RealDate = Full;
             Months = Month;
           }
-          if(A?.length!==0){
-            buildid= parseInt(A?.[A?.length - 1]?.buildId) + 1;
-          }
-          else {
+          if (ImageList?.length !== 0) {
+            buildid = parseInt(A?.[A?.length - 1]?.buildId) + 1;
+          } else {
             buildid = buildid + 1;
           }
-          let WeekDay=getDayOfWeek(RealDate)
-          Image_compress(obj.path).then(res=>{
-            A.push({
-              uri:res,
-              type:obj.mime,
-              fileName:imgName,
-              buildId:buildid,
+          let WeekDay = getDayOfWeek(RealDate);
+          Image_compress(obj.path).then(res => {
+            ImageList.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: buildid,
               title: "",
               Date: RealDate,
-              Type:"Gallery",
-              Day:parseInt(B?.[0]),
-              Month:Months,
-              Show:"Yes",
-              geoLat:location.latitude,
-              geoLong:location.longitude,
-              geoAddress:GeoAddress,
-              Country:Country,
-              WeekDay:WeekDay,
-            });
-            C.push({
-              uri:res,
-              type:obj.mime,
-              fileName:imgName,
-              buildId:buildid,
-              title: "",
-              Date:RealDate,
               Type: "Gallery",
-              Day:parseInt(B?.[0]),
-              Month:Months,
+              Day: parseInt(B?.[0]),
+              Month: Months,
               Show: "Yes",
-              geoLat:location.latitude,
-              geoLong:location.longitude,
-              geoAddress:GeoAddress,
-              Country:Country,
-              WeekDay:WeekDay,
+              geoLat: location.latitude,
+              geoLong: location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+              WeekDay: WeekDay,
+            });
+            ImageListUpload.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: buildid,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              Day: parseInt(B?.[0]),
+              Month: Months,
+              Show: "Yes",
+              geoLat: location.latitude,
+              geoLong: location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+              WeekDay: WeekDay,
             });
 
             List.push({
               Type: "Gallery",
             });
-            if(List?.length===response?.length) {
-              if(A?.length!==0) {
-                A?.sort(dateComparison_data);
-                Make_Week_Filter_List(A);
-                setImageSourceviewarray(A);
-                setImageSourceviewarrayUpload(C);
-                setMudolList(A);
+            if (List?.length === response?.length) {
+              if (ImageList?.length !== 0) {
+                ImageList?.sort(dateComparison_data);
+                Make_Week_Filter_List(ImageList);
+                setImageSourceviewarray(ImageList);
+                setImageSourceviewarrayUpload(ImageListUpload);
+                setMudolList(ImageList);
                 scrollViewRef.current.scrollToEnd({ animated: true });
                 setscroll(true);
                 setShowBackBtn(false);
-                List=[]
-                A = [...A];
-                C = [...C];
+                List = [];
+                ImageList = [...ImageList];
+                ImageListUpload = [...ImageListUpload];
               }
             }
-          })
+          });
         }
 
       }
@@ -487,43 +484,25 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
       height: 400,
     }).then(response => {
       var getFilename = response.path.split("/");
-      var imgName=getFilename[getFilename.length - 1];
+      var imgName = getFilename[getFilename.length - 1];
       setImageSource(response.path);
-      if(ImageSourceviewarray)
-        A = [...ImageSourceviewarray];
-      if(ImageSourceviewarrayUpload)
-        C = [...ImageSourceviewarrayUpload];
-      let buildid=0;
-      if(A?.length!==0){
-        buildid= parseInt(A?.[A?.length - 1]?.buildId) + 1;
-      }
-      else {
+      if (ImageSourceviewarray)
+        ImageList = [...ImageSourceviewarray];
+      if (ImageSourceviewarrayUpload)
+        ImageListUpload = [...ImageSourceviewarrayUpload];
+      let buildid = 0;
+      if (ImageList?.length !== 0) {
+        buildid = parseInt(ImageList?.[ImageList?.length - 1]?.buildId) + 1;
+      } else {
         buildid = buildid + 1;
       }
-      let WeekDay=getDayOfWeek(Full);
-      Image.compress( response.path, {
+      let WeekDay = getDayOfWeek(Full);
+      Image.compress(response.path, {
         maxWidth: 1000,
         quality: 0.8,
       }).then(res => {
 
-        A.push({
-          uri: res,
-          type:response.mime,
-          fileName:imgName,
-          buildId:buildid,
-          title:"",
-          Date:Full,
-          Type:"Camera",
-          Day:Day,
-          Month:Month,
-          Show: "Yes",
-          geoLat: location.latitude,
-          geoLong:location.longitude,
-          geoAddress:GeoAddress,
-          Country:Country,
-          WeekDay:WeekDay,
-        });
-        C.push({
+        ImageList.push({
           uri: res,
           type: response.mime,
           fileName: imgName,
@@ -535,59 +514,78 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
           Month: Month,
           Show: "Yes",
           geoLat: location.latitude,
-          geoLong:location.longitude,
-          geoAddress:GeoAddress,
-          Country:Country,
-          WeekDay:WeekDay,
+          geoLong: location.longitude,
+          geoAddress: GeoAddress,
+          Country: Country,
+          WeekDay: WeekDay,
         });
-        if (A?.length !== 0) {
-          A?.sort(dateComparison_data);
-          Make_Week_Filter_List(A);
+        ImageListUpload.push({
+          uri: res,
+          type: response.mime,
+          fileName: imgName,
+          buildId: buildid,
+          title: "",
+          Date: Full,
+          Type: "Camera",
+          Day: Day,
+          Month: Month,
+          Show: "Yes",
+          geoLat: location.latitude,
+          geoLong: location.longitude,
+          geoAddress: GeoAddress,
+          Country: Country,
+          WeekDay: WeekDay,
+        });
+        if (ImageList?.length !== 0) {
+          ImageList?.sort(dateComparison_data);
+          Make_Week_Filter_List(ImageList);
         }
-        setImageSourceviewarray(A);
-        setImageSourceviewarrayUpload(C);
-        setMudolList(A);
+        setImageSourceviewarray(ImageList);
+        setImageSourceviewarrayUpload(ImageListUpload);
+        setMudolList(ImageList);
         scrollViewRef.current.scrollToEnd({ animated: true });
         setscroll(true);
         setShowBackBtn(false);
-        A = [...A];
-        C = [...C];
-      })
+        ImageList = [...ImageList];
+        ImageListUpload = [...ImageListUpload];
+      });
 
     });
   };
-  const SortByWeek=(startDate,endDate)=>{
-    let Filter=MudolList
-    let Filter2=[]
-    const firstDate = startDate
-    const secondDate = endDate
-    const today=firstDate?.split('-')?.[2]
-    const sevenDaysBefore=secondDate?.split('-')?.[2];
-    const Monthtoday=firstDate?.split('-')?.[1]
-    const MonthsevenDaysBefore=secondDate?.split('-')?.[1];
-    A=Filter?.filter((p) =>parseInt(p.Month)===parseInt(Monthtoday)||parseInt(p.Month)===parseInt(MonthsevenDaysBefore) );
-    if(parseInt(Monthtoday)===parseInt(MonthsevenDaysBefore) ) {
-      Filter2 = A?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore) && parseInt(p.Day) >= parseInt(today));
-      setshowModalCalender( false)
-    }
-    else  {
-      let todays=[];
-      let Copy=[];
-      let sevenDaysBefores=[]
-      let MonthsevenDaysBeforeList=A?.filter((p) => parseInt(p.Month) === parseInt(MonthsevenDaysBefore))
-      let MonthtodayList=A?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday))
-      todays=MonthtodayList?.filter((p) => parseInt(p.Day) >= parseInt(today))
-      sevenDaysBefores=MonthsevenDaysBeforeList?.filter((p) =>  parseInt(p.Day) <= parseInt(sevenDaysBefore))
-      Copy=[].concat(sevenDaysBefores,todays)
-      Filter2=Copy
-      setshowModalCalender( false)
+  /// sort photos by week ///
+  const SortByWeek = (startDate, endDate) => {
+    let Filter = MudolList;
+    let Week_List = [];
+    let Filter2 = [];
+    const firstDate = startDate;
+    const secondDate = endDate;
+    const today = firstDate?.split("-")?.[2];
+    const sevenDaysBefore = secondDate?.split("-")?.[2];
+    const Monthtoday = firstDate?.split("-")?.[1];
+    const MonthsevenDaysBefore = secondDate?.split("-")?.[1];
+    Week_List = Filter?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday) || parseInt(p.Month) === parseInt(MonthsevenDaysBefore));
+    if (parseInt(Monthtoday) === parseInt(MonthsevenDaysBefore)) {
+      Filter2 = Week_List?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore) && parseInt(p.Day) >= parseInt(today));
+      setshowModalCalender(false);
+    } else {
+      let todays = [];
+      let Copy = [];
+      let sevenDaysBefores = [];
+      let MonthsevenDaysBeforeList = Filter?.filter((p) => parseInt(p?.Month) === parseInt(MonthsevenDaysBefore));
+      let MonthtodayList = Filter?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday));
+      todays = MonthtodayList?.filter((p) => parseInt(p.Day) >= parseInt(today));
+      sevenDaysBefores = MonthsevenDaysBeforeList?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore));
+      Copy = [].concat(sevenDaysBefores, todays);
+      Filter2 = Copy;
+      setshowModalCalender(false);
     }
     setShowDateRange(true);
-    setImageSourceviewarray(Filter2)
+    setImageSourceviewarray(Filter2);
   };
+  ///show week list///
   const _showModalCalender = () => {
     return (
-      <SafeAreaView style={[Styles.CalenderBox,]}>
+      <SafeAreaView style={[Styles.CalenderBox]}>
         <View style={Styles.With100List2}>
           <Text style={Styles.WeekFilterTextMiddel}>
             Week beginning
@@ -599,9 +597,12 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         </View>
         <View style={Styles.Calender}>
           {
-            DateRangeList.map((value,index) =>{
+            DateRangeList.map((value, index) => {
               return (
-                <TouchableOpacity onPress={()=> {SortByWeek(value.startDate,value.endDate ); setRange({ firstDate: value.startDate, secondDate: value.endDate });}} key={index} style={Styles.With100List}>
+                <TouchableOpacity onPress={() => {
+                  SortByWeek(value.startDate, value.endDate);
+                  setRange({ firstDate: value.startDate, secondDate: value.endDate });
+                }} key={index} style={Styles.With100List}>
                   <Text style={Styles.WeekFilterText}>
                     {value.startDate}
                   </Text>
@@ -610,34 +611,35 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
                     {value.endDate}
                   </Text>
                 </TouchableOpacity>
-              )})
+              );
+            })
           }
         </View>
         <View style={Styles.With50List}>
           <ButtonI
             style={Styles.btnFilter}
-            onpress={()=> {
+            onpress={() => {
               setshowModalCalender(false);
-              setShowDateRange(false)
+              setShowDateRange(false);
             }}
             categoriIcon={"Nopadding"}
-            title={'Close'}
-            colorsArray={['#b9a4ff','#9f83ff','#7953FAFF']}
-            styleTxt={[Styles.txt,{fontSize: normalize(13),}]} sizeIcon={27} />
+            title={"Close"}
+            colorsArray={["#b9a4ff", "#9f83ff", "#7953FAFF"]}
+            styleTxt={[Styles.txtbtn, { fontSize: normalize(13) }]} sizeIcon={27} />
         </View>
       </SafeAreaView>
     );
   };
-  const AddImageOffline=()=>{
-
+  ///add new image in list when user Offline///
+  const AddImageOffline = () => {
     let List_Item = [];
-    let A=[];
-    let Count=0;
-    List_Item = ImageSourceviewarray?.filter((p) => p.Type==='');
-    A = [...List_Item];
+    let Detail_List = [];
+    let Count = 0;
+    List_Item = ImageSourceviewarray?.filter((p) => p.Type === "");
+    Detail_List = [...List_Item];
     ImageSourceviewarrayUpload?.forEach((obj) => {
-      A.push({
-        uri:obj.uri,
+      Detail_List.push({
+        uri: obj.uri,
         type: obj?.type,
         fileName: obj?.fileName,
         buildId: Count,
@@ -648,118 +650,128 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         relatedId: GLOBAL.UpdateUnitID,
         Show: "Yes",
         geoLat: obj.geoLat,
-        geoLong:obj.geoLong,
-        geoAddress:obj.geoAddress,
-        Country:obj.Country
+        geoLong: obj.geoLong,
+        geoAddress: obj.geoAddress,
+        Country: obj.Country,
       });
-    })
-    if(A?.length!==0) {
-      A?.sort(dateComparison_data)
-      Make_Week_Filter_List(A)
+    });
+    if (Detail_List?.length !== 0) {
+      Detail_List?.sort(dateComparison_data);
+      Make_Week_Filter_List(Detail_List);
     }
-    List_Item = A;
-    setImageSourceviewarray(A);
-    setImageSourceviewarrayUpload([])
-    Save_Details(List_Item)
-  }
-  const Save_Details= async (A)=>{
-    let AllList=[]
-    let SiteDetailList=JSON.parse(await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY));
-    if(SiteDetailList!==null &&SiteDetailList?.length!==0 ){
-      let Filter=SiteDetailList?.filter((p) => parseInt(p.relatedId)===parseInt(GLOBAL.UpdateUnitID))
-      const flag = compareTwoArrayOfObjects(Filter, A)
+    List_Item = Detail_List;
+    setImageSourceviewarray(Detail_List);
+    setImageSourceviewarrayUpload([]);
+    Save_Details(List_Item);
+  };
+  ///add or update sitedetails in asyncStorage when app is offline///
+  const Save_Details = async (A) => {
+    let AllList = [];
+    let SiteDetailList = JSON.parse(await AsyncStorage.getItem(GLOBAL.UnitDetail_KEY));
+    if (SiteDetailList !== null && SiteDetailList?.length !== 0) {
+      let Filter = SiteDetailList?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateUnitID));
+      const flag = compareTwoArrayOfObjects(Filter, A);
       if (flag === false) {
-        let different=getDifference(A, Filter)
-        let Exist=false
+        let different = getDifference(A, Filter);
+        let Exist = false;
         different?.forEach((obj) => {
-          Exist=Filter?.findIndex((p)=>p.buildId===obj.buildId)
-        })
-        if(Exist===-1) {
-          let MakeList = [].concat(Filter, different)
+          Exist = Filter?.findIndex((p) => p.buildId === obj.buildId);
+        });
+        if (Exist === -1) {
+          let MakeList = [].concat(Filter, different);
           AllList = [...SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateUnitID)), ...MakeList];
+        } else {
+          AllList = [...SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateUnitID)), ...A];
         }
-        else {
-          AllList = [...SiteDetailList?.filter((p) => parseInt(p.relatedId)!==parseInt(GLOBAL.UpdateUnitID)), ...A];
-        }
-        AllList?.sort(dateComparison_data)
+        AllList?.sort(dateComparison_data);
         await AsyncStorage.setItem(GLOBAL.UnitDetail_KEY, JSON.stringify(AllList));
       }
-    }
-    else if(A?.length!==0 && SiteDetailList===null) {
-      A?.sort(dateComparison_data)
+    } else if (A?.length !== 0 && SiteDetailList === null) {
+      A?.sort(dateComparison_data);
       await AsyncStorage.setItem(GLOBAL.UnitDetail_KEY,
         JSON.stringify(A),
       );
     }
-  }
+  };
   const DeleteImageFromApi = (buildId) => {
     const formData = new FormData();
-    formData.append("userId", "1");
+    formData.append("userId", GLOBAL.UserInformation?.userId);
     formData.append("buildNoteId", buildId);
     formData.append("notes", "delete");
-    writePostApi("POST", Api.DeleteBuildNote,formData).then(json => {
+    writePostApi("POST", Api.DeleteBuildNote, formData).then(json => {
       if (json) {
         if (json?.status === true) {
           setMessage(json?.msg);
           setShowMessage(true);
-          DeleteImage(buildId)
+          DeleteImage(buildId);
           const timerId = setInterval(() => {
             setShowMessage(false);
-          },4000);
+          }, 4000);
           return () => clearInterval(timerId);
-        }}
-      else  {
-        setMessage('Your BuildNote successfully deleted')
-        setShowMessage(true)
-        DeleteImage(buildId)
+        }
+      } else {
+        setMessage("Your BuildNote successfully deleted");
+        setShowMessage(true);
+        DeleteImage(buildId);
         const timerId = setInterval(() => {
-          setShowMessage(false)
-        }, 4000)
+          setShowMessage(false);
+        }, 4000);
         return () => clearInterval(timerId);
       }
     });
   };
+  ///Delete Photos///
   const DeleteImage = (buildId) => {
     let List_Item = ImageSourceviewarray;
-    const index= List_Item?.findIndex((p)=>p?.buildId===buildId)
+    const index = List_Item?.findIndex((p) => p?.buildId === buildId);
     let markers = [...List_Item];
     markers?.splice(index, 1);
-    markers?.sort(dateComparison_data)
+    markers?.sort(dateComparison_data);
     setImageSourceviewarray(markers);
     setMudolList(markers);
     Save_Details(markers);
   };
-  const Change_Gallry_Date=(date,buildId)=>{
+  ///user can change photos date if select from gallery///
+  const Change_Gallry_Date = (date, buildId) => {
     let List_Item = [];
     List_Item = ImageSourceviewarrayUpload;
     let List_Item_array = [];
-    List_Item_array=ImageSourceviewarray
+    List_Item_array = ImageSourceviewarray;
     let index_array = List_Item_array?.findIndex((p) => p?.buildId === buildId);
     let markers_array = [...List_Item_array];
-    markers_array[index_array] = { ...markers_array[index_array], Date:date,Day:date?.split('-')?.[2]?.split(' ')?.[0],Month:date?.split('-')?.[1] };
-    markers_array?.sort(dateComparison_data)
-    setImageSourceviewarray(markers_array)
-    Make_Week_Filter_List(markers_array)
+    markers_array[index_array] = {
+      ...markers_array[index_array],
+      Date: date,
+      Day: date?.split("-")?.[2]?.split(" ")?.[0],
+      Month: date?.split("-")?.[1],
+    };
+    markers_array?.sort(dateComparison_data);
+    setImageSourceviewarray(markers_array);
+    Make_Week_Filter_List(markers_array);
     let index = List_Item?.findIndex((p) => p?.buildId === buildId);
     let markers = [...List_Item];
-    markers[index] = { ...markers[index], Date:date,Day:date?.split('-')?.[2]?.split(' ')?.[0],Month:date?.split('-')?.[1] };
+    markers[index] = {
+      ...markers[index],
+      Date: date,
+      Day: date?.split("-")?.[2]?.split(" ")?.[0],
+      Month: date?.split("-")?.[1],
+    };
     setImageSourceviewarrayUpload(markers);
-    Save_Details(markers_array)
-  }
-  //////////////////////////////////////
+    Save_Details(markers_array);
+  };
+  ///sort list button =>id==0 means all photos,id==1 means filter by week and id==2 means today photos///
   const FilterFunc = (id) => {
-    let Filter = MudolList;
     if (id === 0) {
       setImageSourceviewarray(MudolList);
     } else if (id === 1) {
       setshowModalCalender(true);
     } else if (id === 2) {
-      const date=new Date() ;
-      const Day=date.getDate();
-      const Month=date.getMonth();
-      let A=[];
-      A=Filter?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month+1);
-      setImageSourceviewarray(A);
+      const date = new Date();
+      const Day = date.getDate();
+      const Month = date.getMonth();
+      let Filter_List = [];
+      Filter_List = MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
+      setImageSourceviewarray(Filter_List);
     }
   };
   const onOpen = () => {
@@ -773,7 +785,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
     <View style={Styles.BtnBox}>
       <TouchableOpacity onPress={() => onClose()} style={Styles.CancelBtn}>
         <View style={{ width: "80%" }}>
-          <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+          <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
         </View>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => {
@@ -795,99 +807,45 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
       </TouchableOpacity>
     </View>
   );
-
-  const Navigate_Url= (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
+  const Navigate_Url = (Url) => {
     navigation.navigate(Url);
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
   };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
-
-        <View style={Styles.With100NoFlex}>
-          <FastImage style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY)
-              setshowModalDelete(false)
-              navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
-
-  const logout_Url= () => {
-    setshowModalDelete(true)
+/// Bottom menu click On LogOut button///
+  const logout_Url = () => {
+    setshowModalDelete(true);
 
   };
-  const Back_navigate=()=>{
-    if (ShowBackBtn===false) {
+  ///header back button =>if add photos and did not send server send message if not navigate back///
+  const Back_navigate = () => {
+    if (ShowBackBtn === false) {
       setShowWarningMessage(true);
       scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
       setscroll(false);
-     // setTimeout(function(){ setShowBackBtn(true)}, 2000)
-      setShowBackBtn(true)
+      // setTimeout(function(){ setShowBackBtn(true)}, 2000)
+      setShowBackBtn(true);
+    } else {
+      goBack();
     }
-    else {
-      goBack()
-    }
-  }
+  };
   const renderItem = ({ item }) => (
     <List_Item_Detail_Images value={item} Change_Gallry_Date={Change_Gallry_Date}
-                             DeleteImage={DeleteImageFromApi} Type={'Feature'} onOpen={onOpen} />
-  )
-  const renderSectionHeader=()=>(
+                             DeleteImage={DeleteImageFromApi} Type={"Feature"} onOpen={onOpen} />
+  );
+  const renderSectionHeader = () => (
     <>
-
-      {ShowWarningMessage===true&&
+      {ShowWarningMessage === true &&
       <View style={Styles.flashMessageWarning4}>
         <View style={Styles.flashMessageWarning6}>
-          <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
-            <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+          <View style={{ width: "10%", alignItems: "center", justifyContent: "flex-start" }}>
+            <FontAwesome size={normalize(18)} color={"#fff"} name={"exclamation-circle"} />
           </View>
-          <View style={{ width: "90%",alignItems:'flex-start' }}>
+          <View style={{ width: "90%", alignItems: "flex-start" }}>
             <Text style={Styles.AddedtTxt}>
               You will lose all changes.Do you still want to leave?
 
@@ -898,7 +856,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         <View style={Styles.With100Row2}>
           <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
             <TouchableOpacity onPress={() => {
-              setShowBackBtn(false)
+              setShowBackBtn(false);
               setShowWarningMessage(false);
             }}>
               <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
@@ -908,25 +866,23 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
             <TouchableOpacity onPress={() => {
               setShowWarningMessage(false);
               setShowBackBtn(true);
-              navigation.navigate('Project_Units')
+              navigation.navigate("Project_Units");
             }}>
               <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
-        {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
-        {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
-        {/*</View>*/}
       </View>
       }
-      {ImageSourceviewarray.length>1?
-        <Filter  FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter} setShowFilter={setShowFilter}/>
-        :null
+      {ImageSourceviewarray.length > 1 ?
+        <Filter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter}
+                setShowFilter={setShowFilter} />
+        : null
       }
 
-      {ShowDateRange===true?
-        <TouchableOpacity onPress={()=>setshowModalCalender( true)} style={Styles.WeekFilterBox}>
-          <Text style={Styles.Filter_txt}>
+      {ShowDateRange === true ?
+        <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
+          <Text style={Styles.Filter_txt3}>
             Start Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
@@ -935,7 +891,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
               }
             </Text>
           </View>
-          <Text style={Styles.Filter_txt}>
+          <Text style={Styles.Filter_txt3}>
             End Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
@@ -947,27 +903,29 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         </TouchableOpacity> : null
       }
     </>
-  )
-
-  const ListFooter=()=>(
+  );
+  const ListFooter = () => (
     <View style={Styles.ViewItems_center_transparent}>
       {
-        ImageSourceviewarrayUpload?.length!==0?
+        ImageSourceviewarrayUpload?.length !== 0 ?
           <ButtonI style={Styles.btn23}
                    onpress={AddUnitesImage}
                    categoriIcon={""}
                    title={"Save Photos"}
                    colorsArray={["#ffadad", "#f67070", "#FF0000"]}
-                   styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null}
+                   styleTxt={[Styles.txtbtn2, { fontSize: normalize(16) }]} sizeIcon={27} /> : null}
     </View>
   );
   const renderItem_dyb = ({ item }) => (
-    <List_Item_Detail_Images value={item} Type={'DYB'}
+    <List_Item_Detail_Images value={item} Type={"DYB"}
     />
-  )
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header  colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate} Title={'Plots / Units Detail'}/>
+      <Header
+        colors={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+        StatusColor={GLOBAL.route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={Back_navigate}
+        Title={"Plots / Units Detail"} />
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
           <View style={Styles.flashMessageSuccsess}>
@@ -982,94 +940,96 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         </View>
         : null}
 
-      {showWarning===true&&  <Warningmessage/>}
-        <View style={Styles.containerList}>
+      <View style={Styles.containerList}>
 
-          <View style={Styles.Center_margin_Bottom2}>
-            {
-              showModalDelete &&
-              <View>
-                {
-                  _showModalDelete()
-                }
-              </View>
-            }
-            {
-              showModalCalender &&
-              _showModalCalender()
-            }
-            {
-              GLOBAL.route === 'structure' ?
-                <>
-                  {ImageSourceviewarray && (
-                    <FlatList
-                      showsVerticalScrollIndicator={false}
-                      data={ImageSourceviewarray}
-                      style={{ width: '100%', flexGrow: 0 }}
-                      renderItem={renderItem}
-                      ListHeaderComponent={renderSectionHeader}
-                      ref={scrollViewRef}
-                      ListFooterComponent={ListFooter}
-                      columnWrapperStyle={{ justifyContent: "space-between", }}
-                      contentContainerStyle={{ justifyContent: "space-between", }}
-                      numColumns={2}
-                      key={'#'}
-                      keyExtractor={(item, index) => {
-                        return "#" + index.toString();
-                      }}
-                    />
-                  )}
-                </> :
-                <>
-                  {ImageSourceviewarray && (
-                    <FlatList
-                      ref={scrollViewRef}
-                      columnWrapperStyle={{ justifyContent: "space-between", }}
-                      contentContainerStyle={{ justifyContent: "space-between", }}
-                      data={ImageSourceviewarray}
-                      numColumns={2}
-                      style={{ width: '100%', }}
-                      ListHeaderComponent={renderSectionHeader}
-                      renderItem={renderItem_dyb}
-                      key={'#'}
-                      keyExtractor={(item, index) => {
-                        return "#" + index.toString();
-                      }}
-                    />
-                  )}
-                </>
-            }
-
-          </View>
+        <View style={Styles.Center_margin_Bottom2}>
+          {showModalDelete &&
+          <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
+          }
+          {
+            showModalCalender &&
+            _showModalCalender()
+          }
+          {
+            GLOBAL.route === "structure" ?
+              <>
+                {ImageSourceviewarray && (
+                  <FlatList
+                    showsVerticalScrollIndicator={false}
+                    data={ImageSourceviewarray}
+                    style={{ width: "100%", flexGrow: 0 }}
+                    renderItem={renderItem}
+                    ListHeaderComponent={renderSectionHeader}
+                    ref={scrollViewRef}
+                    ListFooterComponent={ListFooter}
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                    contentContainerStyle={{ justifyContent: "space-between" }}
+                    numColumns={2}
+                    key={"#"}
+                    keyExtractor={(item, index) => {
+                      return "#" + index.toString();
+                    }}
+                  />
+                )}
+              </> :
+              <>
+                {ImageSourceviewarray && (
+                  <FlatList
+                    ref={scrollViewRef}
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                    contentContainerStyle={{ justifyContent: "space-between" }}
+                    data={ImageSourceviewarray}
+                    numColumns={2}
+                    style={{ width: "100%" }}
+                    ListHeaderComponent={renderSectionHeader}
+                    renderItem={renderItem_dyb}
+                    key={"#"}
+                    keyExtractor={(item, index) => {
+                      return "#" + index.toString();
+                    }}
+                  />
+                )}
+              </>
+          }
+          {
+            ImageSourceviewarray?.length === 0 &&
+            <View style={Styles.With90CenterVertical}>
+              <Text style={Styles.EmptyText}>
+                " No Photos defined "
+              </Text>
+            </View>
+          }
         </View>
+      </View>
       {
-        ImageSourceviewarray?.length>1?
+        ImageSourceviewarray?.length > 1 ?
           <>
             {
-              scroll===false?
+              scroll === false ?
                 <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
                   <TouchableOpacity transparent onPress={() => {
                     scrollViewRef.current.scrollToEnd({ animated: true });
-                    setscroll(true);}}>
+                    setscroll(true);
+                  }}>
                     <AntDesign name="down" size={20} color="#fff" />
                   </TouchableOpacity>
-                </LinearGradient>:
+                </LinearGradient> :
                 <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
-                  <TouchableOpacity transparent onPress={()=>{
+                  <TouchableOpacity transparent onPress={() => {
                     scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
-                    setscroll(false)
+                    setscroll(false);
                   }}>
                     <AntDesign name="up" size={20} color="#fff" />
                   </TouchableOpacity>
                 </LinearGradient>
             }
-          </>:
+          </> :
           null
       }
       <Modalize ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
         {renderContent()}
       </Modalize>
-      <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>
+      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
     </Container>
 
   );

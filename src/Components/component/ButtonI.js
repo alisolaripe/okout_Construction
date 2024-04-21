@@ -9,7 +9,6 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import LinearGradient from "react-native-linear-gradient";
-
 function ButtonI({ onpress, style, styleTxt, title, categoriIcon, nameIcon, sizeIcon, colorIcon,colorsArray }) {
   if (categoriIcon === "FontAwesome") {
     return (
@@ -28,7 +27,6 @@ function ButtonI({ onpress, style, styleTxt, title, categoriIcon, nameIcon, size
       <TouchableOpacity
         onPress={onpress}
         style={style}>
-        <FontAwesome5 name={nameIcon} size={sizeIcon} color={colorIcon} />
         <Text style={[styleTxt, {}]}>{title}</Text>
       </TouchableOpacity>
     );
@@ -76,17 +74,5 @@ function ButtonI({ onpress, style, styleTxt, title, categoriIcon, nameIcon, size
       </View>
     );
   }
-  // else if (categoriIcon === 'image') {
-  //     return (
-  //         <TouchableOpacity
-  //             onPress={onpress}
-  //             style={style}>
-  //            <Image source={nameIcon} style={[Styles.littleImage]}/>
-  //             <Text style={[styleTxt, {}]}>{title}</Text>
-  //         </TouchableOpacity>
-  //     )
-  // }
 }
-
-
 export { ButtonI };

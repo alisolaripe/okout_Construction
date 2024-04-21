@@ -12,8 +12,8 @@ import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
-import { Image } from 'react-native-compressor';
-import FastImage from 'react-native-fast-image';
+import { Image } from "react-native-compressor";
+import { LogOutModal } from "../component/LogOutModal";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
 import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,18 +24,18 @@ import { Filter } from "../component/Filter";
 import { readOnlineApi } from "../ReadPostApi";
 import LinearGradient from "react-native-linear-gradient";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { UserPermission } from "../CheckPermission";
-import { Warningmessage } from "../component/Warningmessage";
+import Geocoder from "react-native-geocoder";
 
-let A = [];
-let C = [];
+let ImageList = [];
+let ImageListUpload = [];
 let Full = "";
 let TodayDate = "";
 let Day = "";
 let Month = "";
-let List=[]
+let List = [];
 const Api = require("../Api");
 const GLOBAL = require("../Global");
+
 function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const modalizeRef = React.createRef();
   const scrollViewRef = useRef();
@@ -57,9 +57,9 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
-  const [showWarning, setshowWarning] = useState(false);
 
   useEffect(() => {
+    Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
     getSitesDetail();
     getLocation();
     const date = new Date();
@@ -72,6 +72,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     TodayDate = `${Year}-${Month}-${Day}`;
     Full = `${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
   }, []);
+  ///get user loction ///
   const getLocation = async () => {
     requestLocationPermission().then(res => {
       if (res) {
@@ -103,21 +104,22 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       }
     });
   };
-  ///////////////////////////////
+  ///compare 2 array by date and sort///
   const dateComparison_data = (a, b) => {
     const date1 = new Date(a?.Date);
     const date2 = new Date(b?.Date);
     return date1 - date2;
   };
+  /// sort date and make list by week by week///
   const Make_Week_Filter_List = (A) => {
-    let B = [];
+    let Week_List = [];
     let endDate_Format = "";
     let today = "";
     let tomorrow = "";
     let endDate = "";
     let Exist = "";
     A?.forEach((obj) => {
-      if(obj?.Date!=='') {
+      if (obj?.Date !== "") {
         today = new Date(obj?.Date);
         tomorrow = new Date(today);
         if (obj?.WeekDay === "Sunday") {
@@ -147,61 +149,47 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         }
         let newString = endDate.split("/");
         endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
-        Exist = B?.findIndex((p) => p.endDate === endDate_Format);
+        Exist = Week_List?.findIndex((p) => p.endDate === endDate_Format);
         if (Exist === -1) {
-          B.push({
+          Week_List.push({
             startDate: obj?.Date?.split(" ")?.[0],
             endDate: endDate_Format,
           });
         }
       }
     });
-    //C=[...B]
-    // while(endDate_Format <= A?.[A?.length-1]?.Date?.split(" ")?.[0]) {
-    //   today=new Date(C?.[C?.length-1]?.endDate);
-    //   tomorrow?.setDate(today?.getDate()+7);
-    //   endDate=tomorrow?.toLocaleDateString();
-    //   let newString=endDate.split('/');
-    //   endDate_Format=newString?.[2]+'-'+newString?.[1]+'-'+newString?.[0];
-    //
-    //     Exist = A?.filter((p) => p.Date === obj.siteId);
-    //
-    //   C.push({
-    //     startDate:C?.[C?.length-1]?.endDate,
-    //     endDate:endDate_Format
-    //   })
-    //   C = [...C]
-    // }
-    setDateRangeList(B);
+    setDateRangeList(Week_List);
   };
+  ///calculate Names of the days of the week///
   const getDayOfWeek = (date) => {
     const dayOfWeek = new Date(date).getDay();
     return isNaN(dayOfWeek) ? null :
       ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
   };
+  ///get site detail from serve///
   const getSitesDetail = async () => {
+    let mark2 = {
+      uri: "",
+      type: "",
+      fileName: "",
+      buildId: "",
+      Type: "",
+      Day: "",
+      Date: "",
+      Month: "",
+      WeekDay: "",
+      relatedId: "",
+      buildIdAttachmentId: "",
+      geoLat: "",
+      geoLong: "",
+      geoAddress: "",
+      Country: "",
+    };
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.getBuildNotes + `userId=${GLOBAL.UserInformation?.userId}&relatedId=${GLOBAL.UpdateSiteID}&relatedName=site`).then(json => {
-        let A = [];
+        let Site_Detail = [];
         let Country = "";
         let Address = "";
-        let mark2 = {
-          uri:"",
-          type:'',
-          fileName:'',
-          buildId:'',
-          Type:"",
-          Day:'',
-          Date:'',
-          Month:'',
-          WeekDay:'',
-          relatedId:'',
-          buildIdAttachmentId:'',
-          geoLat:'',
-          geoLong:'',
-          geoAddress:'',
-          Country:'',
-        };
         json?.buildNotes?.forEach((obj) => {
           obj?.attachements?.forEach((obj2) => {
             const Day = obj2?.postDate?.split("-");
@@ -213,91 +201,73 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
               Country = "";
             }
             if (obj2?.imageUrl !== null) {
-              A.push({
+              Site_Detail.push({
                 uri: GLOBAL.OrgAppLink_value + "/" + obj2?.imageUrl,
-                type:obj2?.imageName?.split(".")?.[1],
-                fileName:obj2?.imageName,
-                buildId:obj2.buildId,
-                Type:"",
-                Day:W?.[0],
-                Date:obj2?.postDate,
-                Month:Day?.[1],
-                WeekDay:getDayOfWeek(obj2?.postDate),
-                relatedId:obj.buildIdRelatedId,
+                type: obj2?.imageName?.split(".")?.[1],
+                fileName: obj2?.imageName,
+                buildId: obj2.buildId,
+                Type: "",
+                Day: W?.[0],
+                Date: obj2?.postDate,
+                Month: Day?.[1],
+                WeekDay: getDayOfWeek(obj2?.postDate),
+                relatedId: obj.buildIdRelatedId,
                 buildIdAttachmentId: obj2.buildIdAttachmentId,
-                geoLat:obj2?.geoLat,
-                geoLong:obj2?.geoLong,
-                geoAddress:obj2?.geoAddress,
-                Country:Country,
-              })}})});
-        if(GLOBAL.route==='structure') {
-          if (A?.length !== 0) {
-            A = [mark2, ...A];
-            A?.sort(dateComparison_data)
-            setImageSourceviewarray(A);
-            setMudolList(A);
-            Make_Week_Filter_List(A)
-            Save_Details_Online(A)
+                geoLat: obj2?.geoLat,
+                geoLong: obj2?.geoLong,
+                geoAddress: obj2?.geoAddress,
+                Country: Country,
+              });
+            }
+          });
+        });
+        if (GLOBAL.route === "structure") {
+          if (Site_Detail?.length !== 0) {
+            Site_Detail = [mark2, ...Site_Detail];
+            Site_Detail?.sort(dateComparison_data);
+            setImageSourceviewarray(Site_Detail);
+            setMudolList(Site_Detail);
+            Make_Week_Filter_List(Site_Detail);
+            Save_Details_Online(Site_Detail);
           } else {
-            A = [mark2];
-            setImageSourceviewarray(A);
+            Site_Detail = [mark2];
+            setImageSourceviewarray(Site_Detail);
           }
-        }
-        else {
-          if (A?.length !== 0) {
-            A?.sort(dateComparison_data)
-            setImageSourceviewarray(A);
-            setMudolList(A);
-            Make_Week_Filter_List(A)
-            Save_Details_Online(A)
-
-          }
-          else {
-            setImageSourceviewarray('')
+        } else {
+          if (Site_Detail?.length !== 0) {
+            Site_Detail?.sort(dateComparison_data);
+            setImageSourceviewarray(Site_Detail);
+            setMudolList(Site_Detail);
+            Make_Week_Filter_List(Site_Detail);
+            Save_Details_Online(Site_Detail);
+          } else {
+            setImageSourceviewarray("");
           }
         }
       });
-    }
-    else {
-      let B=[]
+    } else {
+      let Site_Detail = [];
       let Filter = JSON.parse(await AsyncStorage.getItem(GLOBAL.SiteDetail_KEY))?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateSiteID));
-      //Filter?.sort(dateComparison_data);
-      let mark2 = {
-        uri: "",
-        type:'',
-        fileName: '',
-        buildId:'',
-        Type: "",
-        Day:'',
-        Date:'',
-        Month:'',
-        WeekDay:'',
-        relatedId:'',
-        buildIdAttachmentId: '',
-        geoLat:'',
-        geoLong: '',
-        geoAddress: '',
-        Country:'',
-      };
+
       if (Filter) {
-        if(GLOBAL.route==='structure') {
-          B = [mark2,...Filter];
-          B?.sort(dateComparison_data)
-          Make_Week_Filter_List(B)
-          setImageSourceviewarray(B);
-          setMudolList(B)
-        }
-        else {
-          Filter?.sort(dateComparison_data)
-          Make_Week_Filter_List(Filter)
+        if (GLOBAL.route === "structure") {
+          Site_Detail = [mark2, ...Filter];
+          Site_Detail?.sort(dateComparison_data);
+          Make_Week_Filter_List(Site_Detail);
+          setImageSourceviewarray(Site_Detail);
+          setMudolList(Site_Detail);
+        } else {
+          Filter?.sort(dateComparison_data);
+          Make_Week_Filter_List(Filter);
           setImageSourceviewarray(Filter);
-          setMudolList(Filter)
+          setMudolList(Filter);
         }
       }
       setGeoAddress("");
       setCountry("");
     }
   };
+  ///user can change photos date if select from gallery///
   const Change_Gallry_Date = (date, buildId) => {
     let List_Item = [];
     List_Item = ImageSourceviewarrayUpload;
@@ -325,8 +295,10 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     setImageSourceviewarrayUpload(markers);
     Save_Details(markers_array);
   };
+  /// sort photos by week ///
   const SortByWeek = (startDate, endDate) => {
     let Filter = MudolList;
+    let Week_List = [];
     let Filter2 = [];
     const firstDate = startDate;
     const secondDate = endDate;
@@ -334,26 +306,26 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     const sevenDaysBefore = secondDate?.split("-")?.[2];
     const Monthtoday = firstDate?.split("-")?.[1];
     const MonthsevenDaysBefore = secondDate?.split("-")?.[1];
-    A = Filter?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday) || parseInt(p.Month) === parseInt(MonthsevenDaysBefore));
+    Week_List = Filter?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday) || parseInt(p.Month) === parseInt(MonthsevenDaysBefore));
     if (parseInt(Monthtoday) === parseInt(MonthsevenDaysBefore)) {
-      Filter2 = A?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore) && parseInt(p.Day) >= parseInt(today));
+      Filter2 = Week_List?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore) && parseInt(p.Day) >= parseInt(today));
       setshowModalCalender(false);
     } else {
       let todays = [];
       let Copy = [];
       let sevenDaysBefores = [];
-      let MonthsevenDaysBeforeList = A?.filter((p) => parseInt(p.Month) === parseInt(MonthsevenDaysBefore));
-      let MonthtodayList = A?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday));
+      let MonthsevenDaysBeforeList = Filter?.filter((p) => parseInt(p.Month) === parseInt(MonthsevenDaysBefore));
+      let MonthtodayList = Filter?.filter((p) => parseInt(p.Month) === parseInt(Monthtoday));
       todays = MonthtodayList?.filter((p) => parseInt(p.Day) >= parseInt(today));
       sevenDaysBefores = MonthsevenDaysBeforeList?.filter((p) => parseInt(p.Day) <= parseInt(sevenDaysBefore));
       Copy = [].concat(sevenDaysBefores, todays);
       Filter2 = Copy;
-
       setshowModalCalender(false);
     }
     setShowDateRange(true);
     setImageSourceviewarray(Filter2);
   };
+  ///show week list///
   const _showModalCalender = () => {
     return (
       <SafeAreaView style={[Styles.CalenderBox]}>
@@ -363,7 +335,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           </Text>
 
           <Text style={Styles.WeekFilterTextMiddel}>
-            Week endingsssss
+            Week ending
           </Text>
         </View>
         <View style={Styles.Calender}>
@@ -377,7 +349,6 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
                   <Text style={Styles.WeekFilterText}>
                     {value.startDate}
                   </Text>
-
                   <Text style={Styles.WeekFilterText}>
                     {value.endDate}
                   </Text>
@@ -396,18 +367,19 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             categoriIcon={"Nopadding"}
             title={"Close"}
             colorsArray={["#b9a4ff", "#9f83ff", "#7953FAFF"]}
-            styleTxt={[Styles.txt, { fontSize: normalize(13) }]} sizeIcon={27} />
+            styleTxt={[Styles.txtbtn, { fontSize: normalize(13) }]} sizeIcon={27} />
         </View>
       </SafeAreaView>
     );
   };
+  ///add new image in list when user Offline///
   const AddImageOffline = () => {
     let List_Item = [];
-    let A = [];
+    let Image_List = [];
     List_Item = ImageSourceviewarray?.filter((p) => p.Type === "");
-    A = [...List_Item];
+    Image_List = [...List_Item];
     ImageSourceviewarrayUpload?.forEach((obj) => {
-      A.push({
+      Image_List.push({
         uri: obj.uri,
         type: obj?.type,
         fileName: obj?.fileName,
@@ -425,16 +397,17 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
 
       });
     });
-    if (A?.length !== 0) {
-      A?.sort(dateComparison_data);
-      Make_Week_Filter_List(A);
+    if (Image_List?.length !== 0) {
+      Image_List?.sort(dateComparison_data);
+      Make_Week_Filter_List(Image_List);
     }
-    List_Item = A;
-    setImageSourceviewarray(A);
-    setMudolList(A);
+    List_Item = Image_List;
+    setImageSourceviewarray(Image_List);
+    setMudolList(Image_List);
     setImageSourceviewarrayUpload([]);
     Save_Details(List_Item);
   };
+  ///add or update sitedetails in asyncStorage when app is offline///
   const Save_Details = async (A) => {
     let AllList = [];
     let SiteDetailList = JSON.parse(await AsyncStorage.getItem(GLOBAL.SiteDetail_KEY));
@@ -452,7 +425,6 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           AllList = [...SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateSiteID)), ...MakeList];
         } else {
           AllList = [...SiteDetailList?.filter((p) => parseInt(p.relatedId) !== parseInt(GLOBAL.UpdateSiteID)), ...A];
-
         }
         AllList?.sort(dateComparison_data);
         await AsyncStorage.setItem(GLOBAL.SiteDetail_KEY, JSON.stringify(AllList));
@@ -464,6 +436,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       );
     }
   };
+  ///Delete Photos///
   const DeleteImage = (buildId) => {
     let List_Item = ImageSourceviewarray;
     const index = List_Item?.findIndex((p) => p?.buildId === buildId);
@@ -474,12 +447,14 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     setMudolList(markers);
     Save_Details(markers);
   };
-  const Image_compress=async (path)=>{
-    return  await Image.compress(path, {
+  ///Reduce the size of the photo///
+  const Image_compress = async (path) => {
+    return await Image.compress(path, {
       maxWidth: 1000,
       quality: 0.8,
-    })
-  }
+    });
+  };
+
   const selectPhotoFromGallery = () => {
     onClose();
     ImagePicker.openPicker({
@@ -495,14 +470,13 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         alert(response.customButton);
       } else {
         if (ImageSourceviewarray)
-          A = [...ImageSourceviewarray];
+          ImageList = [...ImageSourceviewarray];
         if (ImageSourceviewarrayUpload)
-          C = [...ImageSourceviewarrayUpload];
+          ImageListUpload = [...ImageSourceviewarrayUpload];
         for (let item in response) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
           var imgName = getFilename[getFilename.length - 1];
-
           let D = "";
           let B = "";
           let RealDate = "";
@@ -519,14 +493,14 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             Months = Month;
           }
           let WeekDay = getDayOfWeek(RealDate);
-          if (A.length !== 0) {
-            buildid = parseInt(A?.[A.length - 1]?.buildId) + 1;
+          if (ImageList.length !== 0) {
+            buildid = parseInt(ImageList?.[ImageList.length - 1]?.buildId) + 1;
           } else {
             buildid = buildid + 1;
           }
-          Image_compress(obj.path).then(res=>{
+          Image_compress(obj.path).then(res => {
 
-            A.push({
+            ImageList.push({
               uri: res,
               type: obj.mime,
               fileName: imgName,
@@ -542,7 +516,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
               Country: Country,
               WeekDay: WeekDay,
             });
-            C.push({
+            ImageListUpload.push({
               uri: res,
               type: obj.mime,
               fileName: imgName,
@@ -561,23 +535,23 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             List.push({
               Type: "Gallery",
             });
-            if(List?.length===response?.length) {
+            if (List?.length === response?.length) {
 
-              if (A?.length !== 0) {
-                A?.sort(dateComparison_data);
-                Make_Week_Filter_List(A);
+              if (ImageList?.length !== 0) {
+                ImageList.sort(dateComparison_data);
+                Make_Week_Filter_List(ImageList);
               }
-              setImageSourceviewarray(A);
-              setMudolList(A);
-              setImageSourceviewarrayUpload(C);
+              setImageSourceviewarray(ImageList);
+              setMudolList(ImageList);
+              setImageSourceviewarrayUpload(ImageListUpload);
               scrollViewRef.current.scrollToEnd({ animated: true });
               setscroll(true);
-              setShowBackBtn(false)
-              List=[]
-              A = [...A];
-              C = [...C];
+              setShowBackBtn(false);
+              List = [];
+              ImageList = [...ImageList];
+              ImageListUpload = [...ImageListUpload];
             }
-          })
+          });
         }
       }
     });
@@ -592,25 +566,25 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       var imgName = getFilename[getFilename.length - 1];
       setImageSource(response.path);
       if (ImageSourceviewarray)
-        A = [...ImageSourceviewarray];
+        ImageList = [...ImageSourceviewarray];
       if (ImageSourceviewarrayUpload)
-        C = [...ImageSourceviewarrayUpload];
+        ImageListUpload = [...ImageSourceviewarrayUpload];
 
       let buildid = 0;
 
-      if (A?.length !== 0) {
-        buildid = parseInt(A?.[A?.length - 1]?.buildId) + 1;
+      if (ImageList?.length !== 0) {
+        buildid = parseInt(ImageList?.[ImageList?.length - 1]?.buildId) + 1;
       } else {
         buildid = buildid + 1;
       }
 
       let WeekDay = getDayOfWeek(Full);
-      Image.compress( response.path, {
+      Image.compress(response.path, {
         maxWidth: 1000,
         quality: 0.8,
       }).then(res => {
 
-        A.push({
+        ImageList.push({
           uri: res,
           type: response.mime,
           fileName: imgName,
@@ -627,7 +601,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           WeekDay: WeekDay,
         });
 
-        C.push({
+        ImageListUpload.push({
           uri: res,
           type: response.mime,
           fileName: imgName,
@@ -643,28 +617,26 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           Country: Country,
           WeekDay: WeekDay,
         });
-        if (A?.length !== 0) {
-          A?.sort(dateComparison_data);
-          Make_Week_Filter_List(A);
+        if (ImageList?.length !== 0) {
+          ImageList?.sort(dateComparison_data);
+          Make_Week_Filter_List(ImageList);
         }
-        setImageSourceviewarray(A);
-        setMudolList(A);
-        setImageSourceviewarrayUpload(C);
+        setImageSourceviewarray(ImageList);
+        setMudolList(ImageList);
+        setImageSourceviewarrayUpload(ImageListUpload);
         scrollViewRef.current.scrollToEnd({ animated: true });
         setscroll(true);
-        setShowBackBtn(false)
-        A = [...A];
-        C = [...C];
-      })
-
-
+        setShowBackBtn(false);
+        ImageList = [...ImageList];
+        ImageListUpload = [...ImageListUpload];
+      });
     });
   };
-  //////////////////////////////
+  ///Add new Photos for Site and sent to server////
   const AddSitesImage = () => {
     let idsArray = "";
     const formData = new FormData();
-    formData.append("userId", "1");
+    formData.append("userId", GLOBAL.UserInformation?.userId);
     formData.append("relatedName", "site");
     formData.append("relatedId", GLOBAL.UpdateSiteID);
     formData.append("geoLat", location.latitude);
@@ -685,22 +657,27 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             if (json?.status === true) {
               setMessage(json?.msg);
               setShowMessage(true);
-              setShowBackBtn(true)
-              setTimeout(function(){ setShowMessage(false)}, 4000)
-              Navigate_Url('Project_Sites')
+              setShowBackBtn(true);
+              setTimeout(function() {
+                setShowMessage(false);
+              }, 4000);
+              Navigate_Url("Project_Sites");
             }
           } else {
             setMessage("Your BuildNotes successfully added");
             setShowMessage(true);
-            setShowBackBtn(true)
-            setTimeout(function(){ setShowMessage(false)}, 4000)
-            Navigate_Url('Project_Sites')
+            setShowBackBtn(true);
+            setTimeout(function() {
+              setShowMessage(false);
+            }, 4000);
+            Navigate_Url("Project_Sites");
           }
         });
       }
       AddImageOffline();
     }
   };
+  ///compare 2 array and get  Difference///
   const getDifference = (array1, array2) => {
     return array1?.filter(object1 => {
       return !array2?.some(object2 => {
@@ -708,6 +685,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       });
     });
   };
+  ///save unit detail information in asyncStorage.to use when app offline///
   const Save_Details_Online = async (A) => {
     let AllList = [];
     let SiteDetailList = JSON.parse(await AsyncStorage.getItem(GLOBAL.SiteDetail_KEY));
@@ -719,6 +697,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     }
     await AsyncStorage.setItem(GLOBAL.SiteDetail_KEY, JSON.stringify(AllList));
   };
+  ///compare 2 array and return they are same or not///
   const compareTwoArrayOfObjects = (
     first_array_of_objects,
     second_array_of_objects,
@@ -734,7 +713,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   };
   const DeleteImageFromApi = (buildId) => {
     const formData = new FormData();
-    formData.append("userId", "1");
+    formData.append("userId", GLOBAL.UserInformation?.userId);
     formData.append("buildNoteId", buildId);
     formData.append("notes", "delete");
     writePostApi("POST", Api.DeleteBuildNote, formData, buildId).then(json => {
@@ -765,8 +744,8 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
   const onClose = () => {
     modalizeRef.current?.close();
   };
+  ///sort list button =>id==0 means all photos,id==1 means filter by week and id==2 means today photos///
   const FilterFunc = (id) => {
-    let Filter = MudolList;
     if (id === 0) {
       setImageSourceviewarray(MudolList);
     } else if (id === 1) {
@@ -776,7 +755,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       const Day = date.getDate();
       const Month = date.getMonth();
       let A = [];
-      A = Filter?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
+      A = MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
       setImageSourceviewarray(A);
     }
   };
@@ -784,7 +763,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     <View style={Styles.BtnBox}>
       <TouchableOpacity onPress={() => onClose()} style={Styles.CancelBtn}>
         <View style={{ width: "80%" }}>
-          <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+          <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
         </View>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => {
@@ -802,92 +781,38 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         <Text style={[Styles.TextUploadBtn]}>
           Choose From Gallery
         </Text>
-
       </TouchableOpacity>
     </View>
   );
   const Navigate_Url = (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
     navigation.navigate(Url);
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete(false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
   };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
-
-        <View style={Styles.With100NoFlex}>
-          <FastImage  style={{ width: "27%", aspectRatio: 1, marginVertical: normalize(10) }}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete(false)}>
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY);
-              setshowModalDelete(false)
-              navigation.navigate("LogIn");
-            }}>
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
+/// Bottom menu click On LogOut button///
   const logout_Url = () => {
     setshowModalDelete(true);
   };
-  const Back_navigate=()=>{
-    console.log(ShowBackBtn,'ShowBackBtn')
-    if (ShowBackBtn===false) {
+  ///header back button =>if add photos and did not send server send message if not navigate back///
+  const Back_navigate = () => {
+    if (ShowBackBtn === false) {
       setShowWarningMessage(true);
       scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
       setscroll(false);
-      setShowBackBtn(true)
-      //setTimeout(function(){ setShowBackBtn(true)}, 2000)
-    }
-    else {
-      goBack()
+      setShowBackBtn(true);
+    } else {
+      goBack();
     }
   };
-  const renderItem = ({ item })=> (
-    <List_Item_Detail_Images value={item}  Change_Gallry_Date={Change_Gallry_Date}
-     DeleteImage={DeleteImageFromApi} Type={'Feature'} onOpen={onOpen} />
+  const renderItem = ({ item }) => (
+    <List_Item_Detail_Images value={item} Change_Gallry_Date={Change_Gallry_Date}
+                             DeleteImage={DeleteImageFromApi} Type={"Feature"} onOpen={onOpen} />
   );
-  const renderSectionHeader=()=>(
+  const renderSectionHeader = () => (
     <>
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
@@ -902,25 +827,22 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           </View>
         </View>
         : null}
-
-      {ShowWarningMessage===true&&
+      {ShowWarningMessage === true &&
       <View style={Styles.flashMessageWarning4}>
         <View style={Styles.flashMessageWarning6}>
-          <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
-            <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+          <View style={{ width: "10%", alignItems: "center", justifyContent: "flex-start" }}>
+            <FontAwesome size={normalize(18)} color={"#fff"} name={"exclamation-circle"} />
           </View>
-          <View style={{ width: "90%",alignItems:'flex-start' }}>
+          <View style={{ width: "90%", alignItems: "flex-start" }}>
             <Text style={Styles.AddedtTxt}>
               You will lose all changes.Do you still want to leave?
-
             </Text>
           </View>
-
         </View>
         <View style={Styles.With100Row2}>
           <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
             <TouchableOpacity onPress={() => {
-              setShowBackBtn(false)
+              setShowBackBtn(false);
               setShowWarningMessage(false);
             }}>
               <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
@@ -930,38 +852,34 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             <TouchableOpacity onPress={() => {
               setShowWarningMessage(false);
               setShowBackBtn(true);
-              navigation.navigate('Project_Sites')
+              navigation.navigate("Project_Sites");
             }}>
               <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
-        {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
-        {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
-        {/*</View>*/}
       </View>
       }
-      {ImageSourceviewarray?.length>1?
+      {ImageSourceviewarray?.length > 1 ?
         <Filter FilterFunc={FilterFunc} setShowDateRange={setShowDateRange} ShowFilter={ShowFilter}
                 setShowFilter={setShowFilter} />
         : null
       }
-
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
-          <Text style={Styles.txtFilter}>
+          <Text style={Styles.txtFilter3}>
             Start Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
-            <Text style={Styles.txtFilter}>
+            <Text style={Styles.txtFilternumber}>
               {selectedRange.firstDate}
             </Text>
           </View>
-          <Text style={Styles.txtFilter}>
+          <Text style={Styles.txtFilter3}>
             End Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
-            <Text style={Styles.txtFilter}>
+            <Text style={Styles.txtFilternumber}>
               {selectedRange.secondDate}
             </Text>
           </View>
@@ -969,108 +887,113 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       }
     </>
   );
-  const ListFooter=()=>(
+  const ListFooter = () => (
     <View style={Styles.ViewItems_center_transparent}>
       {ImageSourceviewarrayUpload?.length !== 0 ?
-          <ButtonI
-            style={Styles.btn23}
-            onpress={AddSitesImage}
-            categoriIcon={""}
-            title={"Save photos"}
-            colorsArray={["#ffadad","#f67070","#FF0000"]}
-            styleTxt={[Styles.txt,{fontSize:normalize(16)}]} sizeIcon={27} />:null
+        <ButtonI
+          style={Styles.btn23}
+          onpress={AddSitesImage}
+          categoriIcon={""}
+          title={"Save photos"}
+          colorsArray={["#ffadad", "#f67070", "#FF0000"]}
+          styleTxt={[Styles.txtbtn, { fontSize: normalize(16) }]} sizeIcon={27} /> : null
       }
     </View>
   );
   const renderItem_dyb = ({ item }) => (
-    <List_Item_Detail_Images value={item} Type={'DYB'}
+    <List_Item_Detail_Images value={item} Type={"DYB"}
     />
-  )
+  );
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header  colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate}
-              Title={"Sites / Buildings Detail"} />
-        <View style={Styles.containerList}>
-          {
-            showModalCalender &&
-            _showModalCalender()
-          }
-          {showWarning===true&&  <Warningmessage/>}
-          <View style={Styles.Center_margin_Bottom2}>
-            {
-              showModalDelete &&
-              <View>
-                {
-                  _showModalDelete()
-                }
-              </View>
-            }
-            {
-              GLOBAL.route === 'structure' ?
-                <>
-                  {ImageSourceviewarray && (
-                    <FlatList
-                      showsVerticalScrollIndicator={false}
-                      data={ImageSourceviewarray}
-                      style={{ width: '100%', flexGrow: 0 }}
-                      renderItem={renderItem}
-                      ListHeaderComponent={renderSectionHeader}
-                      ListFooterComponent={ListFooter}
-                      ref={scrollViewRef}
-                      columnWrapperStyle={{ justifyContent: "space-between" }}
-                      contentContainerStyle={{ justifyContent: "space-between" }}
-                      numColumns={2}
-                      key={'#'}
-                      keyExtractor={(item, index) => {
-                        return "#" + index.toString();
-                      }}
-                    />
-                  )}
-                </> :
-                <>
-                  {ImageSourceviewarray && (
-                    <FlatList
-                      ref={scrollViewRef}
-                      columnWrapperStyle={{ justifyContent: "space-between", }}
-                      contentContainerStyle={{ justifyContent: "space-between", }}
-                      data={ImageSourceviewarray}
-                      numColumns={2}
-                      style={{ width: '100%', }}
-                      ListHeaderComponent={renderSectionHeader}
-                      renderItem={renderItem_dyb}
-                      key={'#'}
-                      keyExtractor={(item, index) => {
-                        return "#" + index.toString();
-                      }}
-                    />
-                  )}
-                </>
-            }
-          </View>
-        </View>
+      <Header
+        colors={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+        StatusColor={GLOBAL.route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={Back_navigate}
+        Title={"Sites / Buildings Detail"} />
+      <View style={Styles.containerList}>
         {
-          ImageSourceviewarray?.length>1?
-            <>
-              {
-                scroll===false?
-                  <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
-                    <TouchableOpacity transparent onPress={() => {
-                      scrollViewRef.current.scrollToEnd({ animated: true });
-                      setscroll(true);}}>
-                      <AntDesign name="down" size={20} color="#fff" />
-                    </TouchableOpacity>
-                  </LinearGradient>:
-                  <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
-                    <TouchableOpacity transparent onPress={()=>{
-                      scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
-                      setscroll(false)
-                    }}>
-                      <AntDesign name="up" size={20} color="#fff" />
-                    </TouchableOpacity>
-                  </LinearGradient>
-              }
-            </>:null
+          showModalCalender &&
+          _showModalCalender()
         }
+        <View style={Styles.Center_margin_Bottom2}>
+          {showModalDelete &&
+          <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
+          }
+          {
+            GLOBAL.route === "structure" ?
+              <>
+                {ImageSourceviewarray && (
+                  <FlatList
+                    showsVerticalScrollIndicator={false}
+                    data={ImageSourceviewarray}
+                    style={{ width: "100%", flexGrow: 0 }}
+                    renderItem={renderItem}
+                    ListHeaderComponent={renderSectionHeader}
+                    ListFooterComponent={ListFooter}
+                    ref={scrollViewRef}
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                    contentContainerStyle={{ justifyContent: "space-between" }}
+                    numColumns={2}
+                    key={"#"}
+                    keyExtractor={(item, index) => {
+                      return "#" + index.toString();
+                    }}
+                  />
+                )}
+              </> :
+              <>
+                {ImageSourceviewarray && (
+                  <FlatList
+                    ref={scrollViewRef}
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                    contentContainerStyle={{ justifyContent: "space-between" }}
+                    data={ImageSourceviewarray}
+                    numColumns={2}
+                    style={{ width: "100%" }}
+                    ListHeaderComponent={renderSectionHeader}
+                    renderItem={renderItem_dyb}
+                    key={"#"}
+                    keyExtractor={(item, index) => {
+                      return "#" + index.toString();
+                    }}
+                  />
+                )}
+              </>
+          }
+          {
+            ImageSourceviewarray?.length === 0 &&
+            <View style={Styles.With90CenterVertical}>
+              <Text style={Styles.EmptyText}>
+                " No Photos defined "
+              </Text>
+            </View>
+          }
+        </View>
+      </View>
+      {
+        ImageSourceviewarray?.length > 1 ?
+          <>
+            {
+              scroll === false ?
+                <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
+                  <TouchableOpacity transparent onPress={() => {
+                    scrollViewRef.current.scrollToEnd({ animated: true });
+                    setscroll(true);
+                  }}>
+                    <AntDesign name="down" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </LinearGradient> :
+                <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={[Styles.scrollBtn2]}>
+                  <TouchableOpacity transparent onPress={() => {
+                    scrollViewRef.current.scrollToOffset({ offset: 0, animated: true });
+                    setscroll(false);
+                  }}>
+                    <AntDesign name="up" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </LinearGradient>
+            }
+          </> : null
+      }
       <Modalize ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
         {renderContent()}
       </Modalize>
@@ -1078,6 +1001,5 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     </Container>
   );
 }
-
 
 export default Project_Site_Detail;

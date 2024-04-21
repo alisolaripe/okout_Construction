@@ -34,7 +34,7 @@ import { Filter } from "../component/Filter";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { readOnlineApi } from "../ReadPostApi";
-Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
+// Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
 function Project_Section_Detail({ navigation, navigation: { goBack } }) {
   const { navigate } = useNavigation();
   const modalizeRef =  React.createRef();

@@ -24,6 +24,14 @@ const Styles = StyleSheet.create({
     width: "100%",
     zIndex:100
   },
+  ViewItems_center_row: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: GLOBAL.OFFICIAL_background,
+    width: "100%",
+    zIndex:100,
+    flexDirection:'row'
+  },
   ViewItems_center_task: {
     justifyContent: "center",
     alignItems: "center",
@@ -45,17 +53,31 @@ const Styles = StyleSheet.create({
     width:'65%',
     alignItems:'center',
     justifyContent:'space-between',
-    backgroundColor:'red'
   },
   txt: {
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(15),
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+  },
+  txtbtn2: {
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(15),
+    fontFamily:'OpenSansBold',
+  },
+  txtMenu: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    fontFamily:'OpenSansBold',
+  },
+  txtbtn: {
+    color: '#fff',
+    fontSize: normalize(15),
+    fontFamily:'OpenSansBold',
   },
   txt_center_login: {
     color: "#fff",
     fontSize: normalize(15),
-    fontWeight:'bold',
+    fontFamily:'OpenSansBold',
     textAlign:'center'
   },
   txtMenuHome: {
@@ -63,21 +85,49 @@ const Styles = StyleSheet.create({
     textAlign: "left",
     color: '#fff',
     paddingBottom: 15,
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold'
   },
   txtMenuHome2: {
     fontSize: normalize(15),
     textAlign: "left",
     color: '#fff',
     paddingVertical: 15,
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+  },
+  txtMenuHome23: {
+    fontSize: normalize(15),
+    textAlign: "left",
+    color: Colors.button,
+    paddingVertical: 15,
+    fontFamily:'OpenSansBold',
   },
   txt_left:{
-    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(15),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
+  },
+  txt_left_Pos:{
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(14),
     marginVertical: 5,
     textAlign: "left",
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+  },
+  txt_left_small2:{
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(12),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
+  },
+  txt_left3:{
+    color: Colors.button,
+    fontSize: normalize(14),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
   },
   txt_left_task:{
 
@@ -86,11 +136,11 @@ const Styles = StyleSheet.create({
     fontSize:normalize(12),color:'#b4b4b4'
   },
   txt_Left_padding_horizontal: {
-    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    color: Colors.button,
     fontSize: normalize(14),
     marginVertical: 5,
     textAlign: "left",
-    fontWeight:'bold',
+    fontFamily:'OpenSansBold',
     paddingHorizontal:normalize(8)
   },
   Filter_txt: {
@@ -99,12 +149,27 @@ const Styles = StyleSheet.create({
     marginVertical: 5,
     textAlign: "left",
   },
-  txt_left_Padding_bottom: {
+  Filter_txt3: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(12),
+    marginVertical: 5,
+    textAlign: "left",
+  },
+  Update_txt: {
     color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(12),
+    paddingBottom: 18,
+    textAlign: "center",
+    fontFamily:'OpenSansBold',
+    paddingVertical:10
+
+  },
+  txt_left_Padding_bottom: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(14),
     marginTop: normalize(5),
     textAlign: "left",
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   txt_left_small: {
     color:'#fff',
@@ -114,10 +179,10 @@ const Styles = StyleSheet.create({
 
   },
   txt_left_small_padding_top: {
-    color:'#fff',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(12),
     textAlign: "left",
-    fontWeight:'bold',
+    fontFamily:'aSignboardCpsNrBoldItalic',
     paddingTop: normalize(8)
 
   },
@@ -128,15 +193,30 @@ const Styles = StyleSheet.create({
     textAlign: "left",
     fontWeight:'bold'
   },
+  txtCenter_filter2: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    margin: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
+  },
   txtCenter_filter: {
     color: GLOBAL.OFFICIAL_WITE_COLOR,
     fontSize: normalize(14),
     margin: 5,
     textAlign: "left",
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   txt_leftDropdown: {
-    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(13),
+    marginVertical:normalize (8),
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
+    paddingLeft:normalize (7)
+  },
+  txt_leftDropdown23: {
+    color: Colors.Light,
     fontSize: normalize(13),
     marginVertical:normalize (8),
     textAlign: "left",
@@ -145,6 +225,11 @@ const Styles = StyleSheet.create({
   },
   txt_left2: {
     color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(14),
+    textAlign: "center",
+    fontFamily:'OpenSansBold',
+  },txt_left23: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(14),
     textAlign: "center",
     fontWeight:'bold'
@@ -166,13 +251,13 @@ const Styles = StyleSheet.create({
     color: GLOBAL.OFFICIAL_WITE_COLOR,
     fontSize: normalize(14),
     textAlign: "center",
-    fontWeight:'bold',
+    fontFamily:'OpenSansBold',
     paddingHorizontal:normalize(8)
   },
   txtcenter: {
     color: "#fff",
     fontSize:normalize(14),textAlign:"center",
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   txtRight: {
     color: "#fff",
@@ -181,7 +266,37 @@ const Styles = StyleSheet.create({
     textAlign: "right",
   },
   txtLightColor: {
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    margin: 7,
+    fontFamily:'OpenSansBold',
+  },
+  txtLightColorLeft: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    margin: 7,
+    fontFamily:'OpenSansBold',
+    textAlign:'left'
+  },
+  txtLightColor2: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    fontFamily:'OpenSansBold',
+  },
+  txtDarkColor: {
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(14),
+    margin: 7,
+    fontFamily:'OpenSansBold',
+  },
+  txtLightColorNumber: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    margin: 7,
+    fontFamily:'aSignboardCpsNrBoldItalic',
+  },
+  txtLightColor5: {
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
     fontSize: normalize(14),
     margin: 7,
     fontWeight:'bold'
@@ -189,7 +304,7 @@ const Styles = StyleSheet.create({
   txtTasktitle: {
     color: "#fff",
     fontSize: normalize(17),
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   txtLightColortask: {
     margin: 2,
@@ -205,7 +320,8 @@ const Styles = StyleSheet.create({
     textAlign:"left",
     marginTop:normalize(4),
     paddingBottom:normalize(5),
-    lineHeight: normalize(20)
+    lineHeight: normalize(20),
+    fontFamily:'TisaSansProBoldItalic'
   },
   txtLightColortaskDescription: {
     margin: 2,
@@ -233,7 +349,17 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   },
   txtLightColortask_Items: {
     marginLeft: normalize(10),
-    fontWeight:'bold',
+    fontFamily:'OpenSansBold',
+    fontSize:normalize(13),color:'#fff',
+  },
+  txtLightColortask_Items33: {
+    marginLeft: normalize(10),
+    fontFamily:'OpenSansBold',
+    fontSize:normalize(13),color:GLOBAL.OFFICIAL_BLUE_COLOR,
+  },
+  txtLightColortask_Items_Number: {
+    marginLeft: normalize(10),
+    fontFamily:'OpenSansBold',
     fontSize:normalize(13),color:'#fff',
   },
   txtLightColortask_Items_Date: {
@@ -242,30 +368,31 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     fontSize:normalize(12),color:'#fff',
   },
   txtLightColor_Left: {
-    color: "#fff",
+    color: Colors.button,
     fontSize: normalize(14),
     margin: 7,
-    fontWeight:'bold',
+    fontFamily:'OpenSansBold',
     textAlign:'left'
   },
   txtLightColor_samall: {
-    color:GLOBAL.OFFICIAL_ORANGE_COLOR,
+    color:Colors.green,
     fontSize: normalize(12),
     margin: 7,
     fontWeight:'bold',
 
   },
   txtLightColorLocation: {
-    color: "#fff",
-    fontSize: normalize(13),
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
     textAlign:"left",
-    paddingVertical:normalize(9)
+    paddingVertical:normalize(7),
+    fontFamily:'GascogneSerialBoldDB',
   },
   txtGrayColor: {
     color: GLOBAL.OFFICIAL_Button,
     fontSize: normalize(14),
     margin: 7,
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   txtGrayLightColor: {
     color: '#aaaaaa',
@@ -280,11 +407,12 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     marginTop:normalize(10),textAlign:"left"
   },
   txtLightcenter: {
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(14),
     margin: 7,
     marginTop:normalize(10),textAlign:"center",
-    paddingVertical:normalize(5)
+    paddingVertical:normalize(5),
+    fontFamily:'OpenSansBold',
   },
   txtFeature: {
     fontSize: normalize(14),
@@ -293,7 +421,16 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     marginVertical:normalize(6),
     textAlign:"center",
     marginLeft:normalize(10),
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+  },
+  txtFeatureNumber: {
+    fontSize: normalize(14),
+    marginTop:normalize(10),
+    color: "#fff",
+    marginVertical:normalize(6),
+    textAlign:"center",
+    marginLeft:normalize(10),
+    fontFamily:'aSignboardCpsNrBoldItalic',
   },
   txtLightcenterNoPadding: {
     color: "#fff",
@@ -308,7 +445,17 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     marginVertical:normalize(6),
     textAlign:"center",
     marginLeft:normalize(7),
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+
+  },
+  txtImageBoxnumber: {
+    color: "#fff",
+    fontSize: normalize(13.5),
+    marginVertical:normalize(6),
+    textAlign:"center",
+    marginLeft:normalize(7),
+    fontFamily:'GascogneSerialBoldDB',
+
 
   },
   txtLightLeftNoPadding: {
@@ -385,6 +532,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     flexDirection: "row",
     width: '40%',
     marginVertical: normalize(5),
+    color:GLOBAL.OFFICIAL_BLUE_COLOR
   },
   btnDYBListDetail: {
     borderRadius: normalize(7),
@@ -404,7 +552,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   },
 
   littleImage: {
-    width: '40%', height: normalize(80),
+    width: '100%', height: normalize(35),
   },
 
   Icon: {
@@ -419,10 +567,29 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   Backcolor: {
     backgroundColor: GLOBAL.OFFICIAL_background,
   },
+  Backcolor2: {
+    backgroundColor: Colors.button,
+  },
+  BackcolorHome: {
+    backgroundColor: '#f6f9f9',
+  },
   HeaderText2:{
-    fontWeight: "bold", color: '#fff',
+    fontFamily:'OpenSansBold',color: Colors.button,
     fontSize: normalize(20), paddingVertical: 6,
     textAlign:'center'
+  },
+
+  HeaderText4:{
+   color: '#4a6e8e',
+    fontSize: normalize(20), paddingVertical: 6,
+    textAlign:'center',
+    fontFamily:'TisaSansProBlack'
+  },
+  HeaderText45:{
+   color: '#4a6e8e',
+    fontSize: normalize(20), paddingVertical: 6,
+    textAlign:'center',
+    fontFamily:'OpenSansBold',
   },
   MenuBtn:{ width: "100%", flexDirection: "row", justifyContent: "center",color:'#fff',},
   linearView: {
@@ -572,9 +739,15 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   },
   Footertxt: {
     color: "#fff",
-    fontSize: normalize(12),
+    fontSize: normalize(13),
     paddingTop: 3,
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
+  },
+  Footertxt_Home: {
+    color: '#4a6e8e',
+    fontSize: normalize(13),
+    paddingTop: 3,
+    fontFamily:'OpenSansBold',
   },
   container: {
     flex: 1,
@@ -705,6 +878,9 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   FlexWrapHome: {
     flexDirection: "row", flexWrap: "wrap", marginTop: normalize(40), justifyContent: "space-between", width: "90%",
   },
+  FlexWrapHome2: {
+    flexDirection: "row", flexWrap: "wrap", marginTop: normalize(20), justifyContent: "space-between", width: "90%", alignItems:"center",
+  },
   WarningBox:{
     flexDirection: "row",marginTop: normalize(25), justifyContent: "space-between", width: "90%",backgroundColor:"#f5e8d3",
     borderRadius:normalize(6)
@@ -738,23 +914,43 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     alignItems:"center",
   },
   ModuleBox:{
-  width:width/2.3,backgroundColor:"#F4F4FB",
-  marginBottom: "5%", borderRadius: normalize(15),
+  width:width/2.3,backgroundColor:"rgba(244,244,251,0)",
+  marginBottom: "5%", borderTopRightRadius: normalize(35),
+    borderRadius: normalize(5),  justifyContent:"center",
+    alignItems:"center",
   },
   ModuleBox2:{
-    width:width/2.3,
+    width:width/2.6,
     marginBottom: "5%", borderRadius: normalize(15),
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor:'#fff'
   },
   FooterFloatBtn: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1e233b",
+    backgroundColor: "#4a6e8e",
     width: Platform.OS === "ios" ? 50 : 60,
     height: Platform.OS === "ios" ? 50 : 60,
     top: Platform.OS === "ios" ? -10 : -15,
     borderRadius: Platform.OS === "ios" ? 25 : 30,
+  },
+  FooterFloatBtn_home: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4a6e8e",
+    width: Platform.OS === "ios" ? 50 : 60,
+    height: Platform.OS === "ios" ? 50 : 60,
+    borderRadius: Platform.OS === "ios" ? 25 : 30,
+  },
+  FooterFloatBtn_home1: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f6f9f9",
+    width: Platform.OS === "ios" ? 60 : 72,
+    height: Platform.OS === "ios" ? 60 : 72,
+    top: Platform.OS === "ios" ? -20 : -25,
+    borderRadius: Platform.OS === "ios" ? 35 : 42,
   },
   FooterTab:{
     backgroundColor:GLOBAL.OFFICIAL_background,
@@ -763,6 +959,11 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     shadowOpacity:0.39,
     shadowRadius:8.30,
     elevation:13,
+    borderTopWidth:0.2,
+    borderTopColor:"rgba(255,255,255,0.18)",
+  },
+  FooterTab_Home:{
+    backgroundColor:'#fff',
     borderTopWidth:0.2,
     borderTopColor:"rgba(255,255,255,0.18)",
   },
@@ -896,7 +1097,9 @@ paddingHorizontal:7,
     borderStyle: "dashed",
     borderColor: GLOBAL.OFFICIAL_Button, justifyContent: "center", alignItems: "center", marginTop: normalize(30),
   },
-  UploadImageText: { fontSize: normalize(14), color: "#fff", fontFamily: GLOBAL.FONT_FAMILY, paddingBottom: 8 },
+  UploadImageText2: { fontSize: normalize(14), color:'#fff', fontFamily:'OpenSansBold', paddingBottom: 8 },
+
+  UploadImageText: { fontSize: normalize(14), color: GLOBAL.OFFICIAL_BLUE_COLOR, fontFamily:'OpenSansBold', paddingBottom: 8 },
   UploadNotesText: { fontSize: normalize(14), color: "#fff", fontFamily: GLOBAL.FONT_FAMILY,},
   ModalizeDetalStyle: {
     alignItems: "center",
@@ -942,7 +1145,7 @@ paddingHorizontal:7,
 
   },
   UploadBtn: {
-    width: "80%", backgroundColor: "rgb(42,48,82)"
+    width: "80%", backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR
     , marginTop: "6%", borderRadius: normalize(5),
     paddingVertical: 9, flexDirection: "row", justifyContent: "center",
   },
@@ -951,6 +1154,7 @@ paddingHorizontal:7,
     fontSize: normalize(14),
     textAlign: "center",
     paddingLeft: normalize(10),
+    fontFamily:'OpenSansBold',
   },
   dropdown2: {
     height: normalize(35),
@@ -978,18 +1182,34 @@ paddingHorizontal:7,
   },
   placeholderStyle: {
     fontSize: normalize(14),
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+  },
+  placeholderStyle5: {
+    fontSize: normalize(14),
+    color: Colors.Light,
   },
   containerStyle: {
-    backgroundColor: "#1e233b",
+    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+  },
+  containerStyle12: {
+    backgroundColor: Colors.Light,
+  },
+  containerStyle3: {
+    backgroundColor:Colors.Light,
   },
   itemTextStyle: {
     fontSize: normalize(14),
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
   },
   selectedTextStyle: {
     fontSize: normalize(14),
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+  },
+  selectedTextStyle12: {
+    fontSize: normalize(14),
+    color: Colors.Light,
   },
   renderItemStyle:{flexDirection:'row',alignItems:'center',paddingVertical:normalize(5)},
   renderItemDetailStyle:{flexDirection:'row',alignItems:'center',paddingVertical:normalize(7)},
@@ -1001,11 +1221,17 @@ paddingHorizontal:7,
     width: 20,
     height: 20,
   },
-  DeleteModalStyle:{ backgroundColor:GLOBAL.OFFICIAL_backgroundItem, paddingVertical:normalize(5),
+  DeleteModalStyle:{ backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR, paddingVertical:normalize(5),
     alignItems: "center", borderRadius: 10,justifyContent:"center",marginTop:'20%' },
   taskModalStyle:{ backgroundColor:GLOBAL.OFFICIAL_background, paddingVertical:normalize(5),
-    alignItems: "center", borderRadius: 10,justifyContent:"center",marginTop:'20%',borderWidth:1,borderColor:'#fff' },
-  DeleteModalStyle2:{backgroundColor:GLOBAL.OFFICIAL_backgroundItem_Lighter, paddingVertical:normalize(5),
+    alignItems: "center", borderRadius: 10,justifyContent:"center",marginTop:'19%',borderWidth:1,borderColor:GLOBAL.OFFICIAL_BLUE_COLOR },
+  DeleteModalStyle2:{backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR, paddingVertical:normalize(5),
+    alignItems: "center",justifyContent:"center", borderWidth:1,
+    borderRadius: normalize(10), borderColor:GLOBAL.OFFICIAL_Button,width:'90%',},
+
+
+
+  DeleteModalStyle23:{backgroundColor:Colors.Light, paddingVertical:normalize(5),
     alignItems: "center",justifyContent:"center", borderWidth:1,
     borderRadius: normalize(10), borderColor:GLOBAL.OFFICIAL_Button,width:'90%',},
   warningModalStyle2:{backgroundColor:'rgb(250,186,46)', paddingVertical:normalize(5),
@@ -1024,7 +1250,13 @@ paddingHorizontal:7,
   inputSearchStyle: {
     height: normalize(40),
     fontSize: normalize(14),
-    backgroundColor: "#1e233b",
+    backgroundColor: Colors.button,
+    color: "#fff",
+  },
+  inputSearchStyle34: {
+    height: normalize(40),
+    fontSize: normalize(14),
+    backgroundColor: Colors.Light,
     color: "#fff",
   },
   item: {
@@ -1032,7 +1264,7 @@ paddingHorizontal:7,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1e233b",
+    backgroundColor: Colors.button,
 
   },
   item_status: {
@@ -1047,6 +1279,7 @@ paddingHorizontal:7,
     flex: 1,
     fontSize: normalize(14),
     color: "#fff",
+    fontFamily:'OpenSansBold',
   },
   textItem_status: {
     flex: 1,
@@ -1055,7 +1288,7 @@ paddingHorizontal:7,
   },
   selectedTextStyle2: {
     fontSize: normalize(14),
-    color: "#fff",
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
     paddingRight: normalize(8),
   },
   selectedStyle2: {
@@ -1073,7 +1306,17 @@ paddingHorizontal:7,
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    marginTop: normalize(7),},
+    marginTop: normalize(8),},
+  BtnListStyle3:{width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: normalize(13),},
+  BtnListStyleDyb:{width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginTop: normalize(17),},
   BtnListStyle2:
     {
     width: "30%",
@@ -1094,14 +1337,29 @@ paddingHorizontal:7,
     marginTop: normalize(7),},
   btnList:
     {
-      backgroundColor: "#7953FAFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(5),
+      backgroundColor: "#7953FAFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(7),
       borderRadius: normalize(6),
       marginRight: normalize(7),
+
+    },
+  btnFactor:
+    {
+      backgroundColor: "#f6f9f9", filter: "blur(15)", width: "85%", paddingVertical: normalize(7),
+      borderRadius: normalize(6),
+      marginBottom: normalize(13),
 
     },
   btnListTask:
     {
       width: "20%", paddingVertical: normalize(5),
+      borderRadius: normalize(6),
+      marginRight: normalize(7),
+
+    },
+  btnPos:
+    {
+      width: "45%",
+      backgroundColor: "#7953FAFF", filter: "blur(15)", paddingVertical: normalize(7),
       borderRadius: normalize(6),
       marginRight: normalize(7),
 
@@ -1116,7 +1374,7 @@ paddingHorizontal:7,
     },
   btnList1:
     {
-      backgroundColor: "#4B75FCFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(5),
+      backgroundColor: "#4B75FCFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(7),
       borderRadius: normalize(6),
       marginRight: normalize(7),
 
@@ -1194,7 +1452,7 @@ paddingHorizontal:7,
     },
   btnList3:
     {
-      backgroundColor: "rgb(55,167,239)", filter: "blur(15)", width: "35%", paddingVertical: normalize(5),
+      backgroundColor: "rgb(55,167,239)", filter: "blur(15)", width: "35%", paddingVertical: normalize(7),
       borderRadius: normalize(6),
       marginRight: normalize(7),
       flexDirection:'row',alignItems:'center',justifyContent:'center'
@@ -1251,7 +1509,8 @@ paddingHorizontal:7,
     padding:6,
     marginBottom:5,
     width:'100%',
-    color:"#fff",
+    color:Colors.button,
+    fontFamily:'OpenSansBold',
   },
   inputStyleTask: {
     borderWidth:0.5,
@@ -1259,8 +1518,8 @@ paddingHorizontal:7,
     borderRadius:normalize(6),
     padding:4,
     width:'100%',
-    color:"#fff",
-
+    color:Colors.button,
+    fontFamily:'OpenSansBold',
   },
   inputetext:{
     color:"#fff",
@@ -1276,9 +1535,9 @@ paddingHorizontal:7,
   },
   inputFeatureNote: {
     borderWidth:1,
-    borderColor:'#1e233b',
+    borderColor:'#fff',
     borderRadius:normalize(6),
-    backgroundColor:'#1e233b',
+    backgroundColor:'#fff',
     padding:6,
     marginVertical:normalize(12),
     width:'96%',
@@ -1313,10 +1572,26 @@ paddingHorizontal:7,
     borderBottomColor: Colors.backgroundTab,
     backgroundColor:GLOBAL.OFFICIAL_background
   },
+  HeaderStyle2:{
+
+    borderBottomWidth:1,
+    borderBottomColor: Colors.Light,
+    backgroundColor:GLOBAL.OFFICIAL_background
+  },
+  HeaderStyleHome:{
+    backgroundColor:'#fff',
+    flexDirection:'row'
+  },
+  HeaderStyleHome1:{
+    backgroundColor:'#fff',
+    width:'100%',
+    borderBottomRightRadius:50,borderBottomLeftRadius:50
+  },
   HeaderText:{
-    fontWeight: "bold", color: Colors.withe,
+    color: Colors.withe,
     fontSize: normalize(20), paddingVertical: 6,
-    textAlign:'center'
+    textAlign:'center',
+    fontFamily:'OpenSansBold',
   },
   CancelBtn:{ width: "100%" ,justifyContent:'center',marginTop:15,alignItems:'center'},
   CancelBtnLeft:{ width: "100%" ,justifyContent:'flex-start',marginTop:15,alignItems:'center'},
@@ -1331,16 +1606,16 @@ paddingHorizontal:7,
   CancelBtnMargin0:{ width: "90%" ,justifyContent:'flex-start',},
   AlertTxt:{
     color: "white",
-    fontFamily: GLOBAL.FONT_FAMILY_BOLD,
-    textAlign:'center',
 
+    textAlign:'center',
+    fontFamily:'OpenSansBold',
   },
   AddedtTxt:{
     color: "white",
-    fontFamily: GLOBAL.FONT_FAMILY_BOLD,
+
     textAlign:'center',
     lineHeight:normalize(25),
-    fontWeight:'bold'
+    fontFamily:'OpenSansBold',
   },
   Backbtn:{ width: "100%", flexDirection: "row", justifyContent: "center" },
   menubtn:{ width: "100%", flexDirection: "row", justifyContent: "flex-start" },
@@ -1353,13 +1628,34 @@ paddingHorizontal:7,
     alignSelf: "center",
     backgroundColor:GLOBAL.OFFICIAL_background
   },
-  ItemDetailBox:{width:width-SPACING?.space_25,backgroundColor:GLOBAL.OFFICIAL_backgroundItem,marginBottom:'4%'
-    ,borderRadius:normalize(6),alignItems:"center",paddingVertical:9,flex:1},
-  ItemDetailBox2:{width:width-SPACING?.space_25,backgroundColor:GLOBAL.OFFICIAL_backgroundItem,marginBottom:'4%'
-    ,alignItems:"center",height:normalize(69),borderRadius:normalize(6),paddingVertical:8},
-  ItemDetailBox1:{width:'100%',backgroundColor:'rgba(42,48,82,0.82)',
-    alignItems:"center",flex:1,borderRadius:normalize(6),position:'absolute',height:normalize(69)},
-  ItemDetailFeatureBox:{backgroundColor:GLOBAL.OFFICIAL_backgroundItem
+  ItemDetailBox:{
+    width:width-SPACING?.space_25,
+    backgroundColor:GLOBAL.OFFICIAL_WITE_COLOR,
+     marginBottom:'2%'
+    ,borderRadius:normalize(6),
+    alignItems:"center",
+    paddingVertical:normalize(15),
+    flex:1,
+    borderWidth:0.7,
+    borderColor:"#eee"
+  },
+  ItemFoctorBox:{
+    width:width-SPACING?.space_25,
+    backgroundColor:GLOBAL.OFFICIAL_WITE_COLOR,
+    marginBottom:'2%'
+    ,borderRadius:normalize(6),
+    alignItems:"center",
+
+    flex:1,
+    borderWidth:0.7,
+    borderColor:"#eee"
+  },
+  ItemDetailBox2:{width:width-SPACING?.space_25,
+     backgroundColor:Colors.withe,marginBottom:'2%'
+    ,alignItems:"center",height:normalize(90),borderRadius:normalize(6),paddingVertical:8},
+  ItemDetailBox1:{width:'100%',backgroundColor:'rgba(246,249,249,0.45)',
+    alignItems:"center",flex:1,borderRadius:normalize(6),position:'absolute',height:normalize(90)},
+  ItemDetailFeatureBox:{backgroundColor:'#fff'
    ,alignItems:"center",paddingVertical:normalize(7),
      width:'100%',
     marginTop: normalize(15),
@@ -1367,8 +1663,9 @@ paddingHorizontal:7,
   },
   With90:{width:'90%',flexDirection:'row'},
  With93_row:{width:'93%',flexDirection:'row'},
-
+  With100_row:{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'center'},
   With65:{width:'65%'},
+
   With35:{width:'35%'},
   With90_zIndex:{width:'90%',flexDirection:'row',zIndex:-1},
   With90Center:{width:'90%',alignItems:'center'},
@@ -1380,6 +1677,7 @@ paddingHorizontal:7,
   DropDown:{backgroundColor:GLOBAL.OFFICIAL_background,borderBottomWidth:1,borderRadius:normalize(6),borderColor:GLOBAL.OFFICIAL_BLUE_COLOR},
   DropDownIcon:{width:'100%',paddingVertical:4,alignItems:"flex-end" },
   DropDownIconFull:{width:'100%',paddingVertical:4,alignItems:"flex-start", },
+  With90CenterVertical3:{width:'100%',alignItems:'center',justifyContent:'center',marginTop:normalize(160)},
   ModalStyle:{
     borderRadius: normalize(15),
     backgroundColor:GLOBAL.OFFICIAL_background,
@@ -1451,7 +1749,9 @@ flex:1,
     justifyContent: 'center',
     width: '95%',
   },
-  Center:{margin:normalize(10),justifyContent:'space-between', width: '93%',alignItems:'center'
+  Center_100:{justifyContent:'center',width:'100%',alignItems:'center'
+  },
+  Center:{margin:normalize(10),justifyContent:'space-between',width:'93%',alignItems:'center'
   },
   Center_margin_Bottom:{margin:normalize(10),justifyContent:'space-between', width: '93%',alignItems:'center',
     marginBottom: normalize(65),
@@ -1466,10 +1766,10 @@ flex:1,
     marginBottom: normalize(38),
   },
   DYB:{width:'100%',flexDirection:'row',alignItems:'center',flexWrap:'wrap',marginTop:normalize(7)},
-  AddTextStyleFullImageFeature:{justifyContent:'space-between',width:'100%',backgroundColor:"rgb(42,48,82)",
+  AddTextStyleFullImageFeature:{justifyContent:'space-between',width:'100%',backgroundColor:Colors.button,
     borderBottomLeftRadius:normalize(6) ,borderBottomRightRadius:normalize(6)},
   AddTextStyle:{justifyContent:'center',width:'100%',backgroundColor:"rgb(42,48,82)", borderBottomLeftRadius:normalize(6),borderBottomRightRadius:normalize(6) },
-  AddTextStyleFullImage:{justifyContent:'space-between',width:'100%',backgroundColor:"rgb(42,48,82)",
+  AddTextStyleFullImage:{justifyContent:'space-between',width:'100%',backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     borderBottomLeftRadius:normalize(6),borderBottomRightRadius:normalize(6) },
   AdddateStyle:{justifyContent:'center',width:'100%'},
   DYBtitleInpute:{  width:'45%' ,
@@ -1504,6 +1804,7 @@ flex:1,
   },
   SectionFooter:{width:'100%',height:normalize(60)},
   SectionHeader:{width:'100%',height:normalize(10)},
+  With100Flex_End:{width:'100%',justifyContent:'flex-end',paddingBottom:normalize(15)},
   With100:{width:'100%'
     ,alignItems:"center",flex:1},
   With94:{width:'94%'
@@ -1521,12 +1822,30 @@ flex:1,
 
   With95:{width:'95%'
     ,alignItems:"center"},
+  With95NoFlex:{width:'95%'
+    ,marginBottom:normalize(45)},
   With100Row:{
     marginVertical: normalize(22),
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
+  },
+  With95Row:{
+    marginVertical: normalize(22),
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+  With95Row2:{
+    marginVertical: normalize(25),
+    width: "95%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
+    marginTop:normalize(35)
+
   },
   With100Row2:{
     marginTop: normalize(8),
@@ -1548,7 +1867,7 @@ flex:1,
     justifyContent: "space-between",
     flexDirection: "row",
     padding:normalize(10),
-    backgroundColor:GLOBAL.OFFICIAL_background,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     marginBottom:normalize(10),
     borderRadius:normalize(6)
   },
@@ -1573,10 +1892,12 @@ flex:1,
   },
   FlexRow:{width:'94%',flexDirection:'row',backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
     marginBottom:normalize(10),paddingVertical:normalize(10),borderRadius:normalize(6)},
+  FlexRow2:{width:'94%',flexDirection:'row'},
+  FlexnoRow:{width:'94%'},
   With80:{width:'80%',alignItems:'center',borderRadius:150/2, margin: 5,},
-  DoneTask:{width:'7%',
-    paddingVertical:normalize(9),alignItems:'center',borderRadius:normalize(550),
-    backgroundColor:'#786b6b',marginRight:normalize(7)},
+  DoneTask:{width:'60%',
+    paddingVertical:normalize(10),alignItems:'center',borderRadius:normalize(550),
+    backgroundColor:'#786b6b'},
   DoneTask2:{width:'70%',
     paddingVertical:normalize(6),alignItems:'center',borderRadius:normalize(550),
     backgroundColor:'#CC0000',marginRight:normalize(7)},
@@ -1601,23 +1922,24 @@ flex:1,
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_35,marginVertical:normalize(4)
   },
   FilterBoxtask:{
-    flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_25,marginVertical:normalize(4),justifyContent:"space-between"
+    flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_25,marginVertical:normalize(4),justifyContent:"flex-start",
   },
   FilterBoxtaskItems:{
     flexDirection: "row", flexWrap: "wrap",  width: width-SPACING.space_25,marginVertical:normalize(4),
   },
   FilterBoxItems: {
-    backgroundColor: "#F4F4FB",
+    backgroundColor: "#fff",
     width: width/4.7
     , marginTop: "2%", borderRadius: normalize(5),
     alignItems:'center',marginRight:normalize(8),
     flexDirection:'row',
     paddingLeft:normalize(6),
-    paddingVertical:normalize(3)
+    paddingVertical:normalize(3),
+    borderWidth:1,borderColor:GLOBAL.OFFICIAL_BLUE_COLOR
   },
 
   FilterBoxItemsSelect: {
-    backgroundColor: 'rgb(42,48,82)',
+    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
     width: width/4.7
     , marginTop: "2%", borderRadius: normalize(5),
     alignItems:'center',marginRight:normalize(8),
@@ -1632,16 +1954,28 @@ flex:1,
     alignItems:'center',marginRight:normalize(8),
     flexDirection:'row',
     paddingLeft:normalize(6),
-    paddingVertical:normalize(3)
+    paddingVertical:normalize(3),
+    borderWidth:1,borderColor:GLOBAL.OFFICIAL_BLUE_COLOR
   },
   FilterBoxItemsSelecttasl: {
-    backgroundColor: 'rgb(42,48,82)',
-    width: '30.5%'
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
+    width:'23.70%'
     , marginTop: "2%", borderRadius: normalize(5),
-    alignItems:'center',marginRight:normalize(8),
+    alignItems:'center',marginRight:normalize(3),
     flexDirection:'row',
     paddingLeft:normalize(6),
-    paddingVertical:normalize(2)
+    paddingVertical:normalize(2),
+
+  },
+  FilterBoxItemsSelectcategory: {
+    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+    paddingHorizontal: normalize(10)
+    , marginTop: "2%", borderRadius: normalize(5),
+    alignItems:'center',
+    flexDirection:'row',
+    paddingLeft:normalize(6),
+    paddingVertical:normalize(2),
+    marginLeft:2
   },
   HeaderItems:{
     width: '100%',
@@ -1657,6 +1991,20 @@ flex:1,
     backgroundColor:GLOBAL.OFFICIAL_background,top:68,
     paddingVertical:20,
     borderTopRightRadius:20,borderTopLeftRadius:20
+  },
+  ViewAbsoluteHome:{
+    width:'100%',
+    position:'absolute',
+    backgroundColor:'#fff',top:0,
+    paddingVertical:50,
+    borderBottomRightRadius:50,borderBottomLeftRadius:50
+  },
+  ViewAbsoluteDrawer:{
+    width:'100%',alignItems:'center',paddingVertical:normalize(14)
+  },
+  ViewAbsolutedoshboard:{
+    width:'100%',
+  alignItems:'center',justifyContent:'center',marginTop:normalize(30)
   },
   ViewAbsolute_header:{
     width:'100%',
@@ -1716,6 +2064,18 @@ flex:1,
     borderRadius: normalize(6),
     flex:1,marginVertical:normalize(10),zIndex:100
   },
+  mainSystemDesignerProfile: {
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '95%',
+    //backgroundColor: 'rgba(33,34,182,0.45)',
+    paddingHorizontal:normalize(5) ,
+    paddingVertical:normalize(15),
+    borderRadius: normalize(6),
+    flex:1,marginVertical:normalize(10),zIndex:100,
+    marginBottom:normalize(30)
+  },
   bottomView: {
     width: "100%",
      bottom :0,
@@ -1748,7 +2108,7 @@ flex:1,
     alignItems:'center',
     maxHeight:normalize(250)
   },
-  CalenderBox:{backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+  CalenderBox:{backgroundColor:'#f6f9f9',
     paddingVertical:'4%',
     width:'60%',
     alignItems:'center',
@@ -1757,6 +2117,7 @@ flex:1,
     zIndex:10000,
     top:normalize(44),
     alignSelf: 'center',
+    borderWidth:1,borderColor:GLOBAL.OFFICIAL_BLUE_COLOR
 
   },
   WeekFilterBox:{
@@ -1791,12 +2152,27 @@ flex:1,
     fontSize: normalize(12),
     marginVertical: 5,
     textAlign: "left",
+    fontFamily:'OpenSansBold',
+  },
+  txtFilternumber: {
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontSize: normalize(12),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'GascogneSerialBoldDB',
+  },
+  txtFilter3: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(13),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
   },
   WeekFilterBoxItem:{
     width:'30%',
 
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     paddingVertical:normalize(3),
     alignItems:'center',
   } ,
@@ -1806,12 +2182,26 @@ flex:1,
     fontSize: normalize(14),
     marginVertical: 5,
     textAlign: "left",
+    fontFamily:'OpenSansBold',
+  },
+  txtdate2: {
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    marginVertical: 5,
+    textAlign: "left",
+    fontFamily:'OpenSansBold',
   },
   dateBoxItem:{
     width:'48%',
     borderColor: GLOBAL.OFFICIAL_Button,
     borderWidth: 0.5,
     borderRadius: normalize(6),
+    paddingVertical:normalize(5),
+    alignItems:'flex-start',
+    paddingHorizontal: 8,
+  } ,
+  dateBoxItem1:{
+    width:'48%',
     paddingVertical:normalize(5),
     alignItems:'flex-start',
     paddingHorizontal: 8,
@@ -1836,7 +2226,7 @@ flex:1,
     paddingVertical:normalize(3),
     alignItems:'center',
   },
-  TextStyleFullImage:{justifyContent:'space-between',width:'100%',backgroundColor:"rgb(42,48,82)",
+  TextStyleFullImage:{justifyContent:'space-between',width:'100%',backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     borderBottomLeftRadius:normalize(6),borderBottomRightRadius:normalize(6),paddingVertical:normalize(12) },
   With96: {
     width: '96%',
@@ -1844,8 +2234,8 @@ flex:1,
   },
   With96_: {
     width: '96%',
-    paddingVertical: normalize(10), color: '#fff',
-    fontWeight:'bold',
+    paddingVertical: normalize(10), color: Colors.button,
+    fontFamily:'OpenSansBold',
     paddingHorizontal:normalize(8)
   },
   containerloadingpage: {
@@ -1853,7 +2243,14 @@ flex:1,
     backgroundColor: '#181b2c'
   },
   EmptyText:{
-    color:'#fff',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize:normalize(16),
+    fontWeight:'bold',
+    paddingVertical:normalize(8)
+
+  },
+  EmptyText2:{
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize:normalize(16),
     fontWeight:'bold',
     paddingVertical:normalize(8)
@@ -1893,12 +2290,12 @@ flex:1,
   WeekFilterText:{
     color:'#fff',
     fontSize:normalize(14),
-    fontWeight:'bold',
+    fontFamily:'GascogneSerialBoldDB'
   } ,
   WeekFilterTextMiddel:{
-    color:'#fff',
-    fontSize:normalize(11),
-    fontWeight:'bold',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize:normalize(14),
+    fontFamily:'OpenSansBold',
     paddingBottom:normalize(8)
   },
   LocationBox:{
@@ -1943,6 +2340,11 @@ flex:1,
     borderBottomWidth:1,
     borderStyle: "dashed",
     borderColor:'rgba(147,147,147,0.71)'
+  },
+  InputeRowItemstask3:{
+    width:'90%',
+    alignItems:'center',
+    justifyContent:'center',
   },
   InputeRowItemstask4:{
     width:'90%',
@@ -1998,16 +2400,16 @@ flex:1,
     alignItems: "center",
   },
   inputStyleLocation : {
-    borderWidth:1,
-    borderColor:'#1e233b',
+    borderWidth:0.7,
+    borderColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     borderRadius:normalize(6),
-    backgroundColor:'#1e233b',
-    padding:6,
+    backgroundColor:'#f6f9f9',
+    padding:5,
     marginBottom:5,
     width:'100%',
-    color:"#fff",
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     marginVertical: normalize(8),
-    paddingVertical: 4,
+    paddingVertical: 2,
 
   },
 
@@ -2024,7 +2426,7 @@ flex:1,
   },
   inputStyletask3 : {
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2035,7 +2437,7 @@ flex:1,
   },
   inputStyletask5 : {
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2046,7 +2448,7 @@ flex:1,
   },
   inputStyletask55 : {
     borderBottomRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2056,7 +2458,26 @@ flex:1,
   },
   inputStyletask2 : {
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    paddingVertical: normalize(16),
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  inputStyletask24 : {
+    borderRadius:normalize(6),
+    padding:6,
+    width:'100%',
+    color:"#fff",
+    paddingVertical: normalize(16),
+    alignItems:'center',
+    justifyContent:'center',
+  },
+  inputStyletask23 : {
+    borderRadius:normalize(6),
+    backgroundColor:'#f89696',
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2066,7 +2487,7 @@ flex:1,
   },
   inputStyletask25 : {
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2077,7 +2498,7 @@ flex:1,
   },
   inputStyletask26 : {
     borderRadius:normalize(6),
-    backgroundColor:GLOBAL.OFFICIAL_backgroundItem,
+    backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     padding:6,
     width:'100%',
     color:"#fff",
@@ -2109,15 +2530,38 @@ flex:1,
     paddingVertical: 4,
   },
   inputStyleLocationAdd2 : {
+    borderWidth:0.8,
+    borderColor:GLOBAL.OFFICIAL_Button,
+    borderRadius:normalize(6),
+    padding:5,
+    marginBottom:5,
+    width:'100%',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    marginVertical: normalize(6),
+    paddingVertical: 3,
+    fontFamily:'OpenSansBold',
+  },
+  inputStyleorderDetails : {
     borderWidth:1,
     borderColor:GLOBAL.OFFICIAL_Button,
     borderRadius:normalize(6),
-    padding:6,
+    padding:5,
     marginBottom:5,
     width:'100%',
-    color:"#fff",
-    marginVertical: normalize(6),
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     paddingVertical: 3,
+    fontFamily:'OpenSansBold',
+  },
+  inputStyleorderDetailsnotes : {
+    borderWidth:1,
+    borderColor:GLOBAL.OFFICIAL_Button,
+    borderRadius:normalize(6),
+    padding:5,
+    marginBottom:15,
+    width:'100%',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    paddingVertical: 3,
+    fontFamily:'OpenSansBold',
   },
   inputStyleLocationError : {
     borderWidth:1,
@@ -2149,15 +2593,26 @@ flex:1,
   },
   dropdownLocation: {
     height: normalize(35),
-    borderColor:'#1e233b',
+    borderColor:GLOBAL.OFFICIAL_BLUE_COLOR,
     borderWidth:1,
     borderRadius: normalize(6),
-    backgroundColor:'#1e233b',
+    backgroundColor:'#f6f9f9',
     padding:7,
     width: "100%",
-    color:"#fff",
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     marginBottom:5,
     paddingVertical: '4%',
+  },
+  dropdownLocationCustomer: {
+    height: normalize(35),
+    borderRadius: normalize(6),
+    backgroundColor:'#fff',
+    padding:8,
+    width: "100%",
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    marginBottom:5,
+    paddingVertical: '4%',
+
   },
   dropdownLocationAdd: {
     height: normalize(35),
@@ -2175,10 +2630,10 @@ flex:1,
     borderColor:'#FF0D10',
     borderWidth:1,
     borderRadius: normalize(6),
-    backgroundColor:'#1e233b',
+    backgroundColor:'#f6f9f9',
     padding:7,
     width: "100%",
-    color:"#fff",
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
     marginBottom:5,
     paddingVertical: '4%',
   },
@@ -2204,17 +2659,38 @@ flex:1,
     paddingVertical:normalize(15),
 
   },
+  ModalTaskStyle:{
+    borderRadius: normalize(15),
+    backgroundColor:GLOBAL.OFFICIAL_background,
+    width:'100%',
+    alignItems:'center',
+    marginTop:'auto',
+
+    paddingVertical:normalize(25),
+
+  },
+  ModalTaskStyle2:{
+    borderRadius: normalize(15),
+    backgroundColor:GLOBAL.OFFICIAL_background,
+    width:'100%',
+    alignItems:'center',
+    marginBottom:'auto',
+
+    paddingBottom:normalize(70),
+
+  },
   item_dropdownLocation: {
     padding: normalize(7),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1e233b",
+    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
 
   },
   inputSearchStyle_dropdownLocation: {
     fontSize: normalize(14),
-    color: "#fff",
+    color: '#fff',
+    fontWeight:'bold',
   },
   TitleValidate:{
     fontSize: normalize(13),
@@ -2278,6 +2754,12 @@ flex:1,
     justifyContent:'center',
     alignItems:'center'
   },
+  RowTask1:{
+    flexDirection:'row',
+    width:'100%',
+    justifyContent:'center',
+    alignItems:'center'
+  },
  RowTaskDate:{
     flexDirection:'row',
     width:'90%',
@@ -2289,6 +2771,7 @@ flex:1,
   RowTask_Items:{
     flexDirection:'row',
     width:'50%',
+
   },
   TaskImage:{ width: "100%",paddingBottom:normalize(25), alignItems: "center",
   position:'absolute',bottom:normalize(50)
@@ -2307,8 +2790,8 @@ flex:1,
   skiptext:{
     fontSize: normalize(13),
     textAlign: "left",
-    color:'#fff',
-    fontWeight:'bold',
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
   },
   carouselBtnStyle:
     {
@@ -2339,6 +2822,12 @@ flex:1,
       alignItems:"center",flexWrap:"wrap",
       justifyContent:'center',alignSelf:'center',marginBottom:'7%'
     },
+  BtnStyle24:
+    {
+      width:'90%',flexDirection:"row",
+      alignItems:"center",flexWrap:"wrap",
+      justifyContent:'space-between',alignSelf:'center',marginBottom:'7%'
+    },
   inputStyle :{
     borderWidth: 1,
     borderColor:GLOBAL.OFFICIAL_Button,
@@ -2348,6 +2837,358 @@ flex:1,
     width: '100%',
     paddingVertical: 4,
     color: '#fff',
-  }
+  } ,
+  inputStyle_with :{
+    borderWidth: 1,
+    borderColor:GLOBAL.OFFICIAL_BLUE_COLOR,
+    borderRadius: normalize(6),
+    padding: 12,
+    marginBottom: 5,
+    width: '100%',
+    paddingVertical: 4,
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+  } ,
+  inputStyle66 :{
+    borderWidth: 1,
+    borderColor:GLOBAL.OFFICIAL_Button,
+    borderRadius: normalize(6),
+    padding: 12,
+    marginBottom: 5,
+    width: '100%',
+    paddingVertical: 4,
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+  },
+  infobox:{
+    width:'98%',
+    alignItems:'center',
+    justifyContent:'space-between',
+
+    flexDirection:"row",
+  },
+  Width30:{
+    width:'30%',
+  },
+  Width70:{width:'70%',},
+  FilterText:{
+    color: '#4a6e8e',
+    fontSize: normalize(20), paddingVertical: 6,
+    textAlign:'center',
+    fontFamily:'NexaBold'
+  },
+  ModalFilterBox:{
+    width:'95%',
+    flexDirection:"row",
+    paddingVertical:normalize(10)
+  },
+  ModalFilterBoxItems:{
+    width:'100%',
+    justifyContent:"space-between",
+    flexDirection:"row",
+    flexWrap: "wrap",
+  },
+  ModalFilterBoxItemsList:
+    {
+      width: "30%",
+      alignItems: "center",
+      backgroundColor:Colors.withe,
+      flexDirection:"row",
+      paddingVertical:normalize(7),marginBottom:normalize(8),
+      borderRadius:normalize(5),
+
+    },
+  txt_leftModalFilter:{
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    marginVertical: 5,
+    textAlign: "left",
+   fontFamily:'OpenSansBold',
+
+  },
+  btntaskModalFilter:
+    {
+     paddingHorizontal:normalize(10), paddingVertical: normalize(10),
+      borderRadius: normalize(6),
+      marginHorizontal: normalize(7),
+
+    },
+  ItemModalFilter:{
+    width:'95%',
+    justifyContent:"flex-start",
+    flexDirection:"row",
+  },
+  triangleModalFilter:{
+    width:0,
+    height:0,
+    backgroundColor:"transparent",
+    borderStyle:"solid",
+    borderLeftWidth:9,
+    borderRightWidth:9,
+    borderBottomWidth:19,
+    borderLeftColor:"transparent",
+    borderRightColor:"transparent",
+    borderBottomColor:GLOBAL.OFFICIAL_background,
+    marginHorizontal: normalize(7),
+  },
+  dropdownModalFilter: {
+    height: normalize(40),
+    backgroundColor:Colors.withe,
+    borderRadius: normalize(6),
+    paddingHorizontal: 8,
+    width: "95%",
+    marginTop: normalize(4),
+    borderWidth:1,borderColor:Colors.button
+  },
+  placeholderStyleModalFilter: {
+    fontSize: normalize(14),
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+    backgroundColor:'#fff'
+  },
+  btnModalFilter:
+    {
+      width:"33%",paddingVertical:normalize(7),
+      borderRadius:normalize(6),
+
+      backgroundColor:Colors.withe
+    },
+  btnModalFilter1:
+    {
+      width:"33%",paddingVertical:normalize(7),
+      borderRadius:normalize(6),
+
+      backgroundColor:Colors.withe,
+      borderWidth:1,
+      borderColor:Colors.button
+    },
+  txt_CenterModalFilter:{
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontSize: normalize(14),
+    marginVertical: 5,
+    textAlign: "center",
+    fontFamily:'OpenSansBold',
+
+  },
+  containerModalFilter: {
+    backgroundColor: Colors.withe,
+  },
+  textItemModalFilter: {
+    flex: 1,
+    fontSize: normalize(14),
+    color:GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+  },
+  itemModalFilter: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.withe,
+
+  },
+  selectedTextModalFilter: {
+    fontSize: normalize(14),
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+  },
+  selectedIconModalFilter:{
+    position:'absolute',
+    right:0,
+    bottom:-4
+  },
+  DoshbordAmonttext:{
+    fontSize: normalize(15),
+    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    fontFamily:'OpenSansBold',
+    paddingVertical:normalize(25)
+  },
+  Width60:{
+    width:'60%',
+    justifyContent:"flex-start",
+
+  },
+  Width40:{
+    width:'40%',
+
+  },
+  QTYList:{
+    width:'100%',
+    flexDirection:'row'
+  },
+  QTYBtn:{width:'33%',backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,paddingVertical:normalize(2),borderRadius:normalize(6),
+  alignItems:'center',justifyContent:'center'
+  },
+  QTYInpute:{width:'33%',
+    paddingVertical: normalize(5),
+    color: Colors.button,
+    fontFamily:'OpenSansBold',
+    borderWidth:0.5,borderColor:'#000',
+    borderRadius:normalize(6),alignItems:'center',justifyContent:'center',
+    textAlign:'center'
+  },
+  QTYBtntext:{
+    fontSize: normalize(20),
+    color: GLOBAL.OFFICIAL_WITE_COLOR,
+    fontFamily:'OpenSansBold',
+  },
+  QTYInputeText:{
+    fontSize: normalize(15),
+    color: Colors.button,
+    fontFamily:'OpenSansBold',
+  },
+  Discount:{
+    backgroundColor:GLOBAL.OFFICIAL_ORANGE_COLOR,
+    width:'13%',
+    paddingVertical:normalize(6),
+    borderTopLeftRadius:normalize(25),
+    borderBottomLeftRadius:normalize(25),
+    marginLeft:'auto'
+  },
+  DiscountText:{
+    fontSize: normalize(13),
+    color: Colors.button,
+    fontFamily:'OpenSansBold',
+    textAlign:'center'
+  },
+  Width50:{
+    width:'50%',
+  },
+  Width25:{
+    width:'25%',
+  },
+  TotalFactor:{
+    width:'100%',
+    paddingVertical:normalize(12),
+    borderRadius:normalize(6),
+    flexDirection:'row'
+  },
+  TotalFactorText:{
+    fontSize: normalize(14),
+    color: Colors.withe,
+    fontFamily:'OpenSansBold',
+    textAlign:'left',
+    paddingLeft:normalize(20),
+    paddingVertical:normalize(5)
+  },
+  Width30_flex:{
+    width:'30%',
+    alignItems:'center',justifyContent:'center',
+  },
+  mainRenderUser: {
+    width: '95%',
+    alignSelf: 'center',
+    marginVertical: 5,
+    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+    borderRadius: 5,
+    /* alignItems: 'flex-end',
+     justifyContent: 'flex-start',*/
+    padding: 20
+  },
+  txtRenderUser: {
+    margin: 2,
+    color: '#fff',
+    fontSize: normalize(14),
+    fontFamily:GLOBAL.FONT_FAMILY,
+    paddingVertical:normalize(13)
+  },
+  dashRenderUser: {
+    width: '100%',
+    borderTopWidth: 1,
+    borderColor:'#fff'
+  },
+  submitted: {
+    alignSelf: 'flex-end',
+    justifyContent: 'center',
+    flexDirection: 'row-reverse',
+    marginBottom: 5,
+    width: '100%',
+    padding: 10,
+    borderRadius: 5
+  },
+  txtTitleSubmitted: {
+
+    fontFamily: GLOBAL.FONT_FAMILY,
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: normalize(14),
+    lineHeight: 20
+
+  },
+  itemSubmitted: {
+    //marginHorizontal: 25,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: GLOBAL.OFFICIAL_PURPLE_COLOR
+  },
+  whiteView: {
+    justifyContent: 'center',
+    flexDirection: 'row-reverse',
+    marginBottom: 2,
+    width: '100%',
+    padding: 10,
+    borderRadius: 5
+  },
+  whiteView2: {
+    justifyContent: 'space-between',
+    flexDirection: 'row-reverse',
+    marginBottom: 2,
+    width: '100%',
+   paddingVertical:normalize(8),
+    borderRadius: 5,
+
+  },
+  txtGreenView2: {
+    fontFamily: GLOBAL.FONT_FAMILY,
+    textAlign: 'center',
+    color: '#000',
+    fontSize: normalize(14),
+    lineHeight: 15,paddingHorizontal:2,paddingVertical:3
+  },
+  background:{
+    width:'100%'
+  },
+  Width47:{
+    width:'48%',
+
+  },
+  map:{
+   flex:1,
+    width:'100%',
+    height:460,marginTop:normalize(10)
+  },
+  imageProfile: {
+    borderWidth: 2,
+    borderColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60,
+    width: 120,
+    height: 120,
+  },
+  imageProfileDrawer: {
+    borderWidth: 2,
+    borderColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60,
+    width: 95,
+    height: 95,
+    // marginTop: normalize(15)
+  },
+  btnSelectImage: {
+    width: '100%',
+   paddingVertical:normalize(10),
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection:'row'
+    /* marginVertical: 10,*/
+
+  },
+
+
 });
 export { Styles };

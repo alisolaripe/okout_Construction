@@ -3,7 +3,7 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,Modal
+  TextInput, Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "../Colors";
@@ -16,9 +16,8 @@ import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
-import { Image } from 'react-native-compressor';
-
-import FastImage from 'react-native-fast-image';
+import { Image } from "react-native-compressor";
+import { LogOutModal } from "../component/LogOutModal";
 import Feature_DYB_detail_Image_Item from "../component/Feature_DYB_detail_Image_Item";
 import DYB_List_Detail_NoteItem from "../component/DYB_List_Detail_NoteItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,15 +27,15 @@ import { Footer1 } from "../component/Footer";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { geocodePosition, removeDataStorage, requestLocationPermission } from "../Get_Location";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { UserPermission } from "../CheckPermission";
-import { Warningmessage } from "../component/Warningmessage";
 const Api = require("../Api");
 const GLOBAL = require("../Global");
-let A = [];
-let C = [];
+const Photoes = require("../Photoes");
+let ImageList = [];
+let ImageListUpload = [];
 let Full = "";
 let Date_Today = "";
-let List=[]
+let List = [];
+
 function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const { navigate } = useNavigation();
   const modalizeRef = React.createRef();
@@ -60,7 +59,6 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
   const [ShowButton, setShowButton] = useState(true);
-  const [showWarning, setshowWarning] = useState(false);
 
   useEffect(() => {
     getLocation();
@@ -83,78 +81,79 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
             setLocation(position.coords);
             var NY = {
               lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
+              lng: position.coords.longitude,
+            };
             geocodePosition(NY).then(res => {
-              if(res) {
+              if (res) {
                 setGeoAddress(res?.[0]?.formattedAddress);
                 setCountry(res?.[0]?.country + " " + res?.[0]?.adminArea);
-              }
-              else {
+              } else {
                 setGeoAddress("");
                 setCountry("");
               }
             })
               .catch(err => {
-              })
+              });
           },
           error => {
             // See error code charts below.
             setLocation(false);
           },
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
         );
       }
     });
   };
   const AddFeatureImage = async () => {
-    setShowButton(false)
+    setShowButton(false);
     let idsArray = "";
     const formData = new FormData();
-    formData.append("userId", "1");
+    formData.append("userId", GLOBAL.UserInformation?.userId);
     formData.append("relatedName", "feature");
     formData.append("relatedId", GLOBAL.UpdateFeatureID);
     formData.append("geoLat", location.latitude);
     formData.append("geoLong", location.longitude);
     formData.append("geoAddress", GeoAddress);
     formData.append("buildType", "dyb");
-    if(GLOBAL.Feature === "Image") {
-      if (GLOBAL.DYB!== "n") {
-        if (Title=== "")
+    if (GLOBAL.Feature === "Image") {
+      if (GLOBAL.DYB !== "n" && Title === "")
         setTitleValidate(true);
-      }
       else if (ImageSourceviewarrayUpload?.length === 0) {
         setTitleValidate(false);
         setImageValidate(true);
       } else {
-        setImageValidate(false)
-        formData.append('title', Title);
+        setImageValidate(false);
+        setTitleValidate(false);
+        formData.append("title", Title);
         for (let i = 0; i < ImageSourceviewarrayUpload.length; i++) {
           idsArray = ImageSourceviewarrayUpload[i];
-          formData.append('attachment', {
+          formData.append("attachment", {
             uri: idsArray.uri,
             type: idsArray.type,
             name: idsArray.fileName,
           });
-          formData.append('postDate', idsArray.Date);
+          formData.append("postDate", idsArray.Date);
           writePostApi("POST", Api.AddBuildNotes, formData, ImageSourceviewarrayUpload).then(json => {
             if (json) {
               if (json.status === true) {
                 setMessage(json.msg);
                 setShowMessage(true);
-                setShowButton(true)
-                setTimeout(function(){ setShowMessage(false)}, 2000)
-                navigation.navigate('Project_Feature_List')
+                setShowButton(true);
+                setTimeout(function() {
+                  setShowMessage(false);
+                }, 2000);
+                navigation.navigate("Project_Feature_List");
               }
             } else {
-              setMessage('Your build notes successfully added');
+              setMessage("Your build notes successfully added");
               setShowMessage(true);
-              setShowButton(true)
-              setTimeout(function(){ setShowMessage(false)}, 2000)
-              navigation.navigate('Project_Feature_List')
+              setShowButton(true);
+              setTimeout(function() {
+                setShowMessage(false);
+              }, 2000);
+              navigation.navigate("Project_Feature_List");
             }
           });
-
         }
         if (GLOBAL.isConnected === false) {
           AddImageOffline();
@@ -165,15 +164,13 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
     else {
       if (ImageTitle === "") {
         setTitleValidate(true);
-      }
-      else if (FeatureNote=== '') {
+      } else if (FeatureNote === "") {
         setTitleValidate(false);
         setImageValidate(true);
-      }
-      else {
-        setImageValidate(false)
+      } else {
+        setImageValidate(false);
+        setTitleValidate(false);
         /////////Send Note/////////////
-
         formData.append("title", ImageTitle);
         formData.append("notes", FeatureNote);
         formData.append("postDate", Full);
@@ -187,26 +184,24 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
             body: formData,
           })
             .then(resp => {
-
               if (resp.status === 201) {
                 setMessage("Your build notes successfully added");
                 setShowMessage(true);
-                setShowButton(true)
-                setTimeout(function(){ setShowMessage(false)}, 2000)
-                navigation.navigate('Project_Feature_List')
+                setShowButton(true);
+                setTimeout(function() {
+                  setShowMessage(false);
+                }, 2000);
+                navigation.navigate("Project_Feature_List");
               }
-
               return resp.txt();
             })
             .then(txt => {
 
             })
             .catch(error => console.log("errorwwww", error));
-
-        }
-        else {
-          AddNoteOffline()
-          let get_MethodsList = await AsyncStorage.getItem(GLOBAL.offline_data)
+        } else {
+          AddNoteOffline();
+          let get_MethodsList = await AsyncStorage.getItem(GLOBAL.offline_data);
           let List = [];
           let AllList = [];
           let ID = 0;
@@ -219,26 +214,26 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
             type: "POST",
             Url: Api.AddBuildNotes,
             formdata: formData,
-            id: ID
+            id: ID,
           });
           if (get_MethodsList !== null) {
             AllList = [...List, ...JSON.parse(get_MethodsList)];
           } else {
-            AllList = [...List]
+            AllList = [...List];
           }
           await AsyncStorage.setItem(GLOBAL.offline_data, JSON.stringify(AllList));
-          setMessage('Your build notes successfully added');
+          setMessage("Your build notes successfully added");
           setShowMessage(true);
-          setShowButton(true)
-          setTimeout(function(){ setShowMessage(false)}, 2000)
-          navigation.navigate('Project_Feature_List')
+          setShowButton(true);
+          setTimeout(function() {
+            setShowMessage(false);
+          }, 2000);
+          navigation.navigate("Project_Feature_List");
         }
       }
-
     }
   };
   const ChangeChecked2 = (value) => {
-
   };
   const onOpen = () => {
     modalizeRef.current?.open();
@@ -246,17 +241,18 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
   const onClose = () => {
     modalizeRef.current?.close();
   };
-  const Image_compress=async (path)=>{
-    return  await Image.compress(path, {
+  ///Reduce the size of the photo///
+  const Image_compress = async (path) => {
+    return await Image.compress(path, {
       maxWidth: 1000,
       quality: 0.8,
-    })
-  }
+    });
+  };
   const selectPhotoFromGallery = () => {
     onClose();
-    if(GLOBAL.isConnected!==true){
-      setGeoAddress('');
-      setCountry('');
+    if (GLOBAL.isConnected !== true) {
+      setGeoAddress("");
+      setCountry("");
     }
     ImagePicker.openPicker({
       width: 300,
@@ -265,7 +261,6 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       mediaType: "photo",
       includeExif: true,
     }).then(response => {
-
       if (response.didCancel) {
       } else if (response.error) {
 
@@ -273,10 +268,10 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
 
         alert(response.customButton);
       } else {
-        if(ImageSourceviewarray)
-          A = [...ImageSourceviewarray];
-        if(ImageSourceviewarrayUpload)
-          C = [...ImageSourceviewarrayUpload];
+        if (ImageSourceviewarray)
+          ImageList = [...ImageSourceviewarray];
+        if (ImageSourceviewarrayUpload)
+          ImageListUpload = [...ImageSourceviewarrayUpload];
         for (let item in response) {
           let obj = response[item];
           var getFilename = obj.path.split("/");
@@ -285,19 +280,17 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           let B = "";
           let RealDate = "";
           let Months = "";
-
           if (obj?.exif?.DateTimeDigitized !== null) {
             D = obj?.exif?.DateTimeDigitized?.split(":");
             B = D?.[2].split(" ");
             RealDate = `${D?.[0]}-${D?.[1]}-${B?.[0]} ${B?.[1]}:${D?.[3]}:${D?.[4]}`;
             Months = D?.[1];
           } else {
-
-            RealDate = Full
+            RealDate = Full;
           }
-          Image_compress(obj.path).then(res=>{
+          Image_compress(obj.path).then(res => {
 
-            A.push({
+            ImageList.push({
               uri: res,
               type: obj.mime,
               fileName: imgName,
@@ -306,51 +299,46 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
               Date: RealDate,
               Type: "Gallery",
               geoLat: location.latitude,
-              geoLong:location.longitude,
-              geoAddress:GeoAddress,
-              Country: Country,
-            });
-            C.push({
-              uri: res,
-              type: obj.mime,
-              fileName: imgName,
-              buildId: 0,
-              title: "",
-              Date: RealDate,
-              Type: "Gallery",
-              geoLat: location.latitude,
-              geoLong:location.longitude,
+              geoLong: location.longitude,
               geoAddress: GeoAddress,
               Country: Country,
             });
-
+            ImageListUpload.push({
+              uri: res,
+              type: obj.mime,
+              fileName: imgName,
+              buildId: 0,
+              title: "",
+              Date: RealDate,
+              Type: "Gallery",
+              geoLat: location.latitude,
+              geoLong: location.longitude,
+              geoAddress: GeoAddress,
+              Country: Country,
+            });
             List.push({
               Type: "Gallery",
             });
-
-            if(List?.length===response?.length) {
-              setImageSourceviewarray(A);
-              setImageSourceviewarrayUpload(C);
-              setMudolList(A);
-              setImageValidate(false)
-              setShowBackBtn(false)
-              List=[]
-              A = [...A];
-              C = [...C];
+            if (List?.length === response?.length) {
+              setImageSourceviewarray(ImageList);
+              setImageSourceviewarrayUpload(ImageListUpload);
+              setMudolList(ImageList);
+              setImageValidate(false);
+              setShowBackBtn(false);
+              List = [];
+              ImageList = [...ImageList];
+              ImageListUpload = [...ImageListUpload];
             }
-          })
-
+          });
         }
-
-
       }
     });
   };
   const selectPhoto = () => {
     onClose();
-    if(GLOBAL.isConnected!==true){
-      setGeoAddress('');
-      setCountry('');
+    if (GLOBAL.isConnected !== true) {
+      setGeoAddress("");
+      setCountry("");
     }
     ImagePicker.openCamera({
       width: 300,
@@ -359,17 +347,15 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       setImageSource(response.path);
-      if(ImageSourceviewarray)
-        A = [...ImageSourceviewarray];
-      if(ImageSourceviewarrayUpload)
-        C = [...ImageSourceviewarrayUpload];
-      Image.compress( response.path, {
+      if (ImageSourceviewarray)
+        ImageList = [...ImageSourceviewarray];
+      if (ImageSourceviewarrayUpload)
+        ImageListUpload = [...ImageSourceviewarrayUpload];
+      Image.compress(response.path, {
         maxWidth: 1000,
         quality: 0.8,
       }).then(res => {
-
-
-        A.push({
+        ImageList.push({
           uri: res,
           type: response.mime,
           fileName: imgName,
@@ -378,12 +364,12 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           Date: Full,
           Type: "Camera",
           geoLat: location.latitude,
-          geoLong:location.longitude,
+          geoLong: location.longitude,
           geoAddress: GeoAddress,
-          Country:Country,
+          Country: Country,
         });
-        C.push({
-          uri:res,
+        ImageListUpload.push({
+          uri: res,
           type: response.mime,
           fileName: imgName,
           buildId: 0,
@@ -391,28 +377,29 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           Date: Full,
           Type: "Camera",
           geoLat: location.latitude,
-          geoLong:location.longitude,
+          geoLong: location.longitude,
           geoAddress: GeoAddress,
-          Country:Country,
+          Country: Country,
         });
-        setImageSourceviewarray(A);
-        setImageSourceviewarrayUpload(C);
-        setMudolList(A);
-        setImageValidate(false)
-        setShowBackBtn(false)
-        A = [...A];
-        C = [...C];
-      })
+        setImageSourceviewarray(ImageList);
+        setImageSourceviewarrayUpload(ImageListUpload);
+        setMudolList(ImageList);
+        setImageValidate(false);
+        setShowBackBtn(false);
+        ImageList = [...ImageList];
+        ImageListUpload = [...ImageListUpload];
+      });
 
     });
   };
-  const  getDayOfWeek=(date)=> {
+  ///calculate Names of the days of the week///
+  const getDayOfWeek = (date) => {
     const dayOfWeek = new Date(date).getDay();
     return isNaN(dayOfWeek) ? null :
-      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek];
-  }
+      ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+  };
   const AddImageOffline = async () => {
-    let A = [];
+    let Image_list = [];
     let Count = 0;
     let different = [];
     let SameTitle = 0;
@@ -421,23 +408,22 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
     let differentDetail = [];
     let AllListDetail = [];
     let Detail_Exist = [];
-    let AllList=[]
+    let AllList = [];
     let List = JSON.parse(await AsyncStorage.getItem(GLOBAL.FeatureList_KEY));
     different = List?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateFeatureID) && p.Type === "Image");
     SameTitle = different?.findIndex((p) => p.title === Title);
     let ListDetail = JSON.parse(await AsyncStorage.getItem(GLOBAL.FeatureList_Details_KEY));
     differentDetail = ListDetail?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateFeatureID) & p.Type === "Image");
-    if (SameTitle === -1||SameTitle ===undefined) {
+    if (SameTitle === -1 || SameTitle === undefined) {
       const date = new Date();
       const Day = date.getDate();
       const Month = date.getMonth() + 1;
-      if (List!==null) {
+      if (List !== null) {
         Buildid = parseInt(List?.[List?.length - 1]?.buildId) + 1;
-      }
-      else {
+      } else {
         Buildid = Buildid + 1;
       }
-      let WeekDay=getDayOfWeek(Date_Today)
+      let WeekDay = getDayOfWeek(Date_Today);
       FeatureList.push({
         Type: "Image",
         Icon: "folder-multiple-image",
@@ -447,22 +433,19 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
         Day: Month,
         relatedId: GLOBAL.UpdateFeatureID,
         buildId: Buildid,
-        WeekDay:WeekDay
+        WeekDay: WeekDay,
       });
-      if(List!==null)
-      {
+      if (List !== null) {
         AllList = [...List, ...FeatureList];
-      }
-      else{
+      } else {
         AllList = [...FeatureList];
       }
-
       ImageSourceviewarrayUpload?.forEach((obj) => {
-        if (differentDetail!==undefined) {
+        if (differentDetail !== undefined) {
           Count = parseInt(differentDetail?.[differentDetail?.length - 1]?.buildId) + 1;
         } else
           Count = Count + 1;
-        A.push({
+        Image_list.push({
           imageUrl: obj.uri,
           title: Title,
           buildId: Count,
@@ -476,19 +459,15 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           relatedId: GLOBAL.UpdateFeatureID,
         });
       });
-      if(ListDetail!==null)
-      {
-        AllListDetail = [...ListDetail, ...A];
+      if (ListDetail !== null) {
+        AllListDetail = [...ListDetail, ...Image_list];
+      } else {
+        AllListDetail = [...Image_list];
       }
-      else{
-        AllListDetail = [...A];
-      }
-
       await AsyncStorage.setItem(GLOBAL.FeatureList_Details_KEY, JSON.stringify(AllListDetail));
       await AsyncStorage.setItem(GLOBAL.FeatureList_KEY, JSON.stringify(AllList));
       setImageSourceviewarrayUpload([]);
-    }
-    else {
+    } else {
       Buildid = different?.find((p) => p.title === Title)?.buildId;
       Detail_Exist = differentDetail?.filter((p) => parseInt(p?.buildIdParent) === parseInt(Buildid));
       ImageSourceviewarrayUpload?.forEach((obj) => {
@@ -496,7 +475,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           Count = parseInt(Detail_Exist?.[Detail_Exist.length - 1]?.buildId) + 1;
         else
           Count = Count + 1;
-        A.push({
+        Image_list.push({
           imageUrl: obj.uri,
           title: Title,
           buildId: Count.toString(),
@@ -510,18 +489,17 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           relatedId: GLOBAL.UpdateFeatureID,
         });
       });
-      if(ListDetail) {
-        AllListDetail = [...ListDetail, ...A];
+      if (ListDetail) {
+        AllListDetail = [...ListDetail, ...Image_list];
+      } else {
+        AllListDetail = [...Image_list];
       }
-      else {
-        AllListDetail=[...A]
-      }
-      setImageSourceviewarrayUpload([])
+      setImageSourceviewarrayUpload([]);
       await AsyncStorage.setItem(GLOBAL.FeatureList_Details_KEY, JSON.stringify(AllListDetail));
     }
   };
   const AddNoteOffline = async () => {
-    let A = [];
+    let Note_list = [];
     let Count = 0;
     let different = [];
     let SameTitle = 0;
@@ -529,23 +507,21 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
     let Buildid = 0;
     let differentDetail = [];
     let AllListDetail = [];
-    let Detail_Exist = [];
-    let AllList=[]
+    let AllList = [];
     let List = JSON.parse(await AsyncStorage.getItem(GLOBAL.FeatureList_KEY));
     different = List?.filter((p) => parseInt(p.relatedId) === parseInt(GLOBAL.UpdateFeatureID) && p.Type === "Note");
     SameTitle = different?.findIndex((p) => p?.title === ImageTitle);
     let ListDetail = JSON.parse(await AsyncStorage.getItem(GLOBAL.FeatureList_Details_KEY));
     differentDetail = ListDetail?.filter((p) => parseInt(p?.relatedId) === parseInt(GLOBAL.UpdateFeatureID) & p?.Type === "Note");
-    if (SameTitle===-1||SameTitle ===undefined) {
+    if (SameTitle === -1 || SameTitle === undefined) {
       const date = new Date();
       const Day = date.getDate();
       const Month = date.getMonth() + 1;
-
-      if (List!==null) {
+      if (List !== null) {
         Buildid = parseInt(List?.[List?.length - 1]?.buildId) + 1;
       } else
         Buildid = Buildid + 1;
-      let WeekDay=getDayOfWeek(Date_Today)
+      let WeekDay = getDayOfWeek(Date_Today);
       FeatureList.push({
         Type: "Note",
         Icon: "clipboard-text-outline",
@@ -555,136 +531,49 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
         Day: Month,
         relatedId: GLOBAL.UpdateFeatureID,
         buildId: Buildid,
-        WeekDay:WeekDay
+        WeekDay: WeekDay,
       });
-      if(List!==null)
-      {
-         AllList = [...List, ...FeatureList];
-      }
-      else{
+      if (List !== null) {
+        AllList = [...List, ...FeatureList];
+      } else {
         AllList = [...FeatureList];
       }
       if (differentDetail !== undefined) {
-          Count = parseInt(differentDetail?.[differentDetail?.length - 1]?.buildId) + 1;
-        } else
-          Count = Count + 1;
-        A.push({
-          buildIdNotes:FeatureNote,
-          title: ImageTitle,
-          buildId: Count,
-          Type: "Note",
-          postDate:Full,
-          buildIdParent: Buildid,
-          geoLat: location.latitude,
-          geoLong: location.longitude,
-          geoAddress: GeoAddress,
-          Country: Country,
-          relatedId: GLOBAL.UpdateFeatureID,
-        });
-      if(ListDetail!==null)
-      {
-        AllListDetail = [...ListDetail, ...A];
-      }
-      else{
-        AllListDetail = [...A];
+        Count = parseInt(differentDetail?.[differentDetail?.length - 1]?.buildId) + 1;
+      } else
+        Count = Count + 1;
+      Note_list.push({
+        buildIdNotes: FeatureNote,
+        title: ImageTitle,
+        buildId: Count,
+        Type: "Note",
+        postDate: Full,
+        buildIdParent: Buildid,
+        geoLat: location.latitude,
+        geoLong: location.longitude,
+        geoAddress: GeoAddress,
+        Country: Country,
+        relatedId: GLOBAL.UpdateFeatureID,
+      });
+      if (ListDetail !== null) {
+        AllListDetail = [...ListDetail, ...Note_list];
+      } else {
+        AllListDetail = [...Note_list];
       }
       await AsyncStorage.setItem(GLOBAL.FeatureList_Details_KEY, JSON.stringify(AllListDetail));
       await AsyncStorage.setItem(GLOBAL.FeatureList_KEY, JSON.stringify(AllList));
       setImageSourceviewarrayUpload([]);
     }
-   //
-   //  else {
-   //        Buildid = different?.find((p) => p.title === ImageTitle)?.buildId;
-   //          Detail_Exist = differentDetail?.filter((p) => parseInt(p.buildIdParent) === parseInt(Buildid));
-   //      if (Detail_Exist)
-   //        Count = parseInt(Detail_Exist?.[Detail_Exist.length - 1]?.buildId) + 1;
-   //      else
-   //        Count = Count + 1;
-   //      A.push({
-   //        buildIdNotes:FeatureNote,
-   //        title: ImageTitle,
-   //        buildId: Count,
-   //        Type: "Note",
-   //        postDate:Full,
-   //        buildIdParent: Buildid,
-   //        geoLat: location.latitude,
-   //        geoLong: location.longitude,
-   //        geoAddress: GeoAddress,
-   //        Country: Country,
-   //        relatedId: GLOBAL.UpdateFeatureID,
-   //      });
-   // if(ListDetail) {
-   //   AllListDetail = [...ListDetail, ...A];
-   // }
-   // else {
-   //   AllListDetail=[...A]
-   // }
-   //    setImageSourceviewarrayUpload([])
-   //    await AsyncStorage.setItem(GLOBAL.FeatureList_Details_KEY, JSON.stringify(AllListDetail));
-   //  }
-   //
-   //     const date = new Date();
-   //     const Day = date.getDate();
-   //     const Month = date.getMonth() + 1;
-   //     if (List) {
-   //       Buildid = parseInt(List?.[List?.length - 1]?.buildId) + 1;
-   //     } else
-   //       Buildid = Buildid + 1;
-   //     FeatureList.push({
-   //       Type: "Note",
-   //       Icon: "file-text-o",
-   //       title: ImageTitle,
-   //       FullYear: Date_Today,
-   //       Month: Day,
-   //       Day: Month,
-   //       relatedId: GLOBAL.UpdateFeatureID,
-   //       buildId: Buildid,
-   //     });
-   //     if(List)
-   //     {
-   //        AllList = [...List, ...FeatureList];
-   //     }
-   //     else{
-   //       AllList = [...FeatureList];
-   //     }
-   //     if (ListDetail?.length !== 0) {
-   //         Count = parseInt(differentDetail?.[differentDetail?.length - 1]?.buildId) + 1;
-   //       } else
-   //         Count = Count + 1;
-   //       A.push({
-   //         buildIdNotes:FeatureNote,
-   //         title: ImageTitle,
-   //         buildId: Count,
-   //         Type: "Note",
-   //         postDate:Full,
-   //         buildIdParent: Buildid,
-   //         geoLat: location.latitude,
-   //         geoLong: location.longitude,
-   //         geoAddress: GeoAddress,
-   //         Country: Country,
-   //         relatedId: GLOBAL.UpdateFeatureID,
-   //       });
-   //     if(ListDetail)
-   //     {
-   //       AllListDetail = [...ListDetail, ...A];
-   //     }
-   //     else{
-   //       AllListDetail = [...A];
-   //     }
-   //     await AsyncStorage.setItem(GLOBAL.FeatureList_Details_KEY, JSON.stringify(AllListDetail));
-   //     await AsyncStorage.setItem(GLOBAL.FeatureList_KEY, JSON.stringify(AllList));
-   //     setImageSourceviewarrayUpload([]);
   };
-
   const DeleteImage = (fileName) => {
-    let A = [...ImageSourceviewarray];
-    let C = [...ImageSourceviewarrayUpload];
-    const index = A.findIndex((p) => p.fileName === fileName);
-    const indexC = C.findIndex((p) => p.fileName === fileName);
-    A.splice(index, 1);
-    C.splice(indexC, 1);
-    setImageSourceviewarray(A);
-    setImageSourceviewarrayUpload(C)
+    let ImageList = [...ImageSourceviewarray];
+    let ImageListupload = [...ImageSourceviewarrayUpload];
+    const index = ImageList.findIndex((p) => p.fileName === fileName);
+    const indexC = ImageListupload.findIndex((p) => p.fileName === fileName);
+    ImageList.splice(index, 1);
+    ImageListupload.splice(indexC, 1);
+    setImageSourceviewarray(ImageList);
+    setImageSourceviewarrayUpload(ImageListupload);
   };
   const renderContent = () => (
     <View style={Styles.BtnBox}>
@@ -698,7 +587,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       }} style={Styles.UploadBtn}>
         <AntDesign name={"camera"} size={17} color={"#fff"} />
         <Text style={[Styles.TextUploadBtn]}>
-         Use Camera
+          Use Camera
         </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => {
@@ -711,88 +600,35 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       </TouchableOpacity>
     </View>
   );
-  const Navigate_Url= (Url) => {
-    if(Url==='ProfileStack') {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
-    }
-    else
+  const Navigate_Url = (Url) => {
     navigation.navigate(Url);
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete( false)}
-          transparent={true}
-        >
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
   };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
 
-        <View style={Styles.With100NoFlex}>
-          <FastImage style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete( false)} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient   colors={['#ffadad','#f67070','#FF0000']} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY)
-              setshowModalDelete(false)
-              navigation.navigate('LogIn');
-            }} >
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
-  const logout_Url= () => {
-    setshowModalDelete(true)
-
+  const logout_Url = () => {
+    setshowModalDelete(true);
   };
-  const Back_navigate=()=>{
+  const Back_navigate = () => {
 
-      if (ShowBackBtn===false) {
-        setShowWarningMessage(true);
-        setShowBackBtn(true)
-        //setTimeout(function(){ setShowBackBtn(true)}, 2000)
-      }
+    if (ShowBackBtn === false) {
+      setShowWarningMessage(true);
+      setShowBackBtn(true);
+    } else {
 
-    else {
-
-      goBack()
+      goBack();
     }
-  }
+  };
   return (
     <Container style={[Styles.Backcolor]}>
-      <Header colors={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']} StatusColor={GLOBAL.route==='structure'?"#ffadad":'#ffc6bb'} onPress={Back_navigate}
-              Title={"Features Detail"} />
+      <Header
+        colors={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+        StatusColor={GLOBAL.route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={Back_navigate}
+        Title={"Features Detail"} />
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
           <View style={[Styles.flashMessageSuccsess, { flexDirection: "row" }]}>
@@ -807,38 +643,30 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
           </View>
         </View>
         : null}
-      <Content style={[{ backgroundColor: Colors.background }]}>
+      <Content style={[{ backgroundColor: Colors.Light }]}>
         <View style={Styles.container}>
-          {
-            showModalDelete &&
-            <View>
-              {
-                _showModalDelete()
-              }
-            </View>
+          {showModalDelete &&
+          <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
           }
-          {showWarning===true&&  <Warningmessage/>}
           {
-            GLOBAL.Feature=== "Image" ?
+            GLOBAL.Feature === "Image" ?
               <View style={Styles.Center}>
-                { ShowWarningMessage===true&&
+                {ShowWarningMessage === true &&
                 <View style={Styles.flashMessageWarning4}>
                   <View style={Styles.flashMessageWarning6}>
-                    <View  style={{ width: "10%",alignItems:'center',justifyContent:'flex-start' }}>
-                      <FontAwesome size={normalize(18)} color={'#fff'}  name={'exclamation-circle'} />
+                    <View style={{ width: "10%", alignItems: "center", justifyContent: "flex-start" }}>
+                      <FontAwesome size={normalize(18)} color={"#fff"} name={"exclamation-circle"} />
                     </View>
-                    <View style={{ width: "90%",alignItems:'flex-start' }}>
+                    <View style={{ width: "90%", alignItems: "flex-start" }}>
                       <Text style={Styles.AddedtTxt}>
                         You will lose all changes.Do you still want to leave?
-
                       </Text>
                     </View>
-
                   </View>
                   <View style={Styles.With100Row2}>
                     <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
                       <TouchableOpacity onPress={() => {
-                        setShowBackBtn(false)
+                        setShowBackBtn(false);
                         setShowWarningMessage(false);
                       }}>
                         <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
@@ -848,28 +676,25 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                       <TouchableOpacity onPress={() => {
                         setShowWarningMessage(false);
                         setShowBackBtn(true);
-                        navigation.navigate('Project_Feature_List')
+                        navigation.navigate("Project_Feature_List");
                       }}>
                         <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
                       </TouchableOpacity>
                     </LinearGradient>
                   </View>
-                  {/*<View style={Styles.CancelBtnLeftAlignwarn}>*/}
-                  {/*  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />*/}
-                  {/*</View>*/}
                 </View>
                 }
                 {
-                  GLOBAL.DYB=== "n" ? null :
+                  GLOBAL.DYB === "n" ? null :
                     <View style={Styles.inputStyleBoxPadding0}>
-                      <Text style={[Styles.txtLightColor,{marginTop:normalize(4)}]}>Title</Text>
+                      <Text style={[Styles.txtLightColor, { marginTop: normalize(4) }]}>Title</Text>
                       <TextInput
                         value={Title}
-                        style={[Styles.inputStyleFeature,TitleValidate&&{borderColor:'#CC0000'}]}
+                        style={[Styles.inputStyleFeature, TitleValidate && { borderColor: "#CC0000" }]}
                         onChangeText={(val) => setTitle(val)}
                         multiline={true}
                         placeholderTextColor={"#fff"} />
-                      {TitleValidate&&(<Text style={Styles.TitleValidate}>Fill the field, please.</Text>)}
+                      {TitleValidate && (<Text style={Styles.TitleValidate}>Fill the field, please.</Text>)}
                     </View>
                 }
                 <View style={Styles.FlexWrap}>
@@ -881,49 +706,50 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
                     <Text style={Styles.UploadImageText}>
                       Add Photos
                     </Text>
-                    <MaterialIcons name={"add-a-photo"} size={20} color={"#fff"}  />
+                    <MaterialIcons name={"add-a-photo"} size={20} color={Colors.button} />
                   </TouchableOpacity>
-
                   {
                     ImageSourceviewarray.map((value, index) => {
                       return (
-                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle} ImagebtnColor={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
-                                                    DeleteImage={DeleteImage} ChangeChecked={ChangeChecked2} IconColor={'#F67070FF'} />
+                        <Feature_DYB_detail_Image_Item value={value} key={index} ImageTitle={ImageTitle}
+                                                       ImagebtnColor={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+                                                       DeleteImage={DeleteImage} ChangeChecked={ChangeChecked2}
+                                                       IconColor={"#F67070FF"} setImageValidate={setImageValidate} />
                       );
                     })}
                 </View>
                 <View style={Styles.FlexWrap}>
-                {ImageValidate&&(<Text style={Styles.TitleValidate}>Select Photos, please.</Text>)}
+                  {ImageValidate && (<Text style={Styles.TitleValidate}>Select Photos, please.</Text>)}
                 </View>
-                {Title!==''|| ImageSourceviewarrayUpload?.length!==0 &&ShowButton===true?
+                {Title !== "" || ImageSourceviewarrayUpload?.length !== 0 && ShowButton === true ?
                   <ButtonI style={Styles.btnDYB}
                            onpress={AddFeatureImage}
                            categoriIcon={""}
                            title={"Save"}
-                           colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
-                           styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null
+                           colorsArray={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+                           styleTxt={[Styles.txtbtn, { fontSize: normalize(16) }]} sizeIcon={27} /> : null
                 }
-
               </View> :
               <View style={Styles.Center}>
                 <View style={Styles.With100}>
                   <View style={Styles.FlexWrap}>
-                    <DYB_List_Detail_NoteItem FeatureNote={FeatureNote} setFeatureNote={setFeatureNote} setImageValidate={setImageValidate}
+                    <DYB_List_Detail_NoteItem FeatureNote={FeatureNote} setFeatureNote={setFeatureNote}
+                                              setImageValidate={setImageValidate}
                                               ImageTitle={ImageTitle} setImageTitle={setImageTitle}
-                                              ChangeChecked={ChangeChecked2} setTitlesList={setTitlesList} TitleValidate={TitleValidate}
+                                              ChangeChecked={ChangeChecked2} setTitlesList={setTitlesList}
+                                              TitleValidate={TitleValidate}
                                               Count={Count} ImageValidate={ImageValidate} />
                   </View>
                 </View>
                 {
-                  ShowButton===true?
-                    <ButtonI  style={Styles.btnDYB}
-                              onpress={AddFeatureImage}
-                              categoriIcon={""}
-                              title={"Save"}
-                              colorsArray={GLOBAL.route==='structure'?["#ffadad", "#f67070", "#FF0000"]:['#ffc2b5','#fca795','#d1583b']}
-                              styleTxt={[Styles.txt, { fontSize: normalize(16) }]} sizeIcon={27} />:null
+                  ShowButton === true ?
+                    <ButtonI style={Styles.btnDYB}
+                             onpress={AddFeatureImage}
+                             categoriIcon={""}
+                             title={"Save"}
+                             colorsArray={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
+                             styleTxt={[Styles.txtbtn, { fontSize: normalize(16) }]} sizeIcon={27} /> : null
                 }
-
               </View>
           }
         </View>
@@ -933,9 +759,7 @@ function Project_Feature_Detail({ navigation, navigation: { goBack } }) {
       </Modalize>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
     </Container>
-
   );
 }
-
 
 export default Project_Feature_Detail;

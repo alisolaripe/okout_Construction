@@ -48,12 +48,12 @@ function TaskDetailImage({ item,colors,IconColor,index}) {
             <TouchableOpacity onPress={() => {
               setvisible(false);
             }} style={[Styles.CancelBtnLeft, { flexDirection: "row" }]}>
-              <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+              <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
               <Text style={[Styles.txtLightcenter]}>Close</Text>
             </TouchableOpacity>
           </View>
           <View style={[{ width: "96%", marginBottom: "5%" }]}>
-            <Image source={{ uri: GLOBAL?.OrgAppLink_value + "/" +FullImage }}
+            <Image source={{ uri:FullImage }}
                    imageStyle={{ borderRadius: normalize(6) }}
                    style={Styles.UnitDetailImagestyleFullScreen}
                    resizeMode="stretch"/>

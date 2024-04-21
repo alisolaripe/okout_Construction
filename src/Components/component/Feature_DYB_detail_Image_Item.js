@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Text,
@@ -18,13 +17,12 @@ import { Colors } from "../Colors";
 import LinearGradient from "react-native-linear-gradient";
 import { Content } from "native-base";
 const GLOBAL = require("../Global");
-function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,IconColor}) {
+const Photoes=require('../Photoes')
+function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,IconColor,setImageValidate}) {
   const [FullImage,setFullImage] = useState(false);
   const [visible,setvisible] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [openMore, setOpenMore] = useState(false);
   const width = Dimensions.get("window").width;
-  const oval1Width = width * 0.5;
   const [isFocus,setIsFocus] = useState(false);
   const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false);
@@ -34,9 +32,7 @@ function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,Ic
     setFullImage(value)
   }
   useEffect(()=>{
-
     setDateFormat(value.Date)
-
   }, []);
   const _showModalDelete = () => {
     return (
@@ -54,10 +50,9 @@ function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,Ic
   };
   const renderModalContent = () => (
     <View style={Styles.DeleteModalStyle}>
-
       <View style={Styles.With100NoFlex}>
         <Image style={{width:'27%',aspectRatio:1,marginVertical:normalize(10)}}
-               source={require("../../Picture/png/AlertImage.png")}
+               source={Photoes.Alert}
                resizeMode="contain" />
         <View style={Styles.With100NoFlex}>
           <Text style={Styles.txt_left2}>
@@ -65,7 +60,6 @@ function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,Ic
           </Text>
         </View>
       </View>
-
       <View style={Styles.With100Row}>
         <LinearGradient  colors={['#9ab3fd','#82a2ff','#4B75FCFF']} style={Styles.btnListDelete}>
           <TouchableOpacity onPress={() => setshowModalDelete( false)} >
@@ -189,10 +183,9 @@ function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,Ic
         animationType="slide"
         transparent={true}
         visible={visible}
-        //onRequestClose={() => {
-        //Alert.alert("Modal has been closed.");
-        //setModalVisible(!modalVisible);
-        //}}
+        onRequestClose={() => {
+          setvisible(false)
+        }}
         >
         <Content contentContainerStyle={Styles.ModalStyleFullImageDetails}>
           <View style={[{ width:'95%',marginVertical:'4%'}]} >
@@ -238,6 +231,4 @@ function Feature_DYB_detail_Image_Item({index,value,DeleteImage,ImagebtnColor,Ic
 
   );
 }
-
-
 export default Feature_DYB_detail_Image_Item;

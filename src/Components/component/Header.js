@@ -1,10 +1,7 @@
-import {
-  StatusBar, Text,
-  View,
-} from "react-native";
+import {StatusBar, Text,View} from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { Styles } from "../Styles";
-import { Button, Container } from "native-base";
+import { Button, } from "native-base";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import React from "react";
 function Header ({colors,Title,onPress,StatusColor}){

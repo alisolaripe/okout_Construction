@@ -14,26 +14,20 @@ import { readOnlineApi } from "../ReadPostApi";
 import { writePostApi } from "../writePostApi";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { ButtonI } from "../component/ButtonI";
-import { UserPermission } from "../CheckPermission";
+import { LogOutModal } from "../component/LogOutModal";
 import { Warningmessage } from "../component/Warningmessage";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { TextInputI } from "../component/TextInputI";
-import Moment from "moment";
+import { isNetworkConnected } from "../GlobalConnected";
+import { Dropdown } from "react-native-element-dropdown";
 
 const GLOBAL = require("../Global");
 const Api = require("../Api");
 let A = [];
-const List = [{ id: 0, Filtername: "Date: َAll", Icon: "calendar-month" },
-  { id: 1, Filtername: "Status", Icon: "checkbox-marked-circle-outline" }, {
-    id: 2,
-    Filtername: "Normal",
-    Icon: "podium",
-  }];
-const data = [{ label: "Edit", value: "1", Icon: "edit" }, { label: "Cancel Task", value: "2", Icon: "cross" }];
 const data2 = [];
 const dataassigned = [];
-const dataassigned2 = [ { label: "Complete Task", value: "4", Icon: "check" }];
 const data3 = [{ label: "Reopen", value: "5", Icon: "retweet" }];
+
 function Task_Management({ navigation, navigation: { goBack } }) {
   const [modules, setmodules] = useState([]);
   const [showModalDelete, setshowModalDelete] = useState(false);
@@ -42,9 +36,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
   const [DateAll, setDateAll] = useState("All");
-  const [StatusAll, setStatusAll] = useState("Open");
+  const [StatusAll, setStatusAll] = useState("Status");
   const [priorityAll, setpriorityAll] = useState("Normal");
   const [CurrentStatus, setCurrentStatus] = useState("");
+  const [selectedRelated, setselectedRelated] = useState("");
+  const [selectedSite, setselectedSite] = useState("");
+  const [selectedUnit, setselectedUnit] = useState("");
   const [showModalCalender, setshowModalCalender] = useState(false);
   const [selectedRange, setRange] = useState({});
   const [ShowDateRange, setShowDateRange] = useState(false);
@@ -53,6 +50,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [Taskpriority, setTaskpriority] = useState([]);
   const [Taskstatus, setTaskstatus] = useState([]);
   const [ShowWarningMessage, setShowWarningMessage] = useState(false);
+  const [visiblFilter, setvisiblFilter] = useState(false);
   const [ShowBackBtn, setShowBackBtn] = useState(true);
   const [Taskpriorityfilter, setTaskpriorityfilter] = useState([]);
   const [Taskstatusfilter, setTaskstatusfilter] = useState([]);
@@ -66,9 +64,14 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [SelectItem, setSelectItem] = useState(0);
   const [SelectDetailItem, setSelectDetailItem] = useState(0);
   const [ColorChange, setColorChange] = useState(false);
-  const [ColorChangestatus, setColorChangestatus] = useState("#ffc2c2");
-  const [ColorChangePriority, setColorChangePriority] = useState("#d2fd77");
+  const [ColorChangestatus, setColorChangestatus] = useState("#fff");
+  const [ColorChangePriority, setColorChangePriority] = useState("#008000");
   const [showModalReject, setshowModalReject] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+  const [TaskRelated, setTaskRelated] = useState([]);
+  const [Taskcategory, setTaskcategory] = useState([]);
+  const [categoryId, setCategoryId] = useState(0);
+  const [categoryName, setcategoryName] = useState("");
   const [FilterTimeList, setFilterTimeList] = useState([{ value: 0, label: "All", Icon: "calendar-month" },
     { value: 1, label: "Week", Icon: "calendar-week" }, { value: 2, label: "Today", Icon: "calendar-today" }]);
   const [FilterList, setFilterList] = useState([{ id: 0, Filtername: "Date: َAll", Icon: "calendar-month" },
@@ -76,94 +79,441 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       id: 2,
       Filtername: "Normal",
       Icon: "podium",
-    }]);
+    }, { id: 3, Filtername: "Category", Icon: "feature-search-outline" }]);
   const [reasons, setreasons] = useState([]);
+  const [RelatedNameList, setRelatedNameList] = useState([{ value: "0", label: "project" }, {
+    value: "1",
+    label: "site",
+  },
+    { value: "2", label: "unit" }, { value: "3", label: "section" }, { value: "4", label: "feature" }]);
+  const [TaskRelatedNameId, setTaskRelatedNameId] = useState("");
+  const [selectedrelatedname, setselectedrelatedname] = useState("");
+  const [SiteList, setSiteList] = useState([]);
+  const [unitList, setunitList] = useState([]);
+  const [sectionList, setsectionList] = useState([]);
+  const [featureList, setfeatureList] = useState([]);
+  const [selectedrelated, setSelectedrelated] = useState("");
+  const [relatedId, setRelatedId] = useState(0);
+  const [TaskProjectId, setTaskProjectId] = useState("");
+  const [TaskSiteId, setTaskSiteId] = useState("");
+  const [TaskunitId, setTaskunitId] = useState("");
+  const [TasksectionId, setTasksectionId] = useState("");
+  const [TaskfeatureId, setTaskfeatureId] = useState("");
+  const [selectedTaskSiteName, setselectedTaskSiteName] = useState("");
+  const [selectedunitName, setselectedunitName] = useState("");
+  const [selectedsectionName, setselectedsectionName] = useState("");
+  const [selectedfeatureName, setselectedfeatureName] = useState("");
   useEffect(() => {
-    Task_status();
-    Task_priority();
-    ReasonCodeReopen(7)
+
     const unsubscribe = navigation.addListener("focus", () => {
-      if (GLOBAL.selectItem === 1) {
+      if (GLOBAL.selectItem === 1 && GLOBAL.TaskName === "") {
         My_TaskList();
-      } else {
+      } else if (GLOBAL.selectItem === 2 && GLOBAL.TaskName === "") {
         Assigned_TaskList();
+      } else if (GLOBAL.TaskName !== "") {
+        getrelatedTask();
       }
     });
+    Task_status();
+    Task_priority();
+    ReasonCodeReopen(7);
+    Task_RelatedList();
+    Task_category();
+    getSites();
+    getUnits();
+    getSection();
+    getFeatures();
     return unsubscribe;
   }, []);
-  const ReasonCodeReopen = async (value) => {
+///get task when come from projectstructure or DYb///
+  const getrelatedTask = async () => {
+    GLOBAL.TaskMenuName = GLOBAL.TaskName + " Tasks";
     if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}&relatedName=${GLOBAL.RelatedName}&relatedId=${GLOBAL.RelatedId}&type=related`).then(json => {
+        let Task_List = [];
+        console.log(json?.tasks, " json?.tasks");
+        for (let item in json?.tasks) {
+          let obj = json?.tasks?.[item];
+          if (obj?.taskRelatedNameRef === GLOBAL.TaskName) {
+            const Year = obj?.taskCreatedOn?.split(" ");
+            const Day = Year?.[0]?.split("-");
+            const W = Day?.[2]?.split(" ");
+            let taskPriorityColor = "";
+            if (obj?.taskPriorityName === "Low")
+              taskPriorityColor = "#999999";
+            else if (obj?.taskPriorityName === "High")
+              taskPriorityColor = "#FF474D";
+            else
+              taskPriorityColor = "#008000";
+            Task_List.push({
+              taskId: obj.taskId,
+              taskTitle: obj.taskTitle,
+              taskPriorityName: obj.taskPriorityName,
+              taskDescription: obj.taskDescription,
+              taskParentTaskId: obj.taskParentTaskId,
+              taskStatusColor: obj.taskStatusColor,
+              taskCreatedOn: obj.taskCreatedOn,
+              taskStatusName: obj.taskStatusName,
+              Year: Year?.[0],
+              WeekDay: getDayOfWeek(Year?.[0]),
+              Day: W?.[0],
+              Month: Day?.[1],
+              taskPriorityColor: taskPriorityColor,
+              attachments: obj?.attachments,
+              taskUpdated: obj?.taskNotify,
+              taskRelatedName: obj?.taskRelatedName,
+              taskCategoryName: obj.taskCategoryName,
+              taskRelatedNameRef: obj.taskRelatedNameRef,
+              taskWorkType: obj.taskWorkType,
+            });
+          }
+        }
+        if (Task_List?.length !== 0) {
+          Task_List?.sort(dateComparison_data);
+          setMudolList(Task_List);
+          Make_Week_Filter_List(Task_List);
+          setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+        } else {
+          setmodules("");
+        }
 
-      fetch(Api.Reason_Code+`userId=1&statusId=${value}`, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"}
-      }).then(resp => {
-        return resp.json();}).then(json => {
-        let A=[];
-        json?.reasons?.forEach((obj) => {
-          A.push({
-            label: obj?.reasonTitle,
-            value: obj?.reasonId,
-            reasonDescription:obj?.reasonDescription
+        writeDataStorage(GLOBAL.Related_Task, json?.tasks);
+      });
+    } else {
+      let Task_List = [];
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Related_Task));
+      for (let item in json) {
+        let obj = json?.[item];
+        if (obj?.taskRelatedNameRef === GLOBAL.TaskName) {
+          const Year = obj?.taskCreatedOn?.split(" ");
+          const Day = Year?.[0]?.split("-");
+          const W = Day?.[2]?.split(" ");
+          let taskPriorityColor = "";
+          if (obj?.taskPriorityName === "Low")
+            taskPriorityColor = "#999999";
+          else if (obj?.taskPriorityName === "High")
+            taskPriorityColor = "#FF474D";
+          else
+            taskPriorityColor = "#008000";
+          Task_List.push({
+            taskId: obj.taskId,
+            taskTitle: obj.taskTitle,
+            taskPriorityName: obj.taskPriorityName,
+            taskDescription: obj.taskDescription,
+            taskParentTaskId: obj.taskParentTaskId,
+            taskStatusColor: obj.taskStatusColor,
+            taskCreatedOn: obj.taskCreatedOn,
+            taskStatusName: obj.taskStatusName,
+            Year: Year?.[0],
+            WeekDay: getDayOfWeek(Year?.[0]),
+            Day: W?.[0],
+            Month: Day?.[1],
+            taskPriorityColor: taskPriorityColor,
+            attachments: obj?.attachments,
+            taskUpdated: obj?.taskNotify,
+            taskRelatedName: obj?.taskRelatedName,
+            taskCategoryName: obj.taskCategoryName,
+            taskRelatedNameRef: obj.taskRelatedNameRef,
+            taskWorkType: obj.taskWorkType,
           });
-        });
-        setreasons(A);
-        writeDataStorage(GLOBAL.Reason_Code_Reopen,json?.reasons);
-
-      })
-        .catch(error => console.log("dd", error))
+        }
+      }
+      if (Task_List?.length !== 0) {
+        Task_List?.sort(dateComparison_data);
+        setMudolList(Task_List);
+        Make_Week_Filter_List(Task_List);
+        setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+      } else {
+        setmodules("");
+      }
     }
-    else {
-      let Modules = await AsyncStorage.getItem(GLOBAL.Reason_Code_Reopen);
-      let A=[];
-      Modules?.forEach((obj) => {
-        A.push({
-          label: obj?.reasonTitle,
-          value: obj?.reasonId,
-          reasonDescription:obj?.reasonDescription
+  };
+
+  const getSites = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    let Site_List = [];
+    if (json !== null) {
+      let Site = json?.find((p) => p?.projectId === GLOBAL.ProjectId);
+      Site?.sites?.forEach((obj) => {
+        Site_List.push({
+          value: obj.siteId,
+          label: obj.siteName,
         });
       });
-      setreasons(A);
-    }
-  }
+      setSiteList(Site_List);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setselectedTaskSiteName({
+          label: Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
+          value: Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.value,
+          _index: Site_List?.findIndex(p => p.label === GLOBAL.FilterSite_name),
+        });
+        if (GLOBAL.TaskRelatedNameId === "1") {
+          setRelatedId(Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
+        } else {
+          getUnits();
+        }
+      } else {
 
-  //${GLOBAL.UserInformation?.userId}
+        getUnits();
+      }
+    }
+  };
+  const getUnits = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    if (json !== null) {
+      let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
+      let unit_List = [];
+      Filter_units?.units?.forEach((obj) => {
+        unit_List.push({
+          value: obj?.unitId,
+          label: obj?.unitName,
+        });
+      });
+      setunitList(unit_List);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setselectedunitName({
+          label: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
+          value: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
+          _index: unit_List?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
+        });
+        if (GLOBAL.TaskRelatedNameId === "2") {
+          setRelatedId(unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
+        } else {
+
+          getSection();
+        }
+      } else {
+
+        getSection();
+      }
+    }
+
+  };
+  const getSection = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    if (json !== null) {
+      let Section_List = [];
+      let Filter_units = "";
+      let Filter_sites = "";
+      let Filter_section = "";
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
+      Filter_section?.sections?.forEach((obj) => {
+        Section_List.push({
+          value: obj.sectionId,
+          label: obj.sectionName,
+        });
+      });
+      setsectionList(Section_List);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setselectedsectionName({
+          label: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
+          value: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
+          _index: Section_List?.findIndex(p => p.label === GLOBAL.FilterSection_name),
+        });
+        if (GLOBAL.TaskRelatedNameId === "3") {
+          setRelatedId(Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
+        } else
+          getFeatures();
+      } else
+        getFeatures();
+    }
+  };
+  const getFeatures = async () => {
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    if (json !== null) {
+      let Feature_List = [];
+      let Filter_units = "";
+      let Filter_sites = "";
+      let Filter_section = "";
+      let Filter_feature = "";
+      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
+      Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
+      if (Filter_feature?.features) {
+        Filter_feature?.features?.forEach((obj) => {
+          Feature_List.push({
+            value: obj.featureId,
+            label: obj.featureName,
+          });
+        });
+        setfeatureList(Feature_List);
+        if (GLOBAL.TaskRelatedNameId === "4") {
+          setselectedfeatureName({
+            label: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
+            value: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
+            _index: Feature_List?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
+          });
+          setRelatedId(Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
+        }
+      }
+    }
+  };
+  const Task_category = async () => {
+    let Category_List = [];
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_category + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
+        for (let item in json?.categories) {
+          let obj = json?.categories?.[item];
+          Category_List.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+          });
+        }
+        setTaskcategory(Category_List);
+      });
+    } else {
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Category));
+      for (let item in json?.categories) {
+        let obj = json?.categories?.[item];
+        Category_List.push({
+          value: obj.categoryId,
+          label: obj.categoryTitle,
+        });
+      }
+      setTaskcategory(Category_List);
+    }
+  };
+  const Task_RelatedList = (Id) => {
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${1}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let RelatedList = [];
+            for (let item in json?.relatedList) {
+              let obj = json?.relatedList?.[item];
+              RelatedList.push({
+                value: obj.relatedId,
+                label: obj.relatedName,
+              });
+            }
+            setTaskRelated(RelatedList);
+            if (GLOBAL.TaskRelatedNameId !== "") {
+              setSelectedrelated({
+                label: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.label,
+                value: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value,
+                _index: RelatedList?.findIndex(p => p.label === GLOBAL.FilterProject_name),
+              });
+              if (GLOBAL.TaskRelatedNameId === "0") {
+                setRelatedId(RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value);
+              } else
+                getSites();
+            }
+          })
+          .catch(error => console.log("error", error));
+      }
+    });
+  };
+  const ReasonCodeReopen = async (value) => {
+    if (GLOBAL.isConnected === true) {
+      fetch(Api.Reason_Code + `userId=${GLOBAL.UserInformation?.userId}&statusId=${value}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }).then(resp => {
+        return resp.json();
+      }).then(json => {
+        let CodeReopen_List = [];
+        json?.reasons?.forEach((obj) => {
+          CodeReopen_List.push({
+            label: obj?.reasonTitle,
+            value: obj?.reasonId,
+            reasonDescription: obj?.reasonDescription,
+          });
+        });
+        setreasons(CodeReopen_List);
+        writeDataStorage(GLOBAL.Reason_Code_Reopen, json?.reasons);
+      }).catch(error => console.log("dd", error));
+    } else {
+      let Modules = await AsyncStorage.getItem(GLOBAL.Reason_Code_Reopen);
+      let CodeReopen = [];
+      Modules?.forEach((obj) => {
+        CodeReopen.push({
+          label: obj?.reasonTitle,
+          value: obj?.reasonId,
+          reasonDescription: obj?.reasonDescription,
+        });
+      });
+      setreasons(CodeReopen);
+    }
+  };
+  ///calculate Names of the days of the week///
   const getDayOfWeek = (date) => {
     const dayOfWeek = new Date(date).getDay();
     return isNaN(dayOfWeek) ? null :
       ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
   };
-
+  ///get user add task list from asyncStorage///
   const My_TaskList = async () => {
-    if(GLOBAL?.FilterTime===true||GLOBAL?.FilterStatus===true||GLOBAL?.FilterPriority===true)
-    {
-
+    if (GLOBAL?.FilterTime === true || GLOBAL?.FilterStatus === true || GLOBAL?.FilterPriority === true || GLOBAL.FilterCategory === true) {
       setmodules(GLOBAL?.FilterList);
       setMudolList(GLOBAL.List);
       setDateAll(GLOBAL.FilterTime_name);
       setStatusAll(GLOBAL.FilterStatus_name);
       setpriorityAll(GLOBAL.FilterPriority_name);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setCategoryId(GLOBAL.categoryId);
+        setcategoryName({ label: "Subcontract", value: "1", _index: 0 });
+        if (GLOBAL.TaskRelatedNameId === "5") {
+          RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId);
+          setselectedrelatedname({
+            label: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId)?.label,
+            value: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId)?.value,
+            _index: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId),
+          });
+          setTaskRelatedNameId(GLOBAL.TaskRelatedId);
+        } else if (GLOBAL.TaskRelatedNameId === "0") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("0");
+          setselectedrelatedname({ label: "Project", value: "0", _index: 0 });
+        } else if (GLOBAL.TaskRelatedNameId === "1") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("1");
+          setselectedrelatedname({ label: "Site", value: "1", _index: 1 });
+        } else if (GLOBAL.TaskRelatedNameId === "2") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("2");
+          setselectedrelatedname({ label: "Unit", value: "2", _index: 2 });
 
-    }
-    else {
+        } else if (GLOBAL.TaskRelatedNameId === "3") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("3");
+          setselectedrelatedname({ label: "Section", value: "3", _index: 3 });
+
+        } else if (GLOBAL.TaskRelatedNameId === "4") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("4");
+          setselectedrelatedname({ label: "Feature", value: "4", _index: 4 });
+        }
+      }
+    } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
-      let A = [];
+      let Task_List = [];
       for (let item in json) {
         let obj = json?.[item];
-        let taskPriorityColor = "";
-        const Year = obj.taskCreatedOn.split(" ");
+        const Year = obj?.taskCreatedOn?.split(" ");
         const Day = Year?.[0]?.split("-");
         const W = Day?.[2]?.split(" ");
+        let taskPriorityColor = "";
         if (obj?.taskPriorityName === "Low")
-          taskPriorityColor = "#fcd274";
-        else if (obj?.taskPriorityName === "Medium")
-          taskPriorityColor = "#fefe77";
+          taskPriorityColor = "#999999";
+        else if (obj?.taskPriorityName === "High")
+          taskPriorityColor = "#FF474D";
         else
-          taskPriorityColor = "#d2fd77";
-        A.push({
+          taskPriorityColor = "#008000";
+        Task_List.push({
           taskId: obj.taskId,
           taskTitle: obj.taskTitle,
-          taskCategoryName: obj.taskCategoryName,
           taskPriorityName: obj.taskPriorityName,
           taskDescription: obj.taskDescription,
           taskParentTaskId: obj.taskParentTaskId,
@@ -176,27 +526,39 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           Month: Day?.[1],
           taskPriorityColor: taskPriorityColor,
           attachments: obj?.attachments,
-          taskUpdated: obj?.taskUpdated,
+          taskUpdated: obj?.taskNotify,
+          taskRelatedName: obj?.taskRelatedName,
+          taskCategoryName: obj.taskCategoryName,
+          taskRelatedNameRef: obj.taskRelatedNameRef,
+          taskWorkType: obj.taskWorkType,
         });
       }
-      if (A?.length !== 0) {
-        A?.sort(dateComparison_data);
-        setmodules(A?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
-        setMudolList(A);
-        Make_Week_Filter_List(A);
+      if (Task_List?.length !== 0) {
+        Task_List?.sort(dateComparison_data);
+        // if(GLOBAL.TaskName!==''){
+        //   setMudolList(Task_List);
+        //   Make_Week_Filter_List(Task_List);
+        //   setmodules(Task_List?.filter((p) => p?.taskRelatedNameRef === GLOBAL.TaskName));
+        // }
+        // else {
+        setMudolList(Task_List);
+        Make_Week_Filter_List(Task_List);
+        setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+        // }
       } else {
         setmodules("");
       }
     }
-
   };
+  ///compare  arrays by date and sort According to Year///
   const dateComparison_data = (a, b) => {
     const date1 = new Date(a?.Year);
     const date2 = new Date(b?.Year);
     return date1 - date2;
   };
+  /// sort date and make list by week by week///
   const Make_Week_Filter_List = (A) => {
-    let B = [];
+    let Week_filter = [];
     let endDate_Format = "";
     let today = "";
     let tomorrow = "";
@@ -233,57 +595,83 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         }
         let newString = endDate.split("/");
         endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
-        Exist = B?.findIndex((p) => p.endDate === endDate_Format);
+        Exist = Week_filter?.findIndex((p) => p.endDate === endDate_Format);
         if (Exist === -1) {
-          B.push({
+          Week_filter.push({
             startDate: obj?.Year?.split(" ")?.[0],
             endDate: endDate_Format,
           });
         }
       }
     });
-    setDateRangeList(B);
+    setDateRangeList(Week_filter);
   };
+  ///get Technician task list from  asyncStorage///
   const Assigned_TaskList = async () => {
-
-    if(GLOBAL?.FilterTime===true||GLOBAL?.FilterStatus===true||GLOBAL?.FilterPriority===true)
-    {
-
-        setmodules(GLOBAL?.FilterList);
-        setMudolList(GLOBAL.List);
-        setDateAll(GLOBAL.FilterTime_name);
-        setStatusAll(GLOBAL.FilterStatus_name);
-        setpriorityAll(GLOBAL.FilterPriority_name);
-
-    }
-    else {
-
+    if (GLOBAL?.FilterTime === true || GLOBAL?.FilterStatus === true || GLOBAL?.FilterPriority === true || GLOBAL.FilterCategory === true) {
+      setmodules(GLOBAL?.FilterList);
+      setMudolList(GLOBAL.List);
+      setDateAll(GLOBAL.FilterTime_name);
+      setStatusAll(GLOBAL.FilterStatus_name);
+      setpriorityAll(GLOBAL.FilterPriority_name);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setCategoryId(GLOBAL.categoryId);
+        setcategoryName({ label: "Subcontract", value: "1", _index: 0 });
+        if (GLOBAL.TaskRelatedNameId === "5") {
+          RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId);
+          setselectedrelatedname({
+            label: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId)?.label,
+            value: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId)?.value,
+            _index: RelatedNameList.findIndex((p) => p.value === GLOBAL.TaskRelatedId),
+          });
+          setTaskRelatedNameId(GLOBAL.TaskRelatedId);
+        } else if (GLOBAL.TaskRelatedNameId === "0") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("0");
+          setselectedrelatedname({ label: "Project", value: "0", _index: 0 });
+        } else if (GLOBAL.TaskRelatedNameId === "1") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("1");
+          setselectedrelatedname({ label: "Site", value: "1", _index: 1 });
+        } else if (GLOBAL.TaskRelatedNameId === "2") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("2");
+          setselectedrelatedname({ label: "Unit", value: "2", _index: 2 });
+        } else if (GLOBAL.TaskRelatedNameId === "3") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("3");
+          setselectedrelatedname({ label: "Section", value: "3", _index: 3 });
+        } else if (GLOBAL.TaskRelatedNameId === "4") {
+          Task_RelatedList("1");
+          setTaskRelatedNameId("4");
+          setselectedrelatedname({ label: "Feature", value: "4", _index: 4 });
+        }
+      }
+    } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Assigned_TaskList));
-
-      let A = [];
-       let taskStatusName=''
+      let Task_List = [];
+      let taskStatusName = "";
       for (let item in json) {
         let obj = json?.[item];
-        let taskPriorityColor = "";
-        const Year = obj?.taskCreatedOn.split(" ");
-        const taskPlanStar = obj?.taskPlanStartDate.split(" ");
-        const taskPlanDue = obj?.taskPlanDueDate.split(" ");
+        const Year = obj?.taskCreatedOn?.split(" ");
+        const taskPlanStar = obj?.taskPlanStartDate?.split(" ");
+        const taskPlanDue = obj?.taskPlanDueDate?.split(" ");
         const Day = Year?.[0]?.split("-");
         const W = Day?.[2]?.split(" ");
+        let taskPriorityColor = "";
         if (obj?.taskPriorityName === "Low")
-          taskPriorityColor = "#fcd274";
-        else if (obj?.taskPriorityName === "Medium")
-          taskPriorityColor = "#fefe77";
+          taskPriorityColor = "#999999";
+        else if (obj?.taskPriorityName === "High")
+          taskPriorityColor = "#FF474D";
         else
-          taskPriorityColor = "#d2fd77";
-        if (obj.taskStatusName==='Accepted')
-          taskStatusName='In Progress'
+          taskPriorityColor = "#008000";
+        if (obj?.taskStatusName === "Accepted")
+          taskStatusName = "In Progress";
         else
-          taskStatusName=obj.taskStatusName
-        A.push({
+          taskStatusName = obj.taskStatusName;
+        Task_List.push({
           taskId: obj.taskId,
           taskTitle: obj.taskTitle,
-          taskCategoryName: obj.taskCategoryName,
           taskPriorityName: obj.taskPriorityName,
           taskDescription: obj.taskDescription,
           taskParentTaskId: obj.taskParentTaskId,
@@ -291,114 +679,69 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           taskPlanDueDate: taskPlanDue?.[0],
           taskStatusColor: obj.taskStatusColor,
           taskCreatedOn: obj.taskCreatedOn,
-          taskStatusName:taskStatusName,
+          taskStatusName: taskStatusName,
           Year: Year?.[0],
           WeekDay: getDayOfWeek(Year?.[0]),
           Day: W?.[0],
           Month: Day?.[1],
           taskPriorityColor: taskPriorityColor,
-          taskUpdated: obj?.taskUpdated,
+          taskUpdated: obj?.taskNotify,
           attachments: obj?.attachments,
-          taskRequestNotes:obj?.taskRequestNotes,
-          taskFeedback:obj?.taskDescription,
-          Format_Dates_StartDate:new Date(obj?.taskPlanStartDate),
-          Format_Dates_DueDate:new Date(obj?.taskPlanDueDate)
-
+          taskRequestNotes: obj?.taskRequestNotes,
+          taskFeedback: obj?.taskDescription,
+          Format_Dates_StartDate: new Date(obj?.taskPlanStartDate),
+          Format_Dates_DueDate: new Date(obj?.taskPlanDueDate),
+          taskRelatedName: obj?.taskRelatedName,
+          taskCategoryName: obj.taskCategoryName,
+          taskRelatedNameRef: obj.taskRelatedNameRef,
+          taskWorkType: obj.taskWorkType,
         });
       }
-      if (A?.length !== 0) {
-        A?.sort(dateComparison_data);
-        setmodules(A.filter((p) => p?.taskPriorityName === "Normal"));
-        setMudolList(A);
-        Make_Week_Filter_List(A);
+      if (Task_List?.length !== 0) {
+        Task_List?.sort(dateComparison_data);
+        // if(GLOBAL.TaskName!==''){
+        //   setmodules(Task_List?.filter((p) => p?.taskRelatedNameRef === GLOBAL.TaskName));
+        //   setMudolList(Task_List);
+        //   Make_Week_Filter_List(Task_List);
+        // }
+        // else {
+        setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+        setMudolList(Task_List);
+        Make_Week_Filter_List(Task_List);
+        // }
       } else {
         setmodules("");
       }
-
     }
   };
+  ///add new task button function///
   const handleSubmit = () => {
     if (modules?.length !== 0)
       GLOBAL.TaskId = parseInt(modules?.[modules?.length - 1]?.taskId) + 1;
     else
       GLOBAL.TaskId = 1;
     navigation.navigate("AddNewTask");
-
   };
+  ///LogOut Function///
+  const LogOut = () => {
+    removeDataStorage(GLOBAL.PASSWORD_KEY);
+    setshowModalDelete(false);
+    navigation.navigate("LogIn");
+  };
+/// Bottom menu click On LogOut button///
   const logout_Url = () => {
     setshowModalDelete(true);
   };
   const Navigate_Url = (Url) => {
     if (Url === "ProfileStack") {
-      UserPermission(GLOBAL.UserPermissionsList?.Profile).then(res => {
-        if (res.view === "1") {
-          navigation.navigate(Url);
-        } else {
-          setshowWarning(true);
-        }
-      });
+      navigation.navigate(Url);
     } else {
       navigation.navigate(Url);
-      // setFilterList([{ id: 0, Filtername: "Date: َAll", Icon: "calendar-month" },
-      //   { id: 1, Filtername: "Status", Icon: "checkbox-marked-circle-outline" }, {
-      //     id: 2,
-      //     Filtername: "Normal",
-      //     Icon: "podium",
-      //   }]);
-      // setColorChange(false);
-      // setColorChangestatus(GLOBAL.OFFICIAL_WITE_COLOR)
-      // setColorChangePriority(GLOBAL.OFFICIAL_WITE_COLOR)
-      GLOBAL.FilterList=modules
-        GLOBAL.List=MudolList
+      GLOBAL.FilterList = modules;
+      GLOBAL.List = MudolList;
     }
   };
-  const _showModalDelete = () => {
-    return (
-      <View style={Styles.bottomModal}>
-        <Modal
-          isVisible={showModalDelete}
-          avoKeyboard={true}
-          onBackdropPress={() => setshowModalDelete(false)}
-          transparent={true}>
-          {renderModalContent()}
-        </Modal>
-      </View>
-    );
-  };
-  const renderModalContent = () => (
-    <View style={Styles.DeleteModalTotalStyle}>
-      <View style={Styles.DeleteModalStyle2}>
-
-        <View style={Styles.With100NoFlex}>
-          <Image style={{ width: "27%", aspectRatio: 1, marginVertical: normalize(10) }}
-                 source={require("../../Picture/png/AlertImage.png")}
-                 resizeMode="contain" />
-          <View style={Styles.With100NoFlex}>
-            <Text style={Styles.txt_left2}>
-              Do you want to Log Out from App?
-            </Text>
-          </View>
-        </View>
-
-        <View style={Styles.With100Row}>
-          <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => setshowModalDelete(false)}>
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> No</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient colors={["#ffadad", "#f67070", "#FF0000"]} style={Styles.btnListDelete}>
-            <TouchableOpacity onPress={() => {
-              removeDataStorage(GLOBAL.PASSWORD_KEY);
-              setshowModalDelete(false);
-              navigation.navigate("LogIn");
-            }}>
-              <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Yes</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
-    </View>
-  );
+  ///update task when app is offline///
   const Update_Off = async (taskId) => {
     let List_Item = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let index = List_Item?.findIndex((p) => parseInt(p?.taskId) === parseInt(taskId));
@@ -407,25 +750,40 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     writeDataStorage(GLOBAL.All_Task, markers_List);
     My_TaskList();
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId)
+    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId);
     let markers_Listdetail = [...json_detail];
-    markers_Listdetail[index_detail] = { ...markers_Listdetail[index_detail], taskStatusColor: "#5a5a5a", taskStatusName: "Cancelled" };
+    markers_Listdetail[index_detail] = {
+      ...markers_Listdetail[index_detail],
+      taskStatusColor: "#5a5a5a",
+      taskStatusName: "Cancelled",
+    };
     writeDataStorage(GLOBAL.Task_Detail, markers_Listdetail);
-
   };
-  const Update_Off_Reopen = async (taskId,reasonDescription) => {
+  ///update task to reopen when app is offline///
+  const Update_Off_Reopen = async (taskId, reasonDescription) => {
     let List_Item = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let index = List_Item?.findIndex((p) => parseInt(p?.taskId) === parseInt(taskId));
     let markers_List = [...List_Item];
-    markers_List[index] = { ...markers_List[index], taskStatusColor: "#ff4545", taskStatusName: "Reopen",taskDescription:reasonDescription};
+    markers_List[index] = {
+      ...markers_List[index],
+      taskStatusColor: "#ff4545",
+      taskStatusName: "Reopen",
+      taskDescription: reasonDescription,
+    };
     writeDataStorage(GLOBAL.All_Task, markers_List);
     My_TaskList();
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId)
+    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId);
     let markers_Listdetail = [...json_detail];
-    markers_Listdetail[index_detail] = { ...markers_Listdetail[index_detail], taskStatusColor: "#ff4545", taskStatusName: "Reopen",taskDescription:reasonDescription};
+    markers_Listdetail[index_detail] = {
+      ...markers_Listdetail[index_detail],
+      taskStatusColor: "#ff4545",
+      taskStatusName: "Reopen",
+      taskDescription: reasonDescription,
+    };
     writeDataStorage(GLOBAL.Task_Detail, markers_Listdetail);
   };
+  ///Technician update task when app is offline///
   const Update_Off_Assigned = async (taskId) => {
     let List_Item = JSON.parse(await AsyncStorage.getItem(GLOBAL.Assigned_TaskList));
     let index = List_Item?.findIndex((p) => parseInt(p?.taskId) === parseInt(taskId));
@@ -434,15 +792,20 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     writeDataStorage(GLOBAL.Assigned_TaskList, markers_List);
     Assigned_TaskList();
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
-    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId)
+    let index_detail = json_detail?.findIndex((p) => p.taskId === taskId);
     let markers_Listdetail = [...json_detail];
-    markers_Listdetail[index_detail] = { ...markers_Listdetail[index_detail], taskStatusColor: "#0000FF", taskStatusName: "Completed" };
+    markers_Listdetail[index_detail] = {
+      ...markers_Listdetail[index_detail],
+      taskStatusColor: "#0000FF",
+      taskStatusName: "Completed",
+    };
     writeDataStorage(GLOBAL.Task_Detail, markers_Listdetail);
   };
 
   const renderItem = ({ item, index }) => (
-    <Task_management_Item data={GLOBAL?.selectItem === 1 ? data : dataassigned} data2={data2} index={index} key={index}
-                          modules={modules?.length} My_TaskList={My_TaskList} dataassigned2={dataassigned2}
+    <Task_management_Item data={GLOBAL?.selectItem === 1 ? GLOBAL.Task_data : dataassigned} data2={data2} index={index}
+                          key={index}
+                          modules={modules?.length} My_TaskList={My_TaskList} dataassigned2={GLOBAL.Task_data_assigned}
                           Assigned_TaskList={Assigned_TaskList} Update_Off_Reopen={Update_Off_Reopen}
                           value={item} Navigate_Url={Navigate_Url} Cheked={Cheked} Update_Off={Update_Off}
                           Taskpriority={Taskpriority} My_TaskList_server={My_TaskList_server}
@@ -453,7 +816,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                           setshowModalReject={setshowModalReject} data3={data3} reasons={reasons}
     />
   );
-
   const renderSectionFooter = () => (
     <View style={Styles.SectionFooter} />
   );
@@ -463,85 +825,77 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const Task_status = async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Task_status + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let D = [];
+        let status_List = [];
         let Filter = {
           value: 10,
           label: "All",
           statusColorCode: "#bd04ae",
           Icon: "status",
         };
-        let C = [];
+        let status_List_Copy = [];
         for (let item in json?.taskStatus) {
           let obj = json?.taskStatus?.[item];
-          D.push({
+          status_List.push({
             value: obj.statusId,
             label: obj.statusTitle,
             statusColorCode: obj.statusColorCode,
             Icon: "status",
           });
         }
-
-        C = [Filter, ...D];
-        setTaskstatus(D);
-        setTaskstatusfilter(C);
-
+        status_List_Copy = [Filter, ...status_List];
+        setTaskstatus(status_List);
+        setTaskstatusfilter(status_List_Copy);
         writeDataStorage(GLOBAL.Task_status, json);
       });
     } else {
+
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_status));
-      let D = [];
+      let status_List = [];
       let Filter = {
         value: 10,
         label: "All",
         statusColorCode: "#bd04ae",
         Icon: "status",
       };
-      let C = [];
+      let status_List_Copy = [];
       for (let item in json?.taskStatus) {
         let obj = json?.taskStatus?.[item];
-        D.push({
+        status_List.push({
           value: obj.statusId,
           label: obj.statusTitle,
           statusColorCode: obj.statusColorCode,
           Icon: "status",
         });
       }
-      setTaskstatus(D);
-      C = [Filter, ...D];
-      setTaskstatusfilter(C);
+      setTaskstatus(status_List);
+      status_List_Copy = [Filter, ...status_List];
+      setTaskstatusfilter(status_List_Copy);
     }
   };
   const Task_priority = async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Task_priority + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
+        let priority_List = [];
+        let priority_List_copy = [];
         let Filter = {
           value: 10,
           label: "All",
           taskPriorityColor: "#bd04ae",
           Icon: "prioriti",
         };
-        let C = [];
         for (let item in json?.priorities) {
           let obj = json?.priorities?.[item];
-          let taskPriorityColor = "";
-          if (obj?.priorityTitle === "Low")
-            taskPriorityColor = "#fcd274";
-          else if (obj?.priorityTitle === "Medium")
-            taskPriorityColor = "#fefe77";
-          else
-            taskPriorityColor = "#d2fd77";
-          A.push({
+          priority_List.push({
             value: obj.priorityId,
             label: obj.priorityTitle,
-            taskPriorityColor: taskPriorityColor,
+            taskPriorityColor: obj.priorityColor,
             Icon: "prioriti",
           });
         }
         writeDataStorage(GLOBAL.priorities, json);
-        setTaskpriority(A);
-        C = [Filter, ...A];
-        setTaskpriorityfilter(C);
+        setTaskpriority(priority_List);
+        priority_List_copy = [Filter, ...priority_List];
+        setTaskpriorityfilter(priority_List_copy);
       });
     } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.priorities));
@@ -551,7 +905,8 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         taskPriorityColor: "#bd04ae",
         Icon: "prioriti",
       };
-      let C = [];
+      let priority_List = [];
+      let priority_List_copy = [];
       for (let item in json?.priorities) {
         let obj = json?.priorities?.[item];
         let taskPriorityColor = "";
@@ -561,7 +916,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           taskPriorityColor = "#fefe77";
         else
           taskPriorityColor = "#d2fd77";
-        A.push({
+        priority_List.push({
           value: obj.priorityId,
           label: obj.priorityTitle,
           taskPriorityColor: taskPriorityColor,
@@ -569,18 +924,19 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         });
       }
 
-      setTaskpriority(A);
-      C = [Filter, ...A];
-      setTaskpriorityfilter(C);
+      setTaskpriority(priority_List);
+      priority_List_copy = [Filter, ...priority_List];
+      setTaskpriorityfilter(priority_List_copy);
     }
   };
+  ///get user add task list from server///
   const My_TaskList_server = async () => {
-
     const date = new Date();
     const Day = date.getDate();
     const Month = date.getMonth();
+    let Task_List = [];
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.My_TaskList + `userId=1`).then(json => {
+      readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         for (let item in json?.tasks) {
           let obj = json?.tasks?.[item];
           let taskPriorityColor = "";
@@ -593,7 +949,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPriorityColor = "#fefe77";
           else
             taskPriorityColor = "#d2fd77";
-          A.push({
+          Task_List.push({
             taskId: obj.taskId,
             taskTitle: obj.taskTitle,
             taskCategoryName: obj.taskCategoryName,
@@ -609,77 +965,59 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPriorityColor: taskPriorityColor,
             attachments: obj?.attachments,
             taskUpdated: obj?.taskUpdated,
-            taskRequestNotes:obj?.taskRequestNotes,
-            taskFeedback:obj?.taskFeedback
-
+            taskRequestNotes: obj?.taskRequestNotes,
+            taskFeedback: obj?.taskFeedback,
           });
         }
         writeDataStorage(GLOBAL.All_Task, json?.tasks);
-
-        if (A?.length !== 0) {
-          A?.sort(dateComparison_data);
-          setMudolList(A);
-          Make_Week_Filter_List(A);
-
+        if (Task_List?.length !== 0) {
+          Task_List?.sort(dateComparison_data);
+          setMudolList(Task_List);
+          Make_Week_Filter_List(Task_List);
           if (GLOBAL?.FilterTime === true || GLOBAL?.FilterStatus === true || GLOBAL?.FilterPriority === true) {
             setDateAll(GLOBAL.FilterTime_name);
             setStatusAll(GLOBAL.FilterStatus_name);
             setpriorityAll(GLOBAL.FilterPriority_name);
-            if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterPriority_name==="All"&&GLOBAL.FilterStatus_name==="All"){
-              setmodules(A);
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name&&p?.taskStatusName === GLOBAL.FilterStatus_name));
-
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => p?.taskStatusName === GLOBAL.FilterStatus_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskPriorityName === GLOBAL.FilterPriority_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskStatusName === GLOBAL.FilterStatus_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskStatusName === GLOBAL.FilterStatus_name&& p?.taskPriorityName === GLOBAL.FilterPriority_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name==="All"){
-              SortByWeek( GLOBAL.selectedRange.firstDate,  GLOBAL.selectedRange.secondDate)
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              FilterWeekstatus   ()
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              FilterWeekPriority()
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
+            if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterPriority_name === "All" && GLOBAL.FilterStatus_name === "All") {
+              setmodules(Task_List);
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Task_List?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name && p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Task_List?.filter((p) => p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Task_List?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Task_List?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Task_List?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskPriorityName === GLOBAL.FilterPriority_name));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Task_List?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Task_List?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskStatusName === GLOBAL.FilterStatus_name && p?.taskPriorityName === GLOBAL.FilterPriority_name));
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name === "All") {
+              SortByWeek(GLOBAL.selectedRange.firstDate, GLOBAL.selectedRange.secondDate);
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              FilterWeekstatus();
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              FilterWeekPriority();
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
               FilterWeek();
             }
+          } else {
+            setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
           }
-          else {
-            setmodules(A?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
-          }
-        }
-        else
-        {
+        } else {
           setmodules("");
         }
       });
     }
   };
+  ///get Technician task list from server///
   const Assigned_TaskList_server = async () => {
     if (GLOBAL.isConnected === true) {
-      let A = [];
-      let taskStatusName=''
-      readOnlineApi(Api.Assigned_TaskList + `userId=1`).then(json => {
-
+      let Assigned_TaskList = [];
+      let taskStatusName = "";
+      readOnlineApi(Api.Assigned_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         for (let item in json?.tasks) {
           let obj = json?.tasks?.[item];
           let taskPriorityColor = "";
@@ -688,18 +1026,17 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           const taskPlanDue = obj?.taskPlanDueDate.split(" ");
           const Day = Year?.[0]?.split("-");
           const W = Day?.[2]?.split(" ");
-
           if (obj?.taskPriorityName === "Low")
             taskPriorityColor = "#fcd274";
-          else if(obj?.taskPriorityName === "Medium")
+          else if (obj?.taskPriorityName === "Medium")
             taskPriorityColor = "#fefe77";
           else
             taskPriorityColor = "#d2fd77";
-          if (obj.taskStatusName==='Accepted')
-            taskStatusName='In Progress'
+          if (obj.taskStatusName === "Accepted")
+            taskStatusName = "In Progress";
           else
-            taskStatusName=obj.taskStatusName
-          A.push({
+            taskStatusName = obj.taskStatusName;
+          Assigned_TaskList.push({
             taskId: obj.taskId,
             taskTitle: obj.taskTitle,
             taskCategoryName: obj.taskCategoryName,
@@ -710,7 +1047,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPlanDueDate: taskPlanDue?.[0],
             taskStatusColor: obj.taskStatusColor,
             taskCreatedOn: obj.taskCreatedOn,
-            taskStatusName:taskStatusName,
+            taskStatusName: taskStatusName,
             Year: Year?.[0],
             WeekDay: getDayOfWeek(Year?.[0]),
             Day: W?.[0],
@@ -718,65 +1055,51 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             taskPriorityColor: taskPriorityColor,
             taskUpdated: obj?.taskUpdated,
             attachments: obj?.attachments,
-            taskRequestNotes:obj?.taskRequestNotes,
-            taskFeedback:obj?.taskDescription,
-            Format_Dates_StartDate:new Date(obj?.taskPlanStartDate),
-            Format_Dates_DueDate:new Date(obj?.taskPlanDueDate)
+            taskRequestNotes: obj?.taskRequestNotes,
+            taskFeedback: obj?.taskDescription,
+            Format_Dates_StartDate: new Date(obj?.taskPlanStartDate),
+            Format_Dates_DueDate: new Date(obj?.taskPlanDueDate),
           });
         }
-        if (A?.length !== 0) {
-
+        if (Assigned_TaskList?.length !== 0) {
           const date = new Date();
           const Day = date.getDate();
           const Month = date.getMonth();
-          A?.sort(dateComparison_data);
-          setMudolList(A);
-          Make_Week_Filter_List(A);
+          Assigned_TaskList?.sort(dateComparison_data);
+          setMudolList(Assigned_TaskList);
+          Make_Week_Filter_List(Assigned_TaskList);
           if (GLOBAL?.FilterTime === true || GLOBAL?.FilterStatus === true || GLOBAL?.FilterPriority === true) {
             setDateAll(GLOBAL.FilterTime_name);
             setStatusAll(GLOBAL.FilterStatus_name);
             setpriorityAll(GLOBAL.FilterPriority_name);
-            if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterPriority_name==="All"&&GLOBAL.FilterStatus_name==="All"){
-              setmodules(A);
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name&&p?.taskStatusName === GLOBAL.FilterStatus_name));
+            if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterPriority_name === "All" && GLOBAL.FilterStatus_name === "All") {
+              setmodules(Assigned_TaskList);
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Assigned_TaskList?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name && p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Assigned_TaskList?.filter((p) => p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "All" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Assigned_TaskList?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name));
 
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => p?.taskStatusName === GLOBAL.FilterStatus_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="All"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => p?.taskPriorityName === GLOBAL.FilterPriority_name));
-
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskPriorityName === GLOBAL.FilterPriority_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskStatusName === GLOBAL.FilterStatus_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Today"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
-              setmodules(A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1&& p?.taskStatusName === GLOBAL.FilterStatus_name&& p?.taskPriorityName === GLOBAL.FilterPriority_name));
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name==="All"){
-              SortByWeek( GLOBAL.selectedRange.firstDate,  GLOBAL.selectedRange.secondDate)
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name==="All"&&GLOBAL.FilterPriority_name!=="All"){
-              FilterWeekstatus   ()
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name==="All"){
-              FilterWeekPriority()
-            }
-            else  if(GLOBAL.FilterTime_name==="Week"&&GLOBAL.FilterStatus_name!=="All"&&GLOBAL.FilterPriority_name!=="All"){
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Assigned_TaskList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Assigned_TaskList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskPriorityName === GLOBAL.FilterPriority_name));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              setmodules(Assigned_TaskList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskStatusName === GLOBAL.FilterStatus_name));
+            } else if (GLOBAL.FilterTime_name === "Today" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
+              setmodules(Assigned_TaskList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskStatusName === GLOBAL.FilterStatus_name && p?.taskPriorityName === GLOBAL.FilterPriority_name));
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name === "All") {
+              SortByWeek(GLOBAL.selectedRange.firstDate, GLOBAL.selectedRange.secondDate);
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name === "All" && GLOBAL.FilterPriority_name !== "All") {
+              FilterWeekstatus();
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name === "All") {
+              FilterWeekPriority();
+            } else if (GLOBAL.FilterTime_name === "Week" && GLOBAL.FilterStatus_name !== "All" && GLOBAL.FilterPriority_name !== "All") {
               FilterWeek();
             }
-          }
-          else {
-            setmodules(A.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll));
+          } else {
+            setmodules(Assigned_TaskList.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll));
           }
         } else {
           setmodules("");
@@ -786,7 +1109,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       });
     }
   };
-
+///delete task when app is offline///
   const Delete_Task_Offline = async (attachmentId, taskId) => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
@@ -826,7 +1149,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     await AsyncStorage.setItem(GLOBAL.Task_attachments, JSON.stringify(List_attachments));
     My_TaskList();
   };
-
+  ///delete Technician task when app is offline///
   const Delete_AssignedTask_Offline = async (attachmentId, taskId) => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Assigned_TaskList));
     let json_detail = JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_Detail));
@@ -873,9 +1196,9 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     markers?.splice(index, 1);
     setImageSourceviewarray(markers);
   };
+  ///sort list by time =>id==0 means all ,id==1 means filter by week and id==2 means today ///
   const FilterFunc = (id, label) => {
-    GLOBAL.FilterTime=true
-
+    GLOBAL.FilterTime = true;
     setDateAll(label);
     let index = 0;
     let markers = [...FilterList];
@@ -886,15 +1209,13 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       if (StatusAll === "All" && priorityAll === "All") {
         setmodules(MudolList);
       } else if (StatusAll !== "All" && priorityAll !== "All") {
-
-        if(CurrentStatus==='') {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
-            setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll &&p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+            setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
           else
             setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll));
-        }
-        else
-        setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll));
+        } else
+          setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll));
       }
     } else if (id === 1) {
       setshowModalCalender(true);
@@ -912,218 +1233,164 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       const Month = date.getMonth();
       let A = [];
       if (priorityAll !== "All" && StatusAll !== "All") {
-
-        if(CurrentStatus==='') {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
             A = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled" && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
           else
             A = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
-        }
-        else
-        A = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
-      }      else {
+        } else
+          A = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
+      } else {
 
         A = MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
       }
       setmodules(A);
     }
   };
+  ///sort list by status ///
   const FilterFuncStatus = (id, label) => {
-    GLOBAL.FilterStatus=true
-    setCurrentStatus(label)
+    GLOBAL.FilterStatus = true;
+    setCurrentStatus(label);
     setStatusAll(label);
     if (id === 10) {
       setShowDateRange(false);
       if (priorityAll === "All" && DateAll === "All") {
         setmodules(MudolList);
-      }
-      else if (DateAll === "Today" && priorityAll !== "All")
-      {
-
+      } else if (priorityAll !== "All" && DateAll === "All") {
+        setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll));
+      } else if (DateAll === "Today" && priorityAll !== "All") {
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
 
         setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-      }
-      else if (DateAll === "Today" && priorityAll === "All")
-      {
-
+      } else if (DateAll === "Today" && priorityAll === "All") {
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
-
         setmodules(MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-      }
-      else if (DateAll === "Week" && priorityAll !== "All") {
-
+      } else if (DateAll === "Week" && priorityAll !== "All") {
         FilterWeekstatus();
       } else if (DateAll === "Week" && priorityAll === "All") {
 
         SortByWeek(selectedRange.firstDate, selectedRange.secondDate);
-      }
-      else if (DateAll === "All" && priorityAll !== "All"){
-
-        setmodules(MudolList?.filter((p) =>p?.taskPriorityName === priorityAll))
-
+      } else if (DateAll === "All" && priorityAll !== "All") {
+        setmodules(MudolList?.filter((p) => p?.taskPriorityName === priorityAll));
       }
       let index = 1;
       let markers = [...FilterList];
       markers[index] = { ...markers[index], Filtername: label };
       setFilterList(markers);
-    }
-    else {
+    } else {
       if (DateAll === "Today" && priorityAll !== "All") {
-
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
         A = A?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === label && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
         setmodules(A);
-
       }
       if (DateAll === "Today" && priorityAll === "All") {
-
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
         A = A?.filter((p) => p?.taskStatusName === label && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
         setmodules(A);
-
-      }
-      else if (DateAll === "Week" && priorityAll !== "All") {
-
+      } else if (DateAll === "Week" && priorityAll !== "All") {
         FilterWeek();
       } else if (DateAll === "Week" && priorityAll === "All") {
-
         FilterWeekPriority();
-      }
-      else if (priorityAll === "All" && DateAll === "All") {
-
+      } else if (priorityAll === "All" && DateAll === "All") {
         A = MudolList?.filter((p) => p?.taskStatusName === label);
         setmodules(A);
-
-      }
-      else if (priorityAll !== "All" && DateAll === "All") {
-
+      } else if (priorityAll !== "All" && DateAll === "All") {
         A = MudolList?.filter((p) => p?.taskStatusName === label && p?.taskPriorityName === priorityAll);
         setmodules(A);
-
-
       }
       let index = 1;
       let markers = [...FilterList];
       markers[index] = { ...markers[index], Filtername: label };
       setFilterList(markers);
-
     }
   };
+  ///sort list by time=> id==1 filter by week ///
   const FilterWeek = async () => {
-
     await SortByWeek(selectedRange.firstDate, selectedRange.secondDate);
-
-    if(CurrentStatus==='') {
+    if (CurrentStatus === "") {
       if (GLOBAL.selectItem === 1)
         A = modules?.filter((p) => p?.taskPriorityName === priorityAll);
       else
         A = modules?.filter((p) => p?.taskPriorityName === priorityAll);
-
-    }
-    else
-    A = modules?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll);
+    } else
+      A = modules?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll);
     setmodules(A);
-
   };
+  ///sort list by time=> id==1 filter by week and status///
   const FilterWeekstatus = async () => {
-
     await SortByWeek(selectedRange.firstDate, selectedRange.secondDate);
-
     setmodules(modules?.filter((p) => p?.taskPriorityName === priorityAll));
-
   };
+  ///sort list by time=> id==1 filter by week and Priority///
   const FilterWeekPriority = async () => {
-
     await SortByWeek(selectedRange.firstDate, selectedRange.secondDate);
-
-    if(CurrentStatus==='') {
-        setmodules(modules);
-    }
-    else
-    setmodules(modules?.filter((p) => p?.taskStatusName === StatusAll));
-
+    if (CurrentStatus === "") {
+      setmodules(modules);
+    } else
+      setmodules(modules?.filter((p) => p?.taskStatusName === StatusAll));
   };
+  ///sort list by Priority ///
   const FilterFuncPriority = (id, label) => {
     setpriorityAll(label);
-    GLOBAL.FilterPriority=true
-
+    GLOBAL.FilterPriority = true;
     if (id === 10) {
       setShowDateRange(false);
-      if (StatusAll === "All" && DateAll === "All" && label === "All") {
+      if (StatusAll === "All" && DateAll === "All") {
         setmodules(MudolList);
-      }
-      else if (DateAll === "Today" && StatusAll !== "All") {
-
+      } else if (DateAll === "Today" && StatusAll !== "All") {
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
-        if(CurrentStatus==='') {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
             setmodules(MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1 && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
           else
             setmodules(MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-        }
-        else
-          setmodules(MudolList?.filter((p)=> p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-
-      }
-      else if (DateAll === "Today" && StatusAll === "All") {
-
-        const date  = new Date();
-        const Day   = date.getDate();
+        } else
+          setmodules(MudolList?.filter((p) => p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
+      } else if (DateAll === "Today" && StatusAll === "All") {
+        const date = new Date();
+        const Day = date.getDate();
         const Month = date.getMonth();
         setmodules(MudolList?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1));
-
-      }
-      else if (DateAll === "Week" && StatusAll !== "All") {
-
+      } else if (DateAll === "Week" && StatusAll !== "All") {
         FilterWeekPriority();
-      }
-      else if (DateAll === "Week" && StatusAll === "All") {
-
+      } else if (DateAll === "Week" && StatusAll === "All") {
         SortByWeek(selectedRange.firstDate, selectedRange.secondDate);
-      }
-      else if (DateAll === "All" && StatusAll !== "All"){
-
-        if(CurrentStatus==='') {
+      } else if (DateAll === "All" && StatusAll !== "All") {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
-            setmodules(MudolList?.filter((p) =>  p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
+            setmodules(MudolList?.filter((p) => p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
           else
             setmodules(MudolList);
-        }
-        else
-        setmodules(MudolList?.filter((p) =>p?.taskStatusName === StatusAll))
-
+        } else
+          setmodules(MudolList?.filter((p) => p?.taskStatusName === StatusAll));
       }
       let index = 2;
       let markers = [...FilterList];
       markers[index] = { ...markers[index], Filtername: label };
       setFilterList(markers);
-    }
-    else {
+    } else {
       if (DateAll === "Today" && StatusAll !== "All") {
-
         const date = new Date();
         const Day = date.getDate();
         const Month = date.getMonth();
-        if(CurrentStatus==='') {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
-          A = A?.filter((p) => p?.taskPriorityName === label &&  p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled" && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
-        else
+            A = A?.filter((p) => p?.taskPriorityName === label && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled" && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
+          else
             A = A?.filter((p) => parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
 
-        }
-        else
-        A = A?.filter((p) => p?.taskPriorityName === label && p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
+        } else
+          A = A?.filter((p) => p?.taskPriorityName === label && p?.taskStatusName === StatusAll && parseInt(p.Day) === Day && parseInt(p.Month) === Month + 1);
         setmodules(A);
 
       }
@@ -1136,8 +1403,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         setmodules(A);
 
 
-      }
-      else if (DateAll === "Week" && StatusAll !== "All") {
+      } else if (DateAll === "Week" && StatusAll !== "All") {
 
         FilterWeek();
       } else if (DateAll === "Week" && StatusAll === "All") {
@@ -1147,30 +1413,25 @@ function Task_Management({ navigation, navigation: { goBack } }) {
 
         A = MudolList?.filter((p) => p?.taskPriorityName === label);
         setmodules(A);
-
-
       } else if (StatusAll !== "All" && DateAll === "All" && label !== "All") {
 
-        if(CurrentStatus==='') {
+        if (CurrentStatus === "") {
           if (GLOBAL.selectItem === 1)
-            A =MudolList?.filter((p) => p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled" && p?.taskPriorityName === label);
+            A = MudolList?.filter((p) => p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled" && p?.taskPriorityName === label);
           else
-            A = MudolList?.filter((p) =>  p?.taskPriorityName === label);
+            A = MudolList?.filter((p) => p?.taskPriorityName === label);
 
-        }
-        else
-        A = MudolList?.filter((p) => p?.taskStatusName === StatusAll && p?.taskPriorityName === label);
+        } else
+          A = MudolList?.filter((p) => p?.taskStatusName === StatusAll && p?.taskPriorityName === label);
         setmodules(A);
-
-
       }
       let index = 2;
       let markers = [...FilterList];
       markers[index] = { ...markers[index], Filtername: label };
       setFilterList(markers);
-
     }
   };
+  ///sort list by time =>id==0 means date ,id==1 means filter by Status and id==2 means Priority ///
   const FilterFunc1 = (id) => {
     if (id === 0) {
       setDateItems(!DateItems);
@@ -1184,18 +1445,24 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       setPriority(!Priority);
       setDateItems(false);
       setStatus(false);
+    } else if (id === 3) {
+      setDateItems(false);
+      setStatus(false);
+      setPriority(false);
+      setvisiblFilter(!visiblFilter);
     }
   };
-
 
   const renderSectionHeader = () => (
     <>
       {showWarning === true && <Warningmessage />}
-      {
-        modules !== "" && <TouchableOpacity onPress={() => setvisibleguide(!visibleguide)}>
-          <AntDesign name={"infocirlce"} size={20} color={GLOBAL.OFFICIAL_ORANGE_COLOR} />
-        </TouchableOpacity>
-      }
+      <View style={Styles.infobox}>
+        {
+          modules !== "" && <TouchableOpacity style={Styles.Width30} onPress={() => setvisibleguide(!visibleguide)}>
+            <AntDesign name={"infocirlce"} size={20} color={GLOBAL.OFFICIAL_ORANGE_COLOR} />
+          </TouchableOpacity>
+        }
+      </View>
       {modules !== "" ?
         <View style={Styles.FilterBoxtask}>
           {FilterList?.map((value, index) => {
@@ -1203,10 +1470,9 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               <TouchableOpacity key={index} onPress={() => {
                 setSelectItem(value.id);
                 FilterFunc1(value.id);
-              }} style={[Styles.FilterBoxItemsSelecttasl]}>
-
+              }} style={[Styles.FilterBoxItemsSelectcategory]}>
                 {
-                  value.id === 0 ?
+                  value.id === 0 || value.id === 3 ?
                     <MaterialCommunityIcons name={value.Icon} size={20}
                                             color={GLOBAL.OFFICIAL_WITE_COLOR} /> :
                     value.id === 1 ?
@@ -1214,7 +1480,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                       <View style={[Styles.triangle, { borderBottomColor: ColorChangePriority }]} />
                 }
                 {
-                  value.id === 0 ?
+                  value.id === 0 || value.id === 3 ?
                     <Text
                       style={Styles.txtCenter_filter}>
                       {value.Filtername}
@@ -1224,10 +1490,15 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                         style={[Styles.txtCenter_filter, { color: ColorChangestatus }]}>
                         {value.Filtername}
                       </Text> :
-                      <Text
-                        style={[Styles.txtCenter_filter, { color: ColorChangePriority }]}>
-                        {value.Filtername}
-                      </Text>
+                      value.id === 2 ?
+                        <Text
+                          style={Styles.txtCenter_filter}>
+                          {value.Filtername}
+                        </Text> :
+                        <Text
+                          style={[Styles.txtCenter_filter, { color: ColorChangePriority }]}>
+                          {value.Filtername}
+                        </Text>
                 }
               </TouchableOpacity>
             );
@@ -1247,12 +1518,13 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   setColorChange(false);
                   setDateItems(false);
                   FilterFunc(value?.value, value.label);
-                  GLOBAL.FilterTime_name=value.label
+                  GLOBAL.FilterTime_name = value.label;
                 }}
-                 style={[SelectDetailItem === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItem === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
                   <MaterialCommunityIcons name={value.Icon} size={20}
-                                          color={SelectDetailItem === value.value ? GLOBAL.OFFICIAL_WITE_COLOR : GLOBAL.OFFICIAL_background} />
-                  <Text style={[SelectDetailItem === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter]}>
+                                          color={SelectDetailItem === value.value ? GLOBAL.OFFICIAL_WITE_COLOR : GLOBAL.OFFICIAL_BLUE_COLOR} />
+                  <Text
+                    style={[SelectDetailItem === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
                     {value.label}
                   </Text>
                 </TouchableOpacity>
@@ -1271,11 +1543,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   FilterFuncStatus(value?.value, value.label);
                   setColorChangestatus(value.statusColorCode);
                   setStatus(false);
-                  GLOBAL.FilterStatus_name=value.label
+                  GLOBAL.FilterStatus_name = value.label;
                 }}
                                   style={[SelectDetailItemStatus === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
                   <View style={[Styles.btntask, { backgroundColor: value.statusColorCode }]} />
-                  <Text style={[SelectDetailItemStatus === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter]}>
+                  <Text
+                    style={[SelectDetailItemStatus === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
                     {value.label}
                   </Text>
                 </TouchableOpacity>
@@ -1294,12 +1567,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   FilterFuncPriority(value?.value, value.label);
                   setColorChangePriority(value.taskPriorityColor);
                   setPriority(false);
-                  GLOBAL.FilterPriority_name=value.label;
+                  GLOBAL.FilterPriority_name = value.label;
                 }}
-                  style={[SelectDetailItemPriority === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItemPriority === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
                   <View style={[Styles.triangle, { borderBottomColor: value.taskPriorityColor }]} />
                   <Text
-                    style={[SelectDetailItemPriority === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter]}>
+                    style={[SelectDetailItemPriority === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
                     {value.label}
                   </Text>
                 </TouchableOpacity>
@@ -1309,7 +1582,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
-          <Text style={Styles.txtFilter}>
+          <Text style={Styles.txtFilter3}>
             Start Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
@@ -1317,7 +1590,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               {selectedRange.firstDate}
             </Text>
           </View>
-          <Text style={Styles.txtFilter}>
+          <Text style={Styles.txtFilter3}>
             End Date
           </Text>
           <View style={Styles.WeekFilterBoxItem}>
@@ -1330,19 +1603,18 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       <View style={Styles.SectionHeader} />
     </>
   );
+  /// sort Task by week ///
   const SortByWeek = (startDate, endDate) => {
     let Filter = "";
     if (priorityAll !== "All" && StatusAll !== "All") {
-      if(CurrentStatus==='') {
+      if (CurrentStatus === "") {
         if (GLOBAL.selectItem === 1)
-        Filter = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled");
+          Filter = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled");
         else
           Filter = MudolList?.filter((p) => p?.taskPriorityName === priorityAll);
-      }
-      else
+      } else
         Filter = MudolList?.filter((p) => p?.taskPriorityName === priorityAll && p?.taskStatusName === StatusAll);
-    }
-    else
+    } else
       Filter = MudolList;
     let Filter2 = [];
     const firstDate = startDate;
@@ -1388,7 +1660,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                 <TouchableOpacity onPress={() => {
                   SortByWeek(value.startDate, value.endDate);
                   setRange({ firstDate: value.startDate, secondDate: value.endDate });
-                  GLOBAL.selectedRange={ firstDate: value.startDate, secondDate: value.endDate }
+                  GLOBAL.selectedRange = { firstDate: value.startDate, secondDate: value.endDate };
                 }} key={index} style={Styles.With100List}>
                   <Text style={Styles.WeekFilterText}>
                     {value.startDate}
@@ -1401,7 +1673,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             })
           }
         </View>
-        <View style={Styles.With50List}>
+        <View style={[Styles.With50List, { marginTop: 50 }]}>
           <ButtonI
             style={Styles.btnFilter}
             onpress={() => {
@@ -1411,11 +1683,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             categoriIcon={"Nopadding"}
             title={"Close"}
             colorsArray={["#b9a4ff", "#9f83ff", "#7953FAFF"]}
-            styleTxt={[Styles.txt, { fontSize: normalize(13) }]} sizeIcon={27} />
+            styleTxt={[Styles.txtbtn, { fontSize: normalize(13) }]} sizeIcon={27} />
         </View>
       </SafeAreaView>
     );
   };
+  ///delete task image when edit///
   const DeleteAttachment = async (attachmentId, taskId) => {
     const formData = new FormData();
     formData.append("userId", "1");
@@ -1485,30 +1758,135 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       </View>
     </View>
   );
-  const Go_Back=()=>{
-      GLOBAL.FilterTime=false;
-      GLOBAL.FilterStatus=false;
-      GLOBAL.FilterPriority=false;
-      GLOBAL.FilterList=[];
-      GLOBAL.List=[];
-      GLOBAL.FilterTime_name='All';
-      GLOBAL.FilterStatus_name='All';
-      GLOBAL.FilterPriority_name='Normal';
-      goBack()
-  }
+  const renderItem_dropDown = item => {
+    return (
+      <View style={Styles.itemModalFilter}>
+        <Text style={Styles.textItemModalFilter}>{item.label}</Text>
+      </View>
+    );
+  };
+  ///header back button///
+  const Go_Back = () => {
+    GLOBAL.TaskRelatedNameId = "";
+    GLOBAL.FilterTime = false;
+    GLOBAL.FilterStatus = false;
+    GLOBAL.FilterPriority = false;
+    GLOBAL.FilterList = [];
+    GLOBAL.List = [];
+    GLOBAL.FilterTime_name = "All";
+    GLOBAL.FilterStatus_name = "All";
+    GLOBAL.FilterPriority_name = "Normal";
+    GLOBAL.FilterEntity_name = "";
+    GLOBAL.FilterProject_name = "";
+    GLOBAL.FilterSite_name = "";
+    GLOBAL.FilterUnit_name = "";
+    GLOBAL.FilterSection_name = "";
+    GLOBAL.FilterFeature_name = "";
+
+    if (GLOBAL.TaskName !== "") {
+      GLOBAL.TaskName = "";
+      Navigate_Url(GLOBAL.Url_Navigate);
+    } else {
+      GLOBAL.TaskName = "";
+      goBack();
+    }
+  };
+  ///filter by category///
+  const ApplyFilter = () => {
+    let index = 3;
+    setmodules(MudolList);
+    let lable = "";
+    GLOBAL.FilterCategory = true;
+    GLOBAL.FilterCategory_name = "subcontract";
+    GLOBAL.categoryId = "1";
+    if (categoryName !== "" && selectedrelatedname === "" && selectedrelated === "" && selectedTaskSiteName === "" && selectedunitName === "" && selectedsectionName === "" && selectedfeatureName === "") {
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: categoryName?.label };
+      setFilterList(markers);
+      modules.filter((p) => p.taskCategoryName === categoryName.label);
+      setmodules(modules.filter((p) => p.taskCategoryName === categoryName.label));
+      GLOBAL.FilterList = modules;
+      GLOBAL.TaskRelatedNameId = "6";
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated === "" && selectedTaskSiteName === "" && selectedunitName === "" && selectedsectionName === "" && selectedfeatureName === "") {
+      let markers = [...FilterList];
+      lable = categoryName.label + "/" + selectedrelatedname?.label;
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedName === selectedrelatedname.label));
+      GLOBAL.FilterList = modules;
+      GLOBAL.TaskRelatedNameId = "5";
+      GLOBAL.TaskRelatedId = selectedrelatedname?.value;
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated !== "" && selectedTaskSiteName === "" && selectedunitName === "" && selectedsectionName === "" && selectedfeatureName === "") {
+      lable = selectedrelated?.label;
+      GLOBAL.FilterEntity_name = "Project";
+      GLOBAL.FilterProject_name = selectedrelated?.label;
+      GLOBAL.TaskRelatedNameId = "0";
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef === selectedrelated.label));
+      GLOBAL.FilterList = modules;
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated !== "" && selectedTaskSiteName !== "" && selectedunitName === "" && selectedsectionName === "" && selectedfeatureName === "") {
+      lable = selectedrelated?.label + " / " + selectedTaskSiteName?.label;
+      GLOBAL.FilterEntity_name = "Site";
+      GLOBAL.FilterProject_name = selectedrelated?.label;
+      GLOBAL.FilterSite_name = selectedTaskSiteName?.label;
+      GLOBAL.TaskRelatedNameId = "1";
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef === selectedTaskSiteName.label));
+      GLOBAL.FilterList = modules;
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated !== "" && selectedTaskSiteName !== "" && selectedunitName !== "" && selectedsectionName === "" && selectedfeatureName === "") {
+      lable = selectedrelated?.label + " / " + selectedTaskSiteName?.label + " / " + selectedunitName?.label;
+      GLOBAL.FilterEntity_name = "Unit";
+      GLOBAL.FilterProject_name = selectedrelated?.label;
+      GLOBAL.FilterSite_name = selectedTaskSiteName?.label;
+      GLOBAL.FilterUnit_name = selectedunitName?.label;
+      GLOBAL.TaskRelatedNameId = "2";
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef === selectedunitName.label));
+      GLOBAL.FilterList = modules;
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated !== "" && selectedTaskSiteName !== "" && selectedunitName !== "" && selectedsectionName !== "" && selectedfeatureName === "") {
+      lable = selectedrelated?.label + " / " + selectedTaskSiteName?.label + " / " + selectedunitName?.label + " / " + selectedsectionName?.label;
+      GLOBAL.FilterEntity_name = "Section";
+      GLOBAL.FilterProject_name = selectedrelated?.label;
+      GLOBAL.FilterSite_name = selectedTaskSiteName?.label;
+      GLOBAL.FilterUnit_name = selectedunitName?.label;
+      GLOBAL.FilterSection_name = selectedsectionName?.label;
+      GLOBAL.TaskRelatedNameId = "3";
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef === selectedsectionName.label));
+      GLOBAL.FilterList = modules;
+    } else if (categoryName !== "" && selectedrelatedname !== "" && selectedrelated !== "" && selectedTaskSiteName !== "" && selectedunitName !== "" && selectedsectionName !== "" && selectedfeatureName !== "") {
+      lable = selectedrelated?.label + " / " + selectedTaskSiteName?.label + " / " + selectedunitName?.label + " / " + selectedsectionName?.label + " / " + selectedfeatureName?.label;
+      GLOBAL.FilterEntity_name = "Feature";
+      GLOBAL.FilterProject_name = selectedrelated?.label;
+      GLOBAL.FilterSite_name = selectedTaskSiteName?.label;
+      GLOBAL.FilterUnit_name = selectedunitName?.label;
+      GLOBAL.FilterSection_name = selectedsectionName?.label;
+      GLOBAL.FilterFeature_name = selectedfeatureName?.label;
+      GLOBAL.TaskRelatedNameId = "4";
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef === selectedfeatureName.label));
+      GLOBAL.FilterList = modules;
+    }
+    setvisiblFilter(false);
+  };
   return (
     <>
-
       <Container style={[Styles.Backcolor]}>
         <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={Go_Back}
                 Title={GLOBAL.TaskMenuName} />
-        {
-          showModalDelete &&
-          <View>
-            {
-              _showModalDelete()
-            }
-          </View>
+
+        {showModalDelete &&
+        <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
         }
         {
           showModalReject &&
@@ -1527,7 +1905,8 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               <Text style={Styles.EmptyText}>
                 Add by pressing button below "
               </Text>
-            </View> : GLOBAL.selectItem !== 1 && modules === "" ?
+            </View>
+            : GLOBAL.selectItem !== 1 && modules === "" ?
               <View style={Styles.With100CenterVertical}>
                 <Text style={Styles.EmptyText}>
                   " No Task defined
@@ -1563,7 +1942,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                 <TouchableOpacity onPress={() => {
                   setvisibleguide(false);
                 }} style={Styles.CancelBtnLeftAlign}>
-                  <AntDesign name={"closecircleo"} size={20} color={"#fff"} />
+                  <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
                 </TouchableOpacity>
               </View>
               <View style={Styles.formContainer}>
@@ -1603,7 +1982,300 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             </View>
           </Content>
         </Modal>
-        {GLOBAL.selectItem === 1 ?
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={visiblFilter}>
+          <Content contentContainerStyle={[Styles.centeredView,
+            { flexGrow: 1, backgroundColor: "rgba(0,0,0, 0.5)", justifyContent: "center" }]}>
+            <View style={[Styles.ModalTaskStyle2]}>
+              <View style={[{ width: "89%", marginBottom: "4%" }]}>
+                <TouchableOpacity onPress={() => {
+                  setvisiblFilter(false);
+                }} style={Styles.CancelBtnLeftAlign}>
+                  <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
+                </TouchableOpacity>
+              </View>
+              <Text style={Styles.FilterText}>
+                Filter
+              </Text>
+              <View style={Styles.ItemModalFilter}>
+                <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Category</Text>
+              </View>
+              <Dropdown
+                style={[Styles.dropdownModalFilter]}
+                showsVerticalScrollIndicator={true}
+                placeholderStyle={Styles.placeholderStyleModalFilter}
+                selectedTextStyle={Styles.selectedTextModalFilter}
+                iconStyle={Styles.iconStyle}
+                itemTextStyle={Styles.itemTextStyle}
+                data={Taskcategory}
+                maxHeight={140}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocus ? "Select Category" : "..."}
+                value={categoryName}
+                containerStyle={Styles.containerModalFilter}
+                renderItem={renderItem_dropDown}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={item => {
+                  setcategoryName(item);
+                  setCategoryId(item.value);
+                }}
+                renderSelectedItem={(item, unSelect) => (
+                  <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                    <View style={Styles.selectedStyle2}>
+                      <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                      <AntDesign color="#fff" name="delete" size={15} />
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+              {categoryId === "1" &&
+              <>
+                <View style={Styles.ItemModalFilter}>
+                  <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Target Entity</Text>
+                </View>
+                <Dropdown
+                  style={[Styles.dropdownModalFilter]}
+                  placeholderStyle={Styles.placeholderStyleModalFilter}
+                  selectedTextStyle={Styles.selectedTextModalFilter}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={RelatedNameList}
+                  maxHeight={140}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "Select Target Entity" : "..."}
+                  value={selectedrelatedname}
+                  containerStyle={Styles.containerModalFilter}
+                  renderItem={renderItem_dropDown}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    setselectedrelatedname(item);
+                    setTaskRelatedNameId(item.value);
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+                <View style={Styles.ItemModalFilter}>
+                  <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Project Name</Text>
+                </View>
+                <Dropdown
+                  style={[Styles.dropdownModalFilter]}
+                  placeholderStyle={Styles.placeholderStyleModalFilter}
+                  selectedTextStyle={Styles.selectedTextModalFilter}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={TaskRelated}
+                  maxHeight={140}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "Select Project Name" : "..."}
+                  value={selectedRelated}
+                  containerStyle={Styles.containerModalFilter}
+                  renderItem={renderItem_dropDown}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    GLOBAL.ProjectId = item.value;
+                    if (TaskRelatedNameId === "0") {
+                      setSelectedrelated(item);
+                      setRelatedId(item.value);
+                    } else {
+                      getSites(item.value);
+                      setSelectedrelated(item);
+                      setTaskProjectId(item.value);
+                    }
+
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+                {parseInt(TaskRelatedNameId) >= 1 &&
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Site</Text>
+                  </View>
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={SiteList}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select Site" : "..."}
+                    value={selectedTaskSiteName}
+                    containerStyle={Styles.containerModalFilter}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      GLOBAL.SiteId = item.value;
+                      if (TaskRelatedNameId === "1") {
+                        setselectedTaskSiteName(item);
+                        setRelatedId(item.value);
+                      } else {
+                        getUnits(item.value);
+                        setselectedTaskSiteName(item);
+                        setTaskSiteId(item.value);
+                      }
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </>
+                }
+                {parseInt(TaskRelatedNameId) >= 2 &&
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>unit</Text>
+                  </View>
+
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={unitList}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select unit" : "..."}
+                    value={selectedunitName}
+                    containerStyle={Styles.containerModalFilter}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      GLOBAL.UnitId = item.value;
+                      if (TaskRelatedNameId === "2") {
+                        setselectedunitName(item);
+                        setRelatedId(item.value);
+                      } else {
+                        getSection();
+                        setselectedunitName(item);
+                        setTaskunitId(item.value);
+                      }
+                    }}
+                  />
+                </>
+                }
+                {parseInt(TaskRelatedNameId) >= 3 &&
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>section</Text>
+                  </View>
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={sectionList}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select section" : "..."}
+                    value={selectedsectionName}
+                    containerStyle={Styles.containerModalFilter}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      GLOBAL.SectionId = item.value;
+                      if (TaskRelatedNameId === "3") {
+                        setselectedsectionName(item);
+                        setRelatedId(item.value);
+                      } else {
+                        getFeatures();
+                        setselectedsectionName(item);
+                        setTasksectionId(item.value);
+                      }
+                    }}
+                  />
+                </>
+                }
+                {TaskRelatedNameId === "4" &&
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>feature</Text>
+                  </View>
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={featureList}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select feature" : "..."}
+                    value={setselectedfeatureName}
+                    containerStyle={Styles.containerModalFilter}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      if (TaskRelatedNameId === "4") {
+                        setselectedfeatureName(item);
+                        setRelatedId(item.value);
+                      } else {
+                        getFeatures();
+                        setselectedfeatureName(item);
+                        setTaskfeatureId(item.value);
+                      }
+                    }}
+                  />
+                </>
+                }
+              </>
+              }
+              <View style={Styles.With95Row2}>
+                <TouchableOpacity style={Styles.btnModalFilter1} onPress={() => {
+                  setTaskRelatedNameId("");
+                  setcategoryName("");
+                  setCategoryId(0);
+                  setmodules(MudolList);
+                  setvisiblFilter(false);
+                }}>
+                  <Text style={[Styles.txt_CenterModalFilter]}> Reset</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={Styles.btnModalFilter1} onPress={() => {
+                  ApplyFilter();
+                }}>
+                  <Text style={[Styles.txt_CenterModalFilter]}> Apply</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Content>
+        </Modal>
+        {GLOBAL.selectItem === 1 || GLOBAL.TaskName !== "" ?
           <FloatAddBtn onPress={handleSubmit} colors={["#a39898", "#786b6b", "#382e2e"]} /> : null
         }
         <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />

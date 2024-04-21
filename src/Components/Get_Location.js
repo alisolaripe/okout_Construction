@@ -1,7 +1,9 @@
 import {PermissionsAndroid} from "react-native";
 import Geocoder from "react-native-geocoder";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-Geocoder.fallbackToGoogle('AIzaSyBv7qilelWW181590KkUizFqj4WcY2P1k0');
+import { useEffect } from "react";
+const GLOBAL = require("./Global");
+
 export async function requestLocationPermission (){
   const requestLocationPermission = async () => {
     try {
@@ -36,6 +38,10 @@ export async function requestLocationPermission (){
 .catch(error => console.log("dd", error)));
 }
 export async function geocodePosition (NY){
+  // useEffect(() => {
+  //   Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
+  // })
+  Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
   return (
     Geocoder.geocodePosition(NY).then(res => {
       return res

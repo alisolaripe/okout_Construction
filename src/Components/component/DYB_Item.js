@@ -1,22 +1,19 @@
-
 import React, {useState} from "react";
 import {
   Text,
   View,
-  TouchableOpacity, Dimensions,Modal
+  TouchableOpacity,
 } from "react-native";
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
-
 import { Dropdown } from 'react-native-element-dropdown';
 import LinearGradient from "react-native-linear-gradient";
 const GLOBAL = require("../Global");
 function DYB_Item({index,value,Navigate_Url}) {
   const data = [
-
     { label: 'DYB List', value: '3' ,Icon:'level-down'},
   ];
   const [isFocus,setIsFocus] = useState(false);
@@ -28,9 +25,7 @@ function DYB_Item({index,value,Navigate_Url}) {
   }
   const renderItem = (item,index) => {
     return (
-
       <View key={index} style={Styles.renderItemDetailStyle}>
-
         <View style={{paddingLeft:7}}>
           <Entypo size={normalize(12)} color={Colors.withe}  name={item.Icon}  />
         </View>
@@ -71,9 +66,21 @@ function DYB_Item({index,value,Navigate_Url}) {
                       null
                   }
                   <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnList1}>
-                    <TouchableOpacity onPress={()=>Navigate_Url('Task_managementStack')} >
-                      <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> task : {value.task}</Text>
-                    </TouchableOpacity>
+                    {
+                      value.task==='0'||value.task===0?
+                        <View>
+                          <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> task : {value.task}</Text>
+                        </View>:
+                        <TouchableOpacity onPress={()=> {
+                          GLOBAL.TaskName=value.featureName;
+                            GLOBAL.RelatedName=value.ListName;
+                          GLOBAL.RelatedId=value.featureId
+                          Navigate_Url("Task_managementStack3");
+                        }} >
+                          <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> task : {value.task}</Text>
+                        </TouchableOpacity>
+                    }
+
                   </LinearGradient>
 
                 </View>
@@ -89,7 +96,7 @@ function DYB_Item({index,value,Navigate_Url}) {
                   renderItem={renderItem}
                   renderRightIcon={() => (
                     <View style={Styles.DropDownIcon}>
-                      <AntDesign name="ellipsis1" size={normalize(17)} color={Colors.withe} />
+                      <AntDesign name="ellipsis1" size={normalize(25)} color={Colors.button} />
                     </View>
                   )}
                   onFocus={() => setIsFocus(true)}
