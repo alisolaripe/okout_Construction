@@ -1284,7 +1284,6 @@ function Task_management_Item({
             <View style={Styles.TaskListStyle}>
               <Text style={[Styles.txt_left_task]}>WorkType : {value?.taskWorkType}</Text>
             </View>
-
           }
           <View style={Styles.TaskListStyle}>
             <Text style={[Styles.txt_left_task]}>{value?.Year}</Text>
@@ -1389,7 +1388,6 @@ function Task_management_Item({
           {
             _changestatus_Reopen()
           }
-
         </View>
       }
       <Modal
