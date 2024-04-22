@@ -3838,13 +3838,9 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               </View>:null
               }
             </View>
-
           )}
         </Formik>
-
       </View>
-
-
     );
   }
   if (numberValue === 29) {

@@ -1425,7 +1425,6 @@ function Task_management_Item({
                       You will lose all changes.Do you still want to leave?
                     </Text>
                   </View>
-
                 </View>
                 <View style={Styles.With100Row2}>
                   <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
