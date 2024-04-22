@@ -44,7 +44,6 @@ function DrawerCustomize(props) {
                 <Image style={Styles.imageProfileDrawer} source={{uri:GLOBAL.PictureUrl}}/>
             }
             <Text style={[Styles.txtMenu,{ margin: normalize(10) }]}>{GLOBAL.UserInformation?.Email}</Text>
-
           </TouchableOpacity>
           </ImageBackground>
         </View>
