@@ -3674,7 +3674,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               }
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskWorkType</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Work Type</Text>
                 </View>
                 <View  style={Styles.dateBoxItem1}>
                   <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Labels</Text>
@@ -3694,10 +3694,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskCategoryName</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Category Name</Text>
                 </View>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskCreatedOn</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Created On</Text>
                 </View>
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
@@ -3714,10 +3714,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskRelatedName</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Related Name</Text>
                 </View>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>taskRelatedNameRef</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Related NameRef</Text>
                 </View>
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
@@ -3963,7 +3963,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   </View>
                 </View>
               </View>
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>PlanFeedback</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Plan Feedback</Text>
               <TextInput
                 value={values.TaskNote}
                 style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
@@ -3976,7 +3976,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }}
                 multiline={true}
                 placeholderTextColor={'#fff'} />
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>CaseNote</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Case Note</Text>
               {showNewInput===false&&
               <TextInput
                 value={values.CaseNote}
@@ -4218,7 +4218,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 placeholderTextColor={'#fff'}/>
               {touched.FeedbackNote && errors.FeedbackNote &&
               <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10),fontWeight:'bold' }}>{errors.FeedbackNote}</Text>}
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>CaseNote</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Case Note</Text>
               <TextInput
                 value={values.CaseNote}
                 style={[inputStyle,{paddingVertical:'4%'}]}

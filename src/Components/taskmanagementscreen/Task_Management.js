@@ -498,6 +498,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
     } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
+      console.log(json,'jsonjsonjson')
       let Task_List = [];
       for (let item in json) {
         let obj = json?.[item];
