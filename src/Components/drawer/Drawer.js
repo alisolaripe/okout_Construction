@@ -56,7 +56,6 @@ function DrawerCustomize(props) {
                  style={{ width: "27%", height: normalize(40) }} />
           <Text style={[Styles.txtMenu,{ margin: normalize(8) }]}>{value.constModule_Name}</Text>
         </TouchableOpacity>
-
         );
         })}
       </View>
