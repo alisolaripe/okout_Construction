@@ -13,9 +13,6 @@ const GLOBAL = require("../Global");
 function DrawerCustomize(props) {
   useEffect( () => {
 
-      console.log(GLOBAL.PictureUrl,'GLOBAL.PictureUrl')
-     console.log(GLOBAL.UserInformation,'DrawerCustomize')
-
   },[]);
   const [PictureUrl,setPictureUrl] = useState(null);
   const Navigate_Between_Modules = (constModule_Id) => {
