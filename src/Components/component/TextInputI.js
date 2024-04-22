@@ -1245,8 +1245,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                         }
                       </View>
                       <View style={Styles.InputeRowItems}>
-                        <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>postal
-                          code</Text>
+                        <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>postal code</Text>
                         <TextInput
                           value={values.GeoAddressPostalCode}
                           style={Styles.inputStyleLocationAdd2}
@@ -1267,8 +1266,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                             name="map-search-outline"
                             size={14}
                           />
-                          <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Lat &
-                            Long
+                          <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Lat & Long
                             <Text style={Styles.txtLightColor_samall}> (click here)</Text>
                           </Text>
                         </View>
@@ -2453,7 +2451,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={[styles.formContainer]}>
 
-              <Text style={[Styles.txt,{paddingVertical:'3%'}]}>OrgKey</Text>
+              <Text style={[Styles.txt,{paddingVertical:'3%'}]}>Org Key</Text>
               <View style={[{
                 borderWidth: 1,
                 borderColor: GLOBAL.OFFICIAL_Button,
@@ -2491,7 +2489,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               {touched.orgkey && errors.orgkey &&
               <Text style={{ fontSize: 12, color: "#FF0D10",paddingTop:2 }}>{errors.orgkey}</Text>
               }
-              <Text style={[Styles.txt,{paddingVertical:'3%'}]}>Username</Text>
+              <Text style={[Styles.txt,{paddingVertical:'3%'}]}>User name</Text>
               <View style={[{
                 borderWidth: 1,
                 borderColor: GLOBAL.OFFICIAL_Button,
