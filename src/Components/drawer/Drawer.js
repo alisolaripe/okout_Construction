@@ -12,7 +12,10 @@ const Photoes=require('../Photoes');
 const GLOBAL = require("../Global");
 function DrawerCustomize(props) {
   useEffect( () => {
-    setPictureUrl(GLOBAL.UserInformation?.customers[0]?.picture)
+
+      console.log(GLOBAL.PictureUrl,'GLOBAL.PictureUrl')
+     console.log(GLOBAL.UserInformation,'DrawerCustomize')
+
   },[]);
   const [PictureUrl,setPictureUrl] = useState(null);
   const Navigate_Between_Modules = (constModule_Id) => {
@@ -36,11 +39,11 @@ function DrawerCustomize(props) {
           <ImageBackground source={Photoes.abstract}
                            style={{ width: "100%", flex: 1,alignItems:'center'  }} resizeMode="stretch">
           <TouchableOpacity onPress={()=>  props.navigation.navigate('ProfileStack')} style={Styles.ViewAbsoluteDrawer}>
-            {  PictureUrl === null ?
+            {  GLOBAL.PictureUrl === null ?
                 <EvilIcons name={"user"} size={130} color={Colors.Light} />:
-                <Image style={Styles.imageProfileDrawer} source={{uri:PictureUrl}}/>
+                <Image style={Styles.imageProfileDrawer} source={{uri:GLOBAL.PictureUrl}}/>
             }
-            <Text style={[Styles.txtMenu,{ margin: normalize(10) }]}>{GLOBAL.UserInformation?.customers[0]?.name}</Text>
+            <Text style={[Styles.txtMenu,{ margin: normalize(10) }]}>{GLOBAL.UserInformation?.Email}</Text>
 
           </TouchableOpacity>
           </ImageBackground>

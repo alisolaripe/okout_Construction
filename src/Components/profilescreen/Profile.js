@@ -37,8 +37,7 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [Message, setMessage] = useState("");
   useEffect( () => {
     setVersionCheck('1.0.24');
-console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
-    setPictureUrl(GLOBAL.UserInformation?.customers[0]?.picture)
+    console.log(GLOBAL.UserInformation,'PictureUrl')
     const date=new Date();
     const Day=date.getDate();
     const Month=date.getMonth()+1;
@@ -48,6 +47,11 @@ console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
     const Second=date.getSeconds();
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`
     setShowDate(Full);
+    const unsubscribe = navigation.addListener("focus", () => {
+      setPictureUrl(GLOBAL.UserInformation?.profileImg);
+    });
+      return unsubscribe;
+
   },[]);
   ///LogOut Function///
   const LogOut =async () => {
@@ -150,9 +154,9 @@ const UpdateProfileInfo=(value)=>{
   let Json= GLOBAL.UserInformation
    Json.Username=value.UserName
    Json.Password=value.password
-   Json.customers[0].picture=PictureUrl
-   console.log(Json,'Json')
+   Json.profileImg=PictureUrl
    GLOBAL.UserInformation=Json
+   GLOBAL.PictureUrl=PictureUrl
    writeDataStorage(GLOBAL.UserInfo,Json);
    writeDataStorage(GLOBAL.PASSWORD_KEY,value.password);
  }
@@ -164,7 +168,6 @@ const UpdateProfileInfo=(value)=>{
   };
   const onClose = () => {
     modalizeRef.current?.close();
-
   };
   ///Reduce the size of the photo///
   const Image_compress = async (path) => {
@@ -293,9 +296,8 @@ const UpdateProfileInfo=(value)=>{
         <Content style={{zIndex:1000}}>
           <View style={[Styles.container,{zIndex:1000}]}>
             {showModalDelete &&
-            <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
+            <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut}/>
             }
-
               <View style={Styles.mainSystemDesignerProfile}>
                 {
                   PictureUrl === null ?

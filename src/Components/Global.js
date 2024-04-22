@@ -183,6 +183,7 @@ module.exports = {
     {label:"Add Task", value: '20', Icon:"new-message"}],
   RelatedName:'',
   RelatedId:'',
-  Url_Navigate:''
+  Url_Navigate:'',
+  PictureUrl:''
 
 };

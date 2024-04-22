@@ -30,6 +30,7 @@ function Home_meno({ navigation }) {
       My_TaskList();
       Task_category();
       getmapkey();
+      GLOBAL.PictureUrl=GLOBAL.UserInformation?.profileImg
     });
     return unsubscribe;
   }, []);
