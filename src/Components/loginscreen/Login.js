@@ -52,7 +52,7 @@ function LogIn({ navigation }) {
     const Second=date.getSeconds();
     const Full=`${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
     setShowDate(Full);
-    setVersionCheck('1.0.24');
+    setVersionCheck('1.0.26');
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return ()=> {
       BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
@@ -132,6 +132,7 @@ function LogIn({ navigation }) {
         }).then(json => {
             if (json?.status===true) {
               GLOBAL.UserInformation=json;
+              GLOBAL.PictureUrl=json?.profileImg
               setBtn(true)
               navigate("Home");
               writeDataStorage(GLOBAL.UserInfo,json);

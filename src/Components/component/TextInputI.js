@@ -110,6 +110,7 @@ function TextInputI({ GeoAddressCity,
   const [sectionList, setsectionList] = useState([]);
   const [featureList, setfeatureList] = useState([]);
   const [Category, setCategory] = useState('');
+ const [categoryEntityShow, setcategoryEntityShow] = useState('');
 
   const getLocation =async (coordinate) => {
     requestLocationPermission().then(res => {
@@ -3186,10 +3187,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
             {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
               <View style={[Styles.formContainer2,]}>
 
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Title</Text>
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Title</Text>
                 <TextInput
                   value={values.Title}
-                  style={[Styles.inputStyleTask]}
+                  style={[Styles.inputStyleTask,{borderColor: GLOBAL.footertext_backgroundColor, color:GLOBAL.footertext_backgroundColor,}]}
                   onChangeText={handleChange("Title")}
                   onFocus={() => setFieldTouched("Title")}
                   multiline={true}
@@ -3233,12 +3234,12 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 {/*{error==='selectedcategory' && selectedcategory==='' ?*/}
                 {/*  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null*/}
                 {/*}*/}
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Category</Text>
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Category</Text>
 
                 <Dropdown
-                  style={[Styles.dropdowntask]}
-                  placeholderStyle={Styles.placeholderStyle}
-                  selectedTextStyle={Styles.selectedTextStyle}
+                  style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                  placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                  selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                   inputSearchStyle={Styles.inputSearchStyle}
                   iconStyle={Styles.iconStyle}
                   itemTextStyle={Styles.itemTextStyle}
@@ -3249,7 +3250,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   placeholder={!isFocus ? 'Select category' : '...'}
                   searchPlaceholder="Search..."
                   value={selectedcategory}
-                  containerStyle={Styles.containerStyle}
+                  containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                   renderItem={renderItem}
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
@@ -3259,6 +3260,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     writeDataStorage(GLOBAL.Category_Last_Info,item.value)
                     Task_RelatedList(item.value)
                     Task_WorkTypeList(item.value)
+                    setcategoryEntityShow(item.categoryEntityShow)
                   }}
                   renderSelectedItem={(item, unSelect) => (
                     <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
@@ -3275,12 +3277,12 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }
 
 
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Work Type</Text>
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Work Type</Text>
 
                 <Dropdown
-                  style={[Styles.dropdowntask]}
-                  placeholderStyle={Styles.placeholderStyle}
-                  selectedTextStyle={Styles.selectedTextStyle}
+                  style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                  placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                  selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                   inputSearchStyle={Styles.inputSearchStyle}
                   iconStyle={Styles.iconStyle}
                   itemTextStyle={Styles.itemTextStyle}
@@ -3291,7 +3293,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   placeholder={!isFocus ? 'Select Work Type' : '...'}
                   searchPlaceholder="Search..."
                   value={selectedWorkType}
-                  containerStyle={Styles.containerStyle}
+                  containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                   renderItem={renderItem}
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
@@ -3309,12 +3311,12 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     </TouchableOpacity>
                   )}
                 />
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Priority</Text>
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Priority</Text>
 
                 <Dropdown
-                  style={[Styles.dropdowntask]}
-                  placeholderStyle={Styles.placeholderStyle}
-                  selectedTextStyle={Styles.selectedTextStyle}
+                  style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                  placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                  selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                   inputSearchStyle={Styles.inputSearchStyle}
                   iconStyle={Styles.iconStyle}
                   itemTextStyle={Styles.itemTextStyle}
@@ -3324,7 +3326,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   valueField="value"
                   placeholder={!isFocus ? 'Select Priority' : '...'}
                   value={selectedpriority}
-                  containerStyle={Styles.containerStyle}
+                  containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                   renderItem={renderItem}
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
@@ -3342,14 +3344,13 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     </TouchableOpacity>
                   )}
                 />
-                {categoryId==='1'?
+                {categoryEntityShow==='y'?
                   <>
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Target Entity </Text>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Target Entity </Text>
                     <Dropdown
-                      style={[Styles.dropdowntask]}
-                      placeholderStyle={Styles.placeholderStyle}
-                      selectedTextStyle={Styles.selectedTextStyle}
-                      inputSearchStyle={Styles.inputSearchStyle}
+                      style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                      placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                      selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                       iconStyle={Styles.iconStyle}
                       itemTextStyle={Styles.itemTextStyle}
                       data={RelatedNameList}
@@ -3359,7 +3360,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       placeholder={!isFocusrelated ? 'Select Target Entity' : '...'}
                       searchPlaceholder="Search..."
                       value={selectedrelatedname}
-                      containerStyle={Styles.containerStyle}
+                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                       renderItem={renderItem}
                       onFocus={() => setIsFocusrelated(true)}
                       onBlur={() => setIsFocusrelated(false)}
@@ -3369,11 +3370,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                         writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label)
                       }}
                     />
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Project Name</Text>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Project Name</Text>
                     <Dropdown
-                      style={[Styles.dropdowntask]}
-                      placeholderStyle={Styles.placeholderStyle}
-                      selectedTextStyle={Styles.selectedTextStyle}
+                      style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                      placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                      selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                       inputSearchStyle={Styles.inputSearchStyle}
                       iconStyle={Styles.iconStyle}
                       itemTextStyle={Styles.itemTextStyle}
@@ -3385,7 +3386,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       placeholder={!isFocusrelated ? 'Select Project Name' : '...'}
                       searchPlaceholder="Search..."
                       value={selectedrelated}
-                      containerStyle={Styles.containerStyle}
+                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                       renderItem={renderItem}
                       onFocus={() => setIsFocusrelated(true)}
                       onBlur={() => setIsFocusrelated(false)}
@@ -3409,11 +3410,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }
                 {parseInt(TaskRelatedNameId)>=1&&
                 <>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Site</Text>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Site</Text>
                   <Dropdown
-                    style={[Styles.dropdowntask]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
+                    style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                    placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                    selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                     inputSearchStyle={Styles.inputSearchStyle}
                     iconStyle={Styles.iconStyle}
                     itemTextStyle={Styles.itemTextStyle}
@@ -3425,7 +3426,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     placeholder={!isFocusrelated ? 'Select Site' : '...'}
                     searchPlaceholder="Search..."
                     value={selectedTaskSiteName}
-                    containerStyle={Styles.containerStyle}
+                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                     renderItem={renderItem}
                     onFocus={() => setIsFocusrelated(true)}
                     onBlur={() => setIsFocusrelated(false)}
@@ -3448,12 +3449,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }
                 {parseInt(TaskRelatedNameId)>=2&&
                 <>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>unit</Text>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>unit</Text>
                   <Dropdown
-                    style={[Styles.dropdowntask]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    inputSearchStyle={Styles.inputSearchStyle}
+                    style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                    placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                    selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                     iconStyle={Styles.iconStyle}
                     itemTextStyle={Styles.itemTextStyle}
                     data={unitList}
@@ -3464,7 +3464,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     placeholder={!isFocusrelated ? 'Select Site' : '...'}
                     searchPlaceholder="Search..."
                     value={selectedunitName}
-                    containerStyle={Styles.containerStyle}
+                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                     renderItem={renderItem}
                     onFocus={() => setIsFocusrelated(true)}
                     onBlur={() => setIsFocusrelated(false)}
@@ -3487,11 +3487,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }
                 {parseInt(TaskRelatedNameId)>=3&&
                   <>
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Section</Text>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Section</Text>
                     <Dropdown
-                      style={[Styles.dropdowntask]}
-                      placeholderStyle={Styles.placeholderStyle}
-                      selectedTextStyle={Styles.selectedTextStyle}
+                      style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                      placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                      selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                       inputSearchStyle={Styles.inputSearchStyle}
                       iconStyle={Styles.iconStyle}
                       itemTextStyle={Styles.itemTextStyle}
@@ -3503,7 +3503,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       placeholder={!isFocusrelated ? 'Select Site' : '...'}
                       searchPlaceholder="Search..."
                       value={selectedsectionName}
-                      containerStyle={Styles.containerStyle}
+                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                       renderItem={renderItem}
                       onFocus={() => setIsFocusrelated(true)}
                       onBlur={() => setIsFocusrelated(false)}
@@ -3526,11 +3526,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 }
                 {TaskRelatedNameId==='4'&&
                     <>
-                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Feature</Text>
+                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Feature</Text>
                       <Dropdown
-                        style={[Styles.dropdowntask]}
-                        placeholderStyle={Styles.placeholderStyle}
-                        selectedTextStyle={Styles.selectedTextStyle}
+                        style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                        placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                        selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                         inputSearchStyle={Styles.inputSearchStyle}
                         iconStyle={Styles.iconStyle}
                         itemTextStyle={Styles.itemTextStyle}
@@ -3542,7 +3542,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                         placeholder={!isFocusrelated ? 'Select Site' : '...'}
                         searchPlaceholder="Search..."
                         value={selectedfeatureName}
-                        containerStyle={Styles.containerStyle}
+                        containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                         renderItem={renderItem}
                         onFocus={() => setIsFocusrelated(true)}
                         onBlur={() => setIsFocusrelated(false)}
@@ -3562,10 +3562,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       />
                     </>
                 }
-                <Text style={[Styles.txtLightColor,{marginTop: normalize(15),}]}>Description</Text>
+                <Text style={[Styles.txtLightColor,{marginTop: normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Description</Text>
                 <TextInput
                   value={values.TaskNote}
-                  style={[Styles.inputStyleTask,{paddingVertical:'4%'}]}
+                  style={[Styles.inputStyleTask,{paddingVertical:'4%',borderColor: GLOBAL.footertext_backgroundColor,color: GLOBAL.footertext_backgroundColor}]}
                   onContentSizeChange={(e) => {
                     numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
                   }}
@@ -3577,11 +3577,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
                 }
                 <View style={Styles.FlexWrap}>
-                  <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-                    <Text style={Styles.UploadImageText}>
+                  <TouchableOpacity onPress={() => onOpen()} style={[Styles.unitDetailUploadImagebox,{borderColor:GLOBAL.footertext_backgroundColor}]}>
+                    <Text style={[Styles.UploadImageText,{color:GLOBAL.footertext_backgroundColor}]}>
                       Add Photos
                     </Text>
-                    <MaterialIcons name={"add-a-photo"} size={20} color={Colors.button}  />
+                    <MaterialIcons name={"add-a-photo"} size={20} color={GLOBAL.footertext_backgroundColor}  />
                   </TouchableOpacity>
                   {
                     ImageSourceviewarray.map((value,key) => {
@@ -3603,7 +3603,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                 </View>
                 {
                   ShowButton===true?
-                    <View style={[Styles.ViewItems_center_row]}>
+                    <View style={[Styles.ViewItems_center_row2]}>
                       <ButtonI style={[Styles.btn, {
                         //margin:normalize(15),
                         flexDirection: "row",
@@ -4607,40 +4607,40 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               {/*{touched.FullName && errors.FullName &&*/}
               {/*<Text style={{ fontSize: 12, color: "#FF0D10",fontWeight:'bold' }}>{errors.FullName}</Text>*/}
               {/*}*/}
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>User Name</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor }]}>User Name</Text>
               <TextInput
                 value={values.UserName}
-                style={[inputStyle,]}
+                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
                 onChangeText={handleChange("UserName")}
                 onFocus={() => setFieldTouched("UserName")}
                 placeholderTextColor={'#fff'} />
               {touched.UserName && errors.UserName &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UserName}</Text>
               }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Password</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor}]}>Password</Text>
               <TextInput
                 value={values.password}
-                style={[inputStyle,]}
+                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
                 onChangeText={handleChange("password")}
                 onFocus={() => setFieldTouched("password")}
                 placeholderTextColor={'#fff'} />
               {touched.password && errors.password &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.password}</Text>
               }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Confirm Password</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor}]}>Confirm Password</Text>
               <TextInput
                 value={values.Confirmpassword}
-                style={[inputStyle,]}
+                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
                 onChangeText={handleChange("Confirmpassword")}
                 onFocus={() => setFieldTouched("Confirmpassword")}
                 placeholderTextColor={'#fff'} />
               {touched.Confirmpassword && errors.Confirmpassword &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Confirmpassword}</Text>
               }
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Org Key</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(25),color:GLOBAL.input_titleColor}]}>Org Key</Text>
               <TextInput
                 value={values.OrgKey}
-                style={[inputStyle]}
+                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
                 onChangeText={handleChange("OrgKey")}
                 onFocus={() => setFieldTouched("OrgKey")}
                 editable={false}
@@ -4649,10 +4649,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.OrgKey}</Text>
               }
               <View style={[Styles.bottomViewFixed]}>
-                <Text style={Styles.txtGrayColor }>
+                <Text style={[Styles.txtGrayColor,{color:GLOBAL.input_titleColor}] }>
                   CurrentVersion
                 </Text>
-                <Text style={Styles.txtLightColorNumber}>
+                <Text style={[Styles.txtLightColorNumber,{color:GLOBAL.footertext_backgroundColor}]}>
                   {Version}
                 </Text>
               </View>

@@ -6,6 +6,7 @@ import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import * as React from "react";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import { Container, Content } from "native-base";
 const Photoes=require('../Photoes');
@@ -30,7 +31,7 @@ function DrawerCustomize(props) {
     }
   };
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors.withe }}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: GLOBAL.backgroundColor }}>
       <View style={styles.menuContainer}>
         <View style={[styles.viewHeaderMeno]}>
           <ImageBackground source={Photoes.abstract}
@@ -48,12 +49,17 @@ function DrawerCustomize(props) {
           return (
         <TouchableOpacity key={key}  onPress={() => Navigate_Between_Modules(value.constModule_Id)}
           style={[styles.circleContainer, {marginTop:15}]}>
-          <Image tintColor={GLOBAL.OFFICIAL_BLUE_COLOR} resizeMode={"contain"} source={{ uri: value.Image }}
+          <Image tintColor={GLOBAL.headertext_backgroundColor} resizeMode={"contain"} source={{ uri: value.Image }}
                  style={{ width: "27%", height: normalize(40) }} />
-          <Text style={[Styles.txtMenu,{ margin: normalize(8) }]}>{value.constModule_Name}</Text>
+          <Text style={[Styles.txtMenu,{ margin: normalize(8),color: GLOBAL.headertext_backgroundColor }]}>{value.constModule_Name}</Text>
         </TouchableOpacity>
         );
         })}
+        {/*<TouchableOpacity   onPress={() =>     props.navigation.navigate("ThemChangeStack")}*/}
+        {/*                  style={[styles.circleContainer, {marginTop:15}]}>*/}
+        {/*  <Ionicons name={"color-palette-outline"} size={27} color={GLOBAL.headertext_backgroundColor} />*/}
+        {/*  <Text style={[Styles.txtMenu,{ margin: normalize(8),marginLeft:normalize(19),color:GLOBAL.headertext_backgroundColor }]}>colour them</Text>*/}
+        {/*</TouchableOpacity>*/}
       </View>
     </DrawerContentScrollView>
   );

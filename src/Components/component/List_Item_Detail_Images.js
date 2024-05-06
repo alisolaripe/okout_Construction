@@ -268,11 +268,11 @@ function List_Item_Detail_Images({index,value,DeleteImage,Type,Change_Gallry_Dat
           </Modal>
         </View>
         :
-        <TouchableOpacity onPress={() => onOpen()} style={Styles.unitDetailUploadImagebox}>
-        <Text style={Styles.UploadImageText}>
+        <TouchableOpacity onPress={() => onOpen()} style={[Styles.unitDetailUploadImagebox,{borderColor: GLOBAL.headertext_backgroundColor}]}>
+        <Text style={[Styles.UploadImageText,{color: GLOBAL.headertext_backgroundColor}]}>
         Add Photos
         </Text>
-        <MaterialIcons name={"add-a-photo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
+        <MaterialIcons name={"add-a-photo"} size={20} color={GLOBAL.headertext_backgroundColor} />
         </TouchableOpacity>
       }
         </>

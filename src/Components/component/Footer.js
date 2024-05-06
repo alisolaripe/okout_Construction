@@ -9,26 +9,26 @@ const GLOBAL = require("../Global");
 function Footer1 ({onPressHome,onPressProfile,onPressdeleteAsync}){
   return (
     <Footer style={{
-      backgroundColor: GLOBAL.OFFICIAL_background
+      backgroundColor: GLOBAL.footer_backgroundColor
     }}>
-      <FooterTab style={Styles.FooterTab_Home}>
+      <FooterTab style={[Styles.FooterTab_Home,{backgroundColor: GLOBAL.footer_backgroundColor}]}>
         <Button onPress={()=>onPressHome('ProfileStack')}>
-          <AntDesign name="user" size={normalize(17)} color={Colors.button} />
-          <Text style={Styles.Footertxt_Home}>Profile</Text>
+          <AntDesign name="user" size={normalize(17)} color={GLOBAL.footertext_backgroundColor} />
+          <Text style={[Styles.Footertxt_Home,{color: GLOBAL.footertext_backgroundColor}]}>Profile</Text>
         </Button>
         <View style={Styles.FooterFloatBtn_home1}>
           <View
-            style={Styles.FooterFloatBtn_home}
+            style={[Styles.FooterFloatBtn_home,{backgroundColor:GLOBAL.headertext_backgroundColor}]}
           >
           <Button onPress={()=>onPressHome('Home')}>
-            <AntDesign name="home" size={normalize(17)} color={Colors.withe} />
-            <Text style={Styles.Footertxt}>Home</Text>
+            <AntDesign name="home" size={normalize(17)} color={GLOBAL.header_backgroundColor} />
+            <Text style={[Styles.Footertxt,{color:GLOBAL.header_backgroundColor}]}>Home</Text>
           </Button>
         </View>
         </View>
         <Button onPress={onPressdeleteAsync}>
-          <AntDesign name="logout" size={normalize(17)} color={Colors.button} />
-          <Text style={Styles.Footertxt_Home}>LogOut</Text>
+          <AntDesign name="logout" size={normalize(17)} color={GLOBAL.footertext_backgroundColor} />
+          <Text style={[Styles.Footertxt_Home,{color: GLOBAL.footertext_backgroundColor}]}>LogOut</Text>
         </Button>
       </FooterTab>
     </Footer>

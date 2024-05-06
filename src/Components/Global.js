@@ -75,6 +75,7 @@ module.exports = {
   unitId_Last_Info:'@MySuperStore:unitId_Last_Info',
   sectionId_Last_Info:'@MySuperStore:sectionId_Last_Info',
   featureId_Last_Info:'@MySuperStore:featureId_Last_Info',
+  Theme_Color:'@MySuperStore:Theme',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",
@@ -184,6 +185,18 @@ module.exports = {
   RelatedName:'',
   RelatedId:'',
   Url_Navigate:'',
-  PictureUrl:''
+  PictureUrl:'',
 
+  backgroundColor:'#f6f9f9',
+  header_backgroundColor:'#fff',
+  status_backgroundColor:'#fff',
+  footer_backgroundColor:'#fff',
+  backgroundImage_backgroundColor:'',
+  headertext_backgroundColor:'#4a6e8e',
+  filter_backgroundColor:'#4a6e8e',
+  task_structurelistbackgroundColor:["#6598cd", "#5082ba", "#4a6e8e"],
+  input_borderColor:'#4a6e8e',
+  input_titleColor:'#4a6e8e',
+  input_textColor:'#4a6e8e',
+  footertext_backgroundColor:'#4a6e8e',
 };

@@ -13,12 +13,14 @@ import DoshboardStack from '../doshboard/index'
 import CustomerStack from '../customerscreen/index'
 import {Dimensions} from "react-native";
 import Home_meno from "./Home_meno";
+import Voice_Search from "./Voice_Search";
+import AddNewTask2 from '../taskmanagementscreen/AddNewTask';
+import ThemChangeStack from '../colorChangescreen/index'
 const Drawer = createDrawerNavigator();
 const width = Dimensions.get("window").width;
 
 function Home_Navigation() {
   return (
-
       <Stack.Navigator screenOptions={{ headerShown: false, gesturesEnabled: true }} initialRouteName={Home} >
         <Stack.Screen name="Home" component={Home_meno} />
         <Stack.Screen name="Project_structureStack" component={Project_structureStack} />
@@ -26,6 +28,9 @@ function Home_Navigation() {
         <Stack.Screen name="ProfileStack" component={ProfileStack} />
         <Stack.Screen name="LogIn" component={LogIn} />
         <Stack.Screen name="CustomerStack" component={CustomerStack} />
+        <Stack.Screen name="VoiceSearch" component={Voice_Search} />
+        <Stack.Screen name="AddNewTask2" component={AddNewTask2} />
+        <Stack.Screen name="ThemChangeStack" component={ThemChangeStack} />
       </Stack.Navigator>
 
 

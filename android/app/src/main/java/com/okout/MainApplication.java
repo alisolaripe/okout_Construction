@@ -11,6 +11,7 @@ import com.facebook.soloader.SoLoader;
 import java.util.List;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.devfd.RNGeocoder.RNGeocoderPackage;
+import com.wenkesj.voice.VoicePackage; // <------ Add this!
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -28,7 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
 
             new VectorIconsPackage();
-
+//   new VoicePackage() // <------ Add this!
           return packages;
         }
 

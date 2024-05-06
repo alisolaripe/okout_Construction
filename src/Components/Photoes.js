@@ -13,10 +13,11 @@ module.exports = {
   DocumentManagement:require("../Picture/png/DocumentManagement.png"),
   CheckInOut:require("../Picture/png/CheckInOut.png"),
   DYB:require("../Picture/png/DYB.png"),
-  abstract:require('../Picture/png/abstract.png'),
+  abstract:require('../Picture/jpg/abstract.jpg'),
   buildingBck:require('../Picture/png/buildingback.png'),
   SiteBack:require('../Picture/png/Siteback.png'),
   unitBack:require('../Picture/png/unitBack.png'),
   sectionBack:require('../Picture/png/sectionBack.png'),
-  featureBack:require('../Picture/png/featureBack.png')
+  featureBack:require('../Picture/png/featureBack.png'),
+  Waves:require('../Picture/png/homewaves.png')
 }

@@ -264,7 +264,7 @@ function Project_structure({ navigation, navigation: { goBack } }) {
                    Navigate_Url={Navigate_Url} />
   );
   return (
-    <Container style={[Styles.Backcolor]}>
+    <Container style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header colors={route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
               StatusColor={route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={goBack}
               Title={"Construction Projects"} />

@@ -106,6 +106,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   useEffect(() => {
 
     const unsubscribe = navigation.addListener("focus", () => {
+      setColorChangestatus(GLOBAL.header_backgroundColor)
       if (GLOBAL.selectItem === 1 && GLOBAL.TaskName === "") {
         My_TaskList();
       } else if (GLOBAL.selectItem === 2 && GLOBAL.TaskName === "") {
@@ -1471,11 +1472,11 @@ function Task_Management({ navigation, navigation: { goBack } }) {
               <TouchableOpacity key={index} onPress={() => {
                 setSelectItem(value.id);
                 FilterFunc1(value.id);
-              }} style={[Styles.FilterBoxItemsSelectcategory]}>
+              }} style={[Styles.FilterBoxItemsSelectcategory,{backgroundColor:GLOBAL.headertext_backgroundColor}]}>
                 {
                   value.id === 0 || value.id === 3 ?
                     <MaterialCommunityIcons name={value.Icon} size={20}
-                                            color={GLOBAL.OFFICIAL_WITE_COLOR} /> :
+                                            color={GLOBAL.header_backgroundColor} /> :
                     value.id === 1 ?
                       <View style={[Styles.btntaskCircel, { backgroundColor: ColorChangestatus }]} /> :
                       <View style={[Styles.triangle, { borderBottomColor: ColorChangePriority }]} />
@@ -1483,7 +1484,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                 {
                   value.id === 0 || value.id === 3 ?
                     <Text
-                      style={Styles.txtCenter_filter}>
+                      style={[Styles.txtCenter_filter,{color:GLOBAL.header_backgroundColor}]}>
                       {value.Filtername}
                     </Text> :
                     value.id === 1 ?
@@ -1493,7 +1494,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                       </Text> :
                       value.id === 2 ?
                         <Text
-                          style={Styles.txtCenter_filter}>
+                          style={[Styles.txtCenter_filter,{color:GLOBAL.header_backgroundColor}]}>
                           {value.Filtername}
                         </Text> :
                         <Text
@@ -1521,7 +1522,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   FilterFunc(value?.value, value.label);
                   GLOBAL.FilterTime_name = value.label;
                 }}
-                                  style={[SelectDetailItem === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItem === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
                   <MaterialCommunityIcons name={value.Icon} size={20}
                                           color={SelectDetailItem === value.value ? GLOBAL.OFFICIAL_WITE_COLOR : GLOBAL.OFFICIAL_BLUE_COLOR} />
                   <Text
@@ -1546,10 +1547,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   setStatus(false);
                   GLOBAL.FilterStatus_name = value.label;
                 }}
-                                  style={[SelectDetailItemStatus === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
-                  <View style={[Styles.btntask, { backgroundColor: value.statusColorCode }]} />
+                                  style={[SelectDetailItemStatus === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
+                  <View style={[Styles.btntask,{backgroundColor:value.statusColorCode}]}/>
                   <Text
-                    style={[SelectDetailItemStatus === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
+                    style={[SelectDetailItemStatus === value.value ? [Styles.txtCenter_filter]:Styles.txtCenter_filter2]}>
                     {value.label}
                   </Text>
                 </TouchableOpacity>
@@ -1570,7 +1571,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   setPriority(false);
                   GLOBAL.FilterPriority_name = value.label;
                 }}
-                                  style={[SelectDetailItemPriority === value.value ? Styles.FilterBoxItemsSelecttasl : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItemPriority === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
                   <View style={[Styles.triangle, { borderBottomColor: value.taskPriorityColor }]} />
                   <Text
                     style={[SelectDetailItemPriority === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
@@ -1583,18 +1584,18 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
-          <Text style={Styles.txtFilter3}>
+          <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
             Start Date
           </Text>
-          <View style={Styles.WeekFilterBoxItem}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
             <Text style={Styles.txtFilter}>
               {selectedRange.firstDate}
             </Text>
           </View>
-          <Text style={Styles.txtFilter3}>
-            End Date
+          <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
+          End Date
           </Text>
-          <View style={Styles.WeekFilterBoxItem}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
             <Text style={Styles.txtFilter}>
               {selectedRange.secondDate}
             </Text>
@@ -1882,7 +1883,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   };
   return (
     <>
-      <Container style={[Styles.Backcolor]}>
+      <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
         <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={Go_Back}
                 Title={GLOBAL.TaskMenuName} />
 

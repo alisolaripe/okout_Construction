@@ -36,8 +36,7 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
   useEffect( () => {
-    setVersionCheck('1.0.24');
-    console.log(GLOBAL.UserInformation,'PictureUrl')
+    setVersionCheck('1.0.26');
     const date=new Date();
     const Day=date.getDate();
     const Month=date.getMonth()+1;
@@ -258,28 +257,28 @@ const UpdateProfileInfo=(value)=>{
     </View>
   );
   return (
-    <Container style={[Styles.Backcolor]}>
-      <Header  style={Styles.HeaderStyle2}>
+    <Container style={{backgroundColor:GLOBAL.backgroundColor}}>
+      <Header  style={[Styles.HeaderStyle2,{backgroundColor:GLOBAL.header_backgroundColor}]}>
         <Left style={{
           flex: 0.5,
         }}>
           <Button onPress={() => {
             goBack();
           }} transparent style={[Styles.Backbtn,{justifyContent:'flex-start'}]}>
-            <AntDesign name={"arrowleft"} size={21} color={Colors.button} />
+            <AntDesign name={"arrowleft"} size={21} color={GLOBAL.headertext_backgroundColor} />
           </Button>
         </Left>
         <Body style={{
           flex: 1,alignItems:"center"
         }}>
-          <Text numberOfLines={1} style={Styles.HeaderText2}>Profile</Text>
+          <Text numberOfLines={1} style={[Styles.HeaderText2,{color: GLOBAL.headertext_backgroundColor}]}>Profile</Text>
         </Body>
         <Right style={{
           flex: 0.5,
         }}>
         </Right>
       </Header>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.Light} />
+      <StatusBar barStyle="light-content" backgroundColor={GLOBAL.header_backgroundColor} />
       {ShowMessage === true ?
         <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
           <View style={Styles.flashMessageSuccsess}>
@@ -301,14 +300,14 @@ const UpdateProfileInfo=(value)=>{
               <View style={Styles.mainSystemDesignerProfile}>
                 {
                   PictureUrl === null ?
-                    <EvilIcons name={"user"} size={170} color={Colors.button} /> :
-                    <FastImage  style={Styles.imageProfile} source={{uri:PictureUrl}}/>
+                    <EvilIcons name={"user"} size={170} color={GLOBAL.headertext_backgroundColor} /> :
+                    <FastImage  style={[Styles.imageProfile,{borderColor: GLOBAL.headertext_backgroundColor}]} source={{uri:PictureUrl}}/>
                 }
                 <TouchableOpacity
                   style={Styles.btnSelectImage}
                   onPress={()=>onOpen()}>
-                  <FontAwesome onPress={()=>onOpen()} name={"exchange"} size={15} color={Colors.button} />
-                  <Text style={[Styles.txtMenu,{marginLeft:10}]}>
+                  <FontAwesome onPress={()=>onOpen()} name={"exchange"} size={15} color={GLOBAL.headertext_backgroundColor} />
+                  <Text style={[Styles.txtMenu,{marginLeft:10,color: GLOBAL.headertext_backgroundColor}]}>
                   Change Photo
                   </Text>
                 </TouchableOpacity>

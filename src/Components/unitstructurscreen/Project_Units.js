@@ -518,7 +518,7 @@ function Project_Units({ navigation, navigation: { goBack } }) {
     <DYB_List_Item SeeDetail={SeeDetail} data={GLOBAL.Unitdata_dyb} value={item} Navigate_Url={Navigate_Url} />
   );
   return (
-    <Container style={[Styles.Backcolor]}>
+    <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header colors={route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
               StatusColor={route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={goBack} Title={"Plots / Units"} />
       <ImageBackground source={Photoes.unitBack}

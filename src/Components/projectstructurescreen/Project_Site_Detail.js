@@ -867,18 +867,18 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
       }
       {ShowDateRange === true ?
         <TouchableOpacity onPress={() => setshowModalCalender(true)} style={Styles.WeekFilterBox}>
-          <Text style={Styles.txtFilter3}>
+          <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
             Start Date
           </Text>
-          <View style={Styles.WeekFilterBoxItem}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
             <Text style={Styles.txtFilternumber}>
               {selectedRange.firstDate}
             </Text>
           </View>
-          <Text style={Styles.txtFilter3}>
+          <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
             End Date
           </Text>
-          <View style={Styles.WeekFilterBoxItem}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
             <Text style={Styles.txtFilternumber}>
               {selectedRange.secondDate}
             </Text>
@@ -905,7 +905,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
     />
   );
   return (
-    <Container style={[Styles.Backcolor]}>
+    <Container style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header
         colors={GLOBAL.route === "structure" ? ["#ffadad", "#f67070", "#FF0000"] : ["#ffc2b5", "#fca795", "#d1583b"]}
         StatusColor={GLOBAL.route === "structure" ? "#ffadad" : "#ffc6bb"} onPress={Back_navigate}

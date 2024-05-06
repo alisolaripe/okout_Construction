@@ -32,6 +32,13 @@ const Styles = StyleSheet.create({
     zIndex:100,
     flexDirection:'row'
   },
+  ViewItems_center_row2: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    zIndex:100,
+    flexDirection:'row'
+  },
   ViewItems_center_task: {
     justifyContent: "center",
     alignItems: "center",
@@ -775,7 +782,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
   containerList: {
     flex: 1,
     alignItems: "center",
-
+    width: "100%",
   },
   editBtn: {
     width: "100%", alignItems: "center", justifyContent: "center",
@@ -879,7 +886,7 @@ borderColor:GLOBAL.OFFICIAL_backgroundItem,
     flexDirection: "row", flexWrap: "wrap", marginTop: normalize(40), justifyContent: "space-between", width: "90%",
   },
   FlexWrapHome2: {
-    flexDirection: "row", flexWrap: "wrap", marginTop: normalize(20), justifyContent: "space-between", width: "90%", alignItems:"center",
+    flexDirection: "row", flexWrap: "wrap", marginTop: normalize(30), justifyContent: "space-between", width: "90%", alignItems:"center",
   },
   WarningBox:{
     flexDirection: "row",marginTop: normalize(25), justifyContent: "space-between", width: "90%",backgroundColor:"#f5e8d3",
@@ -1076,7 +1083,7 @@ paddingHorizontal:7,
     width: "48%", height: normalize(200), borderRadius: normalize(6),
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: GLOBAL.OFFICIAL_Button, justifyContent: "center", alignItems: "center", marginTop: normalize(13),
+    borderColor: GLOBAL.footertext_backgroundColor, justifyContent: "center", alignItems: "center", marginTop: normalize(13),
   },
 
   ListDetailUploadImagebox: {
@@ -1099,7 +1106,7 @@ paddingHorizontal:7,
   },
   UploadImageText2: { fontSize: normalize(14), color:'#fff', fontFamily:'OpenSansBold', paddingBottom: 8 },
 
-  UploadImageText: { fontSize: normalize(14), color: GLOBAL.OFFICIAL_BLUE_COLOR, fontFamily:'OpenSansBold', paddingBottom: 8 },
+  UploadImageText: { fontSize: normalize(14), color:GLOBAL.footertext_backgroundColor, fontFamily:'OpenSansBold', paddingBottom: 8 },
   UploadNotesText: { fontSize: normalize(14), color: "#fff", fontFamily: GLOBAL.FONT_FAMILY,},
   ModalizeDetalStyle: {
     alignItems: "center",
@@ -1167,7 +1174,7 @@ paddingHorizontal:7,
   },
   dropdowntask: {
     height: normalize(35),
-    borderColor: GLOBAL.OFFICIAL_Button,
+    borderColor: GLOBAL.footertext_backgroundColor,
     borderWidth: 0.5,
     borderRadius: normalize(6),
     paddingHorizontal: 8,
@@ -1182,7 +1189,7 @@ paddingHorizontal:7,
   },
   placeholderStyle: {
     fontSize: normalize(14),
-    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    color: GLOBAL.footertext_backgroundColor,
     fontFamily:'OpenSansBold',
   },
   placeholderStyle5: {
@@ -1190,7 +1197,7 @@ paddingHorizontal:7,
     color: Colors.Light,
   },
   containerStyle: {
-    backgroundColor: GLOBAL.OFFICIAL_BLUE_COLOR,
+    backgroundColor: GLOBAL.footer_backgroundColor,
   },
   containerStyle12: {
     backgroundColor: Colors.Light,
@@ -1200,11 +1207,11 @@ paddingHorizontal:7,
   },
   itemTextStyle: {
     fontSize: normalize(14),
-    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    color: GLOBAL.footertext_backgroundColor,
   },
   selectedTextStyle: {
     fontSize: normalize(14),
-    color: GLOBAL.OFFICIAL_BLUE_COLOR,
+    color: GLOBAL.footertext_backgroundColor,
     fontFamily:'OpenSansBold',
   },
   selectedTextStyle12: {
@@ -1514,11 +1521,11 @@ paddingHorizontal:7,
   },
   inputStyleTask: {
     borderWidth:0.5,
-    borderColor:GLOBAL.OFFICIAL_Button,
+    borderColor:GLOBAL.footertext_backgroundColor,
     borderRadius:normalize(6),
     padding:4,
     width:'100%',
-    color:Colors.button,
+    color:GLOBAL.footertext_backgroundColor,
     fontFamily:'OpenSansBold',
   },
   inputetext:{
@@ -1606,7 +1613,6 @@ paddingHorizontal:7,
   CancelBtnMargin0:{ width: "90%" ,justifyContent:'flex-start',},
   AlertTxt:{
     color: "white",
-
     textAlign:'center',
     fontFamily:'OpenSansBold',
   },
@@ -1959,7 +1965,7 @@ flex:1,
   },
   FilterBoxItemsSelecttasl: {
     backgroundColor:GLOBAL.OFFICIAL_BLUE_COLOR,
-    width:'23.70%'
+   paddingHorizontal:normalize(7)
     , marginTop: "2%", borderRadius: normalize(5),
     alignItems:'center',marginRight:normalize(3),
     flexDirection:'row',
@@ -1994,10 +2000,8 @@ flex:1,
   },
   ViewAbsoluteHome:{
     width:'100%',
-    position:'absolute',
-    backgroundColor:'#fff',top:0,
-    paddingVertical:50,
-    borderBottomRightRadius:50,borderBottomLeftRadius:50
+    // position:'absolute',
+    // top:0,
   },
   ViewAbsoluteDrawer:{
     width:'100%',alignItems:'center',paddingVertical:normalize(14)
@@ -3188,7 +3192,258 @@ flex:1,
     /* marginVertical: 10,*/
 
   },
+  VoiceCircle:{
+    width:'18%',
+    paddingVertical:normalize(14),
+    borderWidth:normalize(7),
+    borderRadius:100,
+    backgroundColor:'#fff',
+    position:'absolute',
+    top:normalize(60),
+    borderColor:Colors.Light,
+    alignItems: "center", justifyContent: "center",
+  },
+  containerVoice: {
+    flex: 1,
+    backgroundColor: Colors.Light
+  },
+  Voicecircle:{
+    width:'55%',
+    paddingVertical:normalize(20),
+    borderWidth:normalize(1),
+    borderRadius:200,
+    backgroundColor:'rgba(100,149,191,0.76)',
+    borderColor:Colors.withe,
+    alignItems: "center", justifyContent: "center",
+    marginTop:normalize(50)
+  },
+  Voicecircle1:{
+    width:'100%',
+    alignItems: "center", justifyContent: "center",
+    marginVertical:normalize(20)
 
+  },
+  Voicecircle2:{
+    width:'100%',
+    alignItems: "center", justifyContent: "center",
+    marginVertical:normalize(100)
+  },
+  VoiceBox:{
+    paddingHorizontal:normalize(15),
+    paddingVertical:normalize(15),
+    borderWidth:normalize(1),
+    borderRadius:150,
+    backgroundColor:Colors.button,
+    borderColor:'#5883a8',
+    alignItems: "center", justifyContent: "center",
+  },
+  HeaderStyleVoice:{
+    backgroundColor:'#fff',
+    flexDirection:'row',
+    paddingVertical:normalize(10)
+  },
+  HeaderTextVoice:{
+    color: '#4a6e8e',
+    fontSize: normalize(20), paddingVertical: 6,
+    textAlign:'center',
+    fontFamily:'TisaSansProBlack',
+    marginTop:normalize(55)
+  },
+  VoiceCancellButon:{
+    width:'45%',
+    paddingVertical:normalize(10),
+    borderWidth:normalize(3),
+    borderRadius:6,
+    borderColor:Colors.button,
+    alignItems: "center", justifyContent: "center",
+    marginTop:normalize(55)
+  },
+  stat: {
+    textAlign: 'center',
+    color: '#4a6e8e',
+    fontFamily:'OpenSansBold',
+    fontSize: normalize(14),
+  },
+  action: {
+    textAlign: 'center',
+    color: '#0000FF',
+    marginVertical: 5,
+    fontWeight: 'bold',
+  },
+  containerListVoice: {
+    flex: 1,
+    alignItems: "center",
+    width: "90%",
+    flexDirection:'row',
+    justifyContent:'space-between'
+  },
+  containerresultVoice: {
+    flex: 1,
+    alignItems: "center",
+    width: "90%",
+    justifyContent:'center',
+    marginTop:normalize(25)
+  },
+  containerresultVoiceItem: {
 
+    alignItems: "center",
+    width: "50%",
+    justifyContent:'center',
+    marginBottom:normalize(8),
+    borderWidth:normalize(3),
+    borderRadius:6,
+    borderColor:Colors.button,
+    paddingVertical:normalize(5)
+  },
+  themBox:{
+    width:'100%',
+    alignItems: "center",
+    justifyContent:'center',
+    marginVertical:normalize(15),
+  },
+  themBoxItems:{
+    width:'60%',
+    alignItems: "center",
+    justifyContent:'center',
+    borderWidth:0.5,
+    borderColor:Colors.button
+  },
+  ModuleBoxthem:{
+    width:'47%',backgroundColor:"rgba(244,244,251,0)",
+    marginBottom: "5%", borderTopRightRadius: normalize(35),
+    borderRadius: normalize(5),  justifyContent:"center",
+    alignItems:"center",
+  },
+  txtMenuHomethem: {
+    fontSize: normalize(10),
+    textAlign: "left",
+    color: '#fff',
+    paddingBottom: 5,
+    fontFamily:'OpenSansBold'
+  },
+  VoiceCircletheme:{
+    width:'21%',
+    paddingVertical:normalize(14),
+    borderWidth:normalize(4),
+    borderRadius:180,
+    backgroundColor:'#fff',
+    position:'absolute',
+    top:normalize(2),
+    borderColor:Colors.Light,
+    alignItems: "center", justifyContent: "center",
+  },
+  HeaderTexttheme:{
+    color: '#4a6e8e',
+    fontSize: normalize(14), paddingVertical: 4,
+    textAlign:'center',
+    fontFamily:'TisaSansProBlack'
+  },
+  littleImagetheme: {
+    width: '90%', height: normalize(18),
+  },
+  statuscolor:{
+    width:'100%',
+    paddingVertical:normalize(5),
+    backgroundColor:'#fff',
+  },
+  FooterTab_Home_theme:{
+    backgroundColor:'#fff',
+    borderTopWidth:0.2,
+    borderTopColor:"rgba(255,255,255,0.18)"
+  ,flexDirection:'row'
+  },
+  FooterFloatBtn_homeTheme: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f6f9f9",
+    width: Platform.OS === "ios" ? 40 : 42,
+    height: Platform.OS === "ios" ? 40 : 42,
+    top: Platform.OS === "ios" ? -10 : -15,
+    borderRadius: Platform.OS === "ios" ? 25 : 32,
+  },
+  FooterFloatBtn_homeTheme1: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4a6e8e",
+    width: Platform.OS === "ios" ? 30 : 42,
+    height: Platform.OS === "ios" ? 30 : 42,
+    borderRadius: Platform.OS === "ios" ? 25 : 30,
+  },
+  FooterTab_theme:{
+    width:'42.2%',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  Footertxt4: {
+    color: "#fff",
+    fontSize: normalize(9),
+    paddingTop: 3,
+    fontFamily:'OpenSansBold',
+  },
+  Footertxt_Home_theme: {
+    color: '#4a6e8e',
+    fontSize: normalize(9),
+    paddingTop: 2,
+    fontFamily:'OpenSansBold',
+  },
+  colorList:{
+    width:'90%',
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop:normalize(10),
+    flexDirection: "row", flexWrap: "wrap",
+  },
+  colorListitems:{
+    width:'47%',
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    borderWidth:1,
+    borderRadius:6,
+    borderColor:GLOBAL.OFFICIAL_backgroundItem,
+    zIndex:-10,
+    marginBottom:normalize(12)
+  },
+  colorListitems_box:{
+    width:'50%',
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius:6
+  },
+  colorListitems_box1:{
+    width:'100%',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical:normalize(25)
+
+  } ,
+  colorListitems_boxtext:{
+    width:'100%',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical:normalize(8)
+
+  },
+  colorListitems_text:{
+    color: '#4a6e8e',
+    fontSize: normalize(12),
+    paddingTop: 2,
+    fontFamily:'OpenSansBold',
+  },
+  Floatcheck:{
+    position:'absolute',
+    top:normalize(-12),
+    zIndex:100,
+    right:normalize(-10)
+  },
+  With95Rowthemw:{
+    marginVertical: normalize(25),
+    width: "89%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
+    marginTop:normalize(35)
+
+  },
 });
 export { Styles };

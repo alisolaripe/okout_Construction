@@ -27,6 +27,7 @@ class App extends Component {
       GLOBAL.OrgAppLink_value = await this.readDataStorage(GLOBAL.OrgAppLink);
       GLOBAL.UserInformation=await this.readDataStorage(GLOBAL.UserInfo);
       GLOBAL.modules=JSON.parse (await AsyncStorage.getItem(GLOBAL.Modules))
+      GLOBAL.PictureUrl=GLOBAL.UserInformation?.profileImg
       // this._interval = setInterval(() => {
       //
       //   clearInterval(this._interval);

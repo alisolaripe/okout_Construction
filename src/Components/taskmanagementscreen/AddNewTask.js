@@ -120,11 +120,13 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     if(GLOBAL.isConnected===true) {
       readOnlineApi(Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         let A = [];
+        console.log(json?.categories,'json?.categories')
         for (let item in json?.categories) {
           let obj = json?.categories?.[item];
           A.push({
             value: obj.categoryId,
             label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow
           });
         }
         setTaskcategory(A);
@@ -785,7 +787,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   }
 
   return (
-    <Container style={[Styles.Backcolor]}>
+    <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
         <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={Back_navigate}
                 Title={"Add New Task"} />
         {ShowMessage === true ?
@@ -802,7 +804,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
           </View>
           : null}
       {showWarning===true&&  <Warningmessage/>}
-        <Content style={[{ backgroundColor: Colors.Light }]}>
+        <Content >
           <View style={Styles.container}>
             <View style={Styles.Center_margin_Bottom}>
               {showModalDelete &&

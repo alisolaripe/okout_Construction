@@ -50,12 +50,11 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
   const writeDataStorage = async (key, obj) => {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(obj));
-    } catch (e) {
     }
+    catch (e) {}
   };
-
   return (
-    <Container style={[Styles.HeaderBackColor]}>
+    <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header colors={["#a39898", "#786b6b", "#382e2e"]} StatusColor={"#a39897"} onPress={goBack}
               Title={"Task Management"} />
       {showModalDelete &&
@@ -63,7 +62,6 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
       }
       <ImageBackground tintColor={"rgba(77,120,165,0.16)"} source={Photoes.Task_backgrung}
                        style={{ width: "100%", flex: 1, alignSelf: "stretch" }} resizeMode="stretch">
-
         <View style={Styles.container_task2}>
           {
             GLOBAL.Submodules?.length !== 0 ?
@@ -82,8 +80,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
                           GLOBAL.TaskMenuName = "WorkShop";
                           GLOBAL.TaskName = "";
                           navigation.navigate("Task_Management");
-                        }
-                      }
+                        }}
                       } style={{
                         width: "100%", alignItems: "center", justifyContent: "center", alignSelf: "center",
                       }}>
@@ -108,7 +105,6 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
                                    }}
                             />
                         }
-
                         <Text style={Styles.txtMenuHome2}>{value.constModule_Name}</Text>
                       </TouchableOpacity>
                     </LinearGradient>
@@ -121,7 +117,6 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
                 </Text>
               </View>
           }
-
         </View>
       </ImageBackground>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />

@@ -14,8 +14,9 @@ const Photoes = require("../Photoes");
 import LinearGradient from "react-native-linear-gradient";
 import { readOnlineApi } from "../ReadPostApi";
 import { Footer1 } from "../component/Footer";
-import { UserPermission } from "../CheckPermission";
+
 import AntDesign from "react-native-vector-icons/AntDesign";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function Home_meno({ navigation }) {
@@ -30,7 +31,7 @@ function Home_meno({ navigation }) {
       My_TaskList();
       Task_category();
       getmapkey();
-      GLOBAL.PictureUrl=GLOBAL.UserInformation?.profileImg
+
     });
     return unsubscribe;
   }, []);
@@ -145,14 +146,15 @@ function Home_meno({ navigation }) {
     if (constModule_Id === "1") {
         GLOBAL.TaskName = "";
         GLOBAL.route = "structure";
-        navigation.navigate("Project_structureStack");
+      Navigate_Url("Project_structureStack")
+
     } else if (constModule_Id === "4") {
-      navigation.navigate("Task_managementStack");
       GLOBAL.TaskName = "";
+      Navigate_Url("Task_managementStack")
     } else if (constModule_Id === "3") {
       GLOBAL.route = "DYB";
       GLOBAL.TaskName = "";
-      navigation.navigate("Project_structureStack", { screenMode: "Dyb" });
+      Navigate_Url("Project_structureStack")
     }
   };
   const Navigate_Url = (Url) => {
@@ -166,20 +168,20 @@ function Home_meno({ navigation }) {
   const LogOut = () => {
     removeDataStorage(GLOBAL.PASSWORD_KEY);
     setshowModalDelete(false);
-    navigation.navigate("LogIn");
+    Navigate_Url("LogIn")
   };
   return (
-    <Container style={[Styles.BackcolorHome]}>
-      <StatusBar barStyle="light-content" backgroundColor={"#fff"} />
-      <View style={Styles.HeaderStyleHome}>
+    <Container style={{backgroundColor:GLOBAL.backgroundColor}}>
+      <StatusBar barStyle="light-content" backgroundColor={ GLOBAL.status_backgroundColor} />
+      <View style={[Styles.HeaderStyleHome,{backgroundColor:GLOBAL.header_backgroundColor}]}>
         <View style={{ width: "2%" }} />
         <View style={{ width: "12%" }}>
-          <Button onPress={() => navigation.dispatch(DrawerActions.openDrawer())} transparent style={Styles.Backbtn}>
-            <AntDesign name={"menuunfold"} size={21} color={Colors.button} />
+          <Button onPress={() => navigation.dispatch(DrawerActions.openDrawer())} transparent style={[Styles.Backbtn]}>
+            <AntDesign name={"menuunfold"} size={21} color={GLOBAL.headertext_backgroundColor} />
           </Button>
         </View>
         <View style={{ width: "72%" }}>
-          <Text numberOfLines={1} style={[Styles.HeaderText4]}>Home</Text>
+          <Text numberOfLines={1} style={[Styles.HeaderText4,{color:GLOBAL.headertext_backgroundColor}]}>Home</Text>
         </View>
         <View style={{ width: "12%" }} >
           <Image style={Styles.littleImage} source={Photoes.OkoutLogo} resizeMode={"stretch"}/>
@@ -188,8 +190,15 @@ function Home_meno({ navigation }) {
       </View>
       <ImageBackground source={Photoes.Home_backgrung}
                        style={{ width: "100%", flex: 1, alignSelf: "stretch" }} resizeMode="stretch">
-        <Content contentContainerStyle={{ alignItems: "center", justifyContent: "center" }}>
-          <View style={Styles.ViewAbsoluteHome} />
+        <Content contentContainerStyle={{ alignItems: "center", justifyContent: "center"}}>
+          <View style={Styles.ViewAbsoluteHome} >
+            <ImageBackground source={Photoes.Waves} tintColor={GLOBAL.header_backgroundColor}
+                             style={{ width: "100%", flex: 1, alignItems: "center", justifyContent: "center",height:120 }} resizeMode="stretch">
+              <TouchableOpacity onPress={()=> Navigate_Url("VoiceSearch")} style={[Styles.VoiceCircle,{backgroundColor:GLOBAL.header_backgroundColor}]}>
+                <MaterialIcons name={"keyboard-voice"} size={35} color={GLOBAL.headertext_backgroundColor}  />
+              </TouchableOpacity>
+            </ImageBackground>
+          </View>
           {showModalDelete &&
           <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
           }
@@ -216,7 +225,7 @@ function Home_meno({ navigation }) {
           }
         </Content>
       </ImageBackground>
-      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />
+      <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url}  />
     </Container>
   );
 }

@@ -4,6 +4,7 @@ import { Styles } from "../Styles";
 import { Button, } from "native-base";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import React from "react";
+const GLOBAL = require("../Global");
 function Header ({colors,Title,onPress,StatusColor}){
   return (
     <View>
@@ -20,7 +21,7 @@ function Header ({colors,Title,onPress,StatusColor}){
         </View>
         <View style={{ width: "10%" }} />
       </LinearGradient>
-      <View style={Styles.ViewAbsolute}/>
+      <View style={[Styles.ViewAbsolute,{backgroundColor:GLOBAL.backgroundColor}]}/>
     </View>
   )
 }
