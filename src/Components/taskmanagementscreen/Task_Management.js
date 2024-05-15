@@ -81,11 +81,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       Icon: "podium",
     }, { id: 3, Filtername: "Category", Icon: "feature-search-outline" }]);
   const [reasons, setreasons] = useState([]);
-  const [RelatedNameList, setRelatedNameList] = useState([{ value: "0", label: "project" }, {
-    value: "1",
-    label: "site",
-  },
-    { value: "2", label: "unit" }, { value: "3", label: "section" }, { value: "4", label: "feature" }]);
+  const [RelatedNameList, setRelatedNameList] = useState([]);
   const [TaskRelatedNameId, setTaskRelatedNameId] = useState("");
   const [selectedrelatedname, setselectedrelatedname] = useState("");
   const [SiteList, setSiteList] = useState([]);
@@ -103,6 +99,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [selectedunitName, setselectedunitName] = useState("");
   const [selectedsectionName, setselectedsectionName] = useState("");
   const [selectedfeatureName, setselectedfeatureName] = useState("");
+  const [categoryEntityShow, setcategoryEntityShow] = useState('n');
+  const [categoryLevellist, setcategoryLevellist] = useState([]);
+  const [categoryLevel, setcategoryLevel] = useState('');
+  const [RelatedNameLvalue, setRelatedNameLvalue] = useState('');
   useEffect(() => {
 
     const unsubscribe = navigation.addListener("focus", () => {
@@ -120,10 +120,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     ReasonCodeReopen(7);
     Task_RelatedList();
     Task_category();
-    getSites();
-    getUnits();
-    getSection();
-    getFeatures();
+    // getSites();
+    // getUnits();
+    // getSection();
+    // getFeatures();
     return unsubscribe;
   }, []);
 ///get task when come from projectstructure or DYb///
@@ -132,7 +132,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}&relatedName=${GLOBAL.RelatedName}&relatedId=${GLOBAL.RelatedId}&type=related`).then(json => {
         let Task_List = [];
-        console.log(json?.tasks, " json?.tasks");
         for (let item in json?.tasks) {
           let obj = json?.tasks?.[item];
           if (obj?.taskRelatedNameRef === GLOBAL.TaskName) {
@@ -229,129 +228,304 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
     }
   };
+  const getEntityInfo =async (categoryId,SearchId) => {
+    return (
+      readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${categoryId}&relatedSearchId=${SearchId}`).then(json => {
+        return json;
+      }));
 
-  const getSites = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    let Site_List = [];
-    if (json !== null) {
-      let Site = json?.find((p) => p?.projectId === GLOBAL.ProjectId);
-      Site?.sites?.forEach((obj) => {
-        Site_List.push({
-          value: obj.siteId,
-          label: obj.siteName,
-        });
+
+  };
+  const getSites = async (TaskRelatedNameId,value,SubCategory_List) => {
+
+    const json=await getEntityInfo(TaskRelatedNameId,value)
+
+    let A = [];
+    for (let item in json?.relatedList) {
+      let obj = json?.relatedList?.[item];
+      A.push({
+        value: obj.relatedId,
+        label: obj.relatedName,
       });
-      setSiteList(Site_List);
-      if (GLOBAL.TaskRelatedNameId !== "") {
-        setselectedTaskSiteName({
-          label: Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
-          value: Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.value,
-          _index: Site_List?.findIndex(p => p.label === GLOBAL.FilterSite_name),
-        });
-        if (GLOBAL.TaskRelatedNameId === "1") {
-          setRelatedId(Site_List?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
-        } else {
-          getUnits();
-        }
-      } else {
+    }
+    setSiteList(A);
 
-        getUnits();
+    if(GLOBAL.TaskRelatedNameId!=='') {
+      let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value
+      const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='3')?.value
+      setselectedTaskSiteName({
+        label: A?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
+        value: A?.find(p => p.label === GLOBAL.FilterSite_name)?.value,
+        _index: A?.findIndex(p => p.label === GLOBAL.FilterSite_name),
+      });
+      if(GLOBAL.TaskRelatedNameId==='1') {
+        setRelatedId(A?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
+      }
+      else {
+        getUnits(categoryId,seacrhId,SubCategory_List)
       }
     }
+
+
+    // if (GLOBAL.TaskRelatedNameId !== "") {
+    //
+    //   if (GLOBAL.TaskRelatedNameId === "1") {
+    //     setRelatedId(A?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
+    //   } else {
+    //     getUnits();
+    //   }
+    // }
+    // else {
+    //
+    //   getUnits();
+    // }
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${7}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //         setSiteList(A);
+    //         if (GLOBAL.TaskRelatedNameId !== "") {
+    //           setselectedTaskSiteName({
+    //             label: A?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
+    //             value: A?.find(p => p.label === GLOBAL.FilterSite_name)?.value,
+    //             _index: A?.findIndex(p => p.label === GLOBAL.FilterSite_name),
+    //           });
+    //           if (GLOBAL.TaskRelatedNameId === "1") {
+    //             setRelatedId(A?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
+    //           } else {
+    //             getUnits();
+    //           }
+    //         } else {
+    //
+    //           getUnits();
+    //         }
+    //
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
   };
   const getUnits = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    if (json !== null) {
-      let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
-      let unit_List = [];
-      Filter_units?.units?.forEach((obj) => {
-        unit_List.push({
-          value: obj?.unitId,
-          label: obj?.unitName,
-        });
-      });
-      setunitList(unit_List);
-      if (GLOBAL.TaskRelatedNameId !== "") {
-        setselectedunitName({
-          label: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
-          value: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
-          _index: unit_List?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
-        });
-        if (GLOBAL.TaskRelatedNameId === "2") {
-          setRelatedId(unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
-        } else {
+    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    // if (json !== null) {
+    //   let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+    //   let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
+    //   let unit_List = [];
+    //   Filter_units?.units?.forEach((obj) => {
+    //     unit_List.push({
+    //       value: obj?.unitId,
+    //       label: obj?.unitName,
+    //     });
+    //   });
+    //   setunitList(unit_List);
+    //   if (GLOBAL.TaskRelatedNameId !== "") {
+    //     setselectedunitName({
+    //       label: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
+    //       value: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
+    //       _index: unit_List?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
+    //     });
+    //     if (GLOBAL.TaskRelatedNameId === "2") {
+    //       setRelatedId(unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
+    //     } else {
+    //
+    //       getSection();
+    //     }
+    //   }
+    //   else {
+    //     getSection();
+    //   }
+    // }
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${8}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let A = [];
+            for (let item in json?.relatedList) {
+              let obj = json?.relatedList?.[item];
+              A.push({
+                value: obj.relatedId,
+                label: obj.relatedName,
+              });
+            }
+            setunitList(A);
+            if (GLOBAL.TaskRelatedNameId !== "") {
+              setselectedunitName({
+                label: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
+                value: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
+                _index: A?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
+              });
+              if (GLOBAL.TaskRelatedNameId === "2") {
+                setRelatedId(A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
+              } else {
 
-          getSection();
-        }
-      } else {
-
-        getSection();
+                getSection();
+              }
+            }
+            else {
+              getSection();
+            }
+          })
+          .catch(error => console.log("error", error));
       }
-    }
-
+    });
   };
   const getSection = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    if (json !== null) {
-      let Section_List = [];
-      let Filter_units = "";
-      let Filter_sites = "";
-      let Filter_section = "";
-      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
-      Filter_section?.sections?.forEach((obj) => {
-        Section_List.push({
-          value: obj.sectionId,
-          label: obj.sectionName,
-        });
-      });
-      setsectionList(Section_List);
-      if (GLOBAL.TaskRelatedNameId !== "") {
-        setselectedsectionName({
-          label: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
-          value: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
-          _index: Section_List?.findIndex(p => p.label === GLOBAL.FilterSection_name),
-        });
-        if (GLOBAL.TaskRelatedNameId === "3") {
-          setRelatedId(Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
-        } else
-          getFeatures();
-      } else
-        getFeatures();
-    }
+    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    // if (json !== null) {
+    //   let Section_List = [];
+    //   let Filter_units = "";
+    //   let Filter_sites = "";
+    //   let Filter_section = "";
+    //   Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+    //   Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+    //   Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
+    //   Filter_section?.sections?.forEach((obj) => {
+    //     Section_List.push({
+    //       value: obj.sectionId,
+    //       label: obj.sectionName,
+    //     });
+    //   });
+    //   setsectionList(Section_List);
+    //   if (GLOBAL.TaskRelatedNameId !== "") {
+    //     setselectedsectionName({
+    //       label: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
+    //       value: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
+    //       _index: Section_List?.findIndex(p => p.label === GLOBAL.FilterSection_name),
+    //     });
+    //     if (GLOBAL.TaskRelatedNameId === "3") {
+    //       setRelatedId(Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
+    //     } else
+    //       getFeatures();
+    //   } else
+    //     getFeatures();
+    // }
+
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${9}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let A = [];
+            for (let item in json?.relatedList) {
+              let obj = json?.relatedList?.[item];
+              A.push({
+                value: obj.relatedId,
+                label: obj.relatedName,
+              });
+            }
+            setsectionList(A);
+            if (GLOBAL.TaskRelatedNameId !== "") {
+              setselectedsectionName({
+                label: A?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
+                value: A?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
+                _index: A?.findIndex(p => p.label === GLOBAL.FilterSection_name),
+              });
+              if (GLOBAL.TaskRelatedNameId === "3") {
+                setRelatedId(A?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
+              } else
+                getFeatures();
+            } else
+              getFeatures();
+          })
+          .catch(error => console.log("error", error));
+      }
+    });
   };
   const getFeatures = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    if (json !== null) {
-      let Feature_List = [];
-      let Filter_units = "";
-      let Filter_sites = "";
-      let Filter_section = "";
-      let Filter_feature = "";
-      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
-      Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
-      if (Filter_feature?.features) {
-        Filter_feature?.features?.forEach((obj) => {
-          Feature_List.push({
-            value: obj.featureId,
-            label: obj.featureName,
-          });
-        });
-        setfeatureList(Feature_List);
-        if (GLOBAL.TaskRelatedNameId === "4") {
-          setselectedfeatureName({
-            label: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
-            value: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
-            _index: Feature_List?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
-          });
-          setRelatedId(Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
-        }
+    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
+    // if (json !== null) {
+    //   let Feature_List = [];
+    //   let Filter_units = "";
+    //   let Filter_sites = "";
+    //   let Filter_section = "";
+    //   let Filter_feature = "";
+    //   Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
+    //   Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
+    //   Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
+    //   Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
+    //   if (Filter_feature?.features) {
+    //     Filter_feature?.features?.forEach((obj) => {
+    //       Feature_List.push({
+    //         value: obj.featureId,
+    //         label: obj.featureName,
+    //       });
+    //     });
+    //     setfeatureList(Feature_List);
+    //     if (GLOBAL.TaskRelatedNameId === "4") {
+    //       setselectedfeatureName({
+    //         label: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
+    //         value: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
+    //         _index: Feature_List?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
+    //       });
+    //       setRelatedId(Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
+    //     }
+    //   }
+    // }
+    isNetworkConnected().then(status => {
+      if (status) {
+        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${10}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(resp => {
+            return resp.json();
+          })
+          .then(json => {
+            let A = [];
+            for (let item in json?.relatedList) {
+              let obj = json?.relatedList?.[item];
+              A.push({
+                value: obj.relatedId,
+                label: obj.relatedName,
+              });
+            }
+            setfeatureList(A);
+            if (GLOBAL.TaskRelatedNameId === "4") {
+              setselectedfeatureName({
+                label: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
+                value: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
+                _index: A?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
+              });
+              setRelatedId(A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
+            }
+          })
+          .catch(error => console.log("error", error));
       }
-    }
+    });
   };
   const Task_category = async () => {
     let Category_List = [];
@@ -362,8 +536,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           Category_List.push({
             value: obj.categoryId,
             label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow
           });
         }
+        writeDataStorage(GLOBAL.Task_Category, json);
         setTaskcategory(Category_List);
       });
     } else {
@@ -373,48 +549,67 @@ function Task_Management({ navigation, navigation: { goBack } }) {
         Category_List.push({
           value: obj.categoryId,
           label: obj.categoryTitle,
+          categoryEntityShow:obj.categoryEntityShow
         });
       }
       setTaskcategory(Category_List);
     }
   };
-  const Task_RelatedList = (Id) => {
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${1}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let RelatedList = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              RelatedList.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-            setTaskRelated(RelatedList);
-            if (GLOBAL.TaskRelatedNameId !== "") {
-              setSelectedrelated({
-                label: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.label,
-                value: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value,
-                _index: RelatedList?.findIndex(p => p.label === GLOBAL.FilterProject_name),
-              });
-              if (GLOBAL.TaskRelatedNameId === "0") {
-                setRelatedId(RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value);
-              } else
-                getSites();
-            }
-          })
-          .catch(error => console.log("error", error));
+  const Task_RelatedList =async () => {
+    let SubCategory_List =JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_SubCategory2))
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${1}`).then(json => {
+        let RelatedList = [];
+        for (let item in json?.relatedList) {
+          let obj = json?.relatedList?.[item];
+          RelatedList.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
+        setTaskRelated(RelatedList);
+        writeDataStorage(GLOBAL.RelatedList, json);
+
+        if(GLOBAL.TaskRelatedNameId!=='') {
+          let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
+          const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
+          setSelectedrelated({
+            label: A?.find(p => p.label === GLOBAL.FilterProject_name)?.label,
+            value: A?.find(p => p.label === GLOBAL.FilterProject_name)?.value,
+            _index: A?.findIndex(p => p.label === GLOBAL.FilterProject_name),
+          });
+          if(GLOBAL.TaskRelatedNameId==='0') {
+            setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
+          }
+          else
+            getSites(categoryId,seacrhId,SubCategory_List);
+        }
+      });
+    }
+    else {
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.RelatedList));
+      let RelatedList = [];
+      for (let item in json?.relatedList) {
+        let obj = json?.relatedList?.[item];
+        RelatedList.push({
+          value: obj.relatedId,
+          label: obj.relatedName,
+        });
       }
-    });
+      setTaskRelated(RelatedList);
+      writeDataStorage(GLOBAL.RelatedList, json);
+      if (GLOBAL.TaskRelatedNameId !== "") {
+        setSelectedrelated({
+          label: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.label,
+          value: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value,
+          _index: RelatedList?.findIndex(p => p.label === GLOBAL.FilterProject_name),
+        });
+        if (GLOBAL.TaskRelatedNameId === "0") {
+          setRelatedId(RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value);
+        } else
+          getSites(categoryId,seacrhId,SubCategory_List);
+      }
+    }
   };
   const ReasonCodeReopen = async (value) => {
     if (GLOBAL.isConnected === true) {
@@ -499,7 +694,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
     } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Task));
-      console.log(json,'jsonjsonjson')
       let Task_List = [];
       for (let item in json) {
         let obj = json?.[item];
@@ -931,6 +1125,38 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       setTaskpriorityfilter(priority_List_copy);
     }
   };
+  const Task_subcategory =async (value) => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_subcategory + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${value}`).then(json => {
+        let A = [];
+        for (let item in json?.subCategories) {
+          let obj = json?.subCategories?.[item];
+          A.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow,
+            categoryLevel:obj.categoryLevel
+          });
+        }
+        setRelatedNameList(A);
+        writeDataStorage(GLOBAL.Task_SubCategory, json);
+      })
+    }
+    else {
+      let A=[]
+      let json =JSON.parse( await AsyncStorage.getItem(GLOBAL.Task_SubCategory));
+      for (let item in json?.subCategories) {
+        let obj = json?.subCategories?.[item];
+        A.push({
+          value: obj.categoryId,
+          label: obj.categoryTitle,
+          categoryEntityShow:obj.categoryEntityShow,
+          categoryLevel:obj.categoryLevel
+        });
+      }
+      setRelatedNameList(A);
+    }
+  }
   ///get user add task list from server///
   const My_TaskList_server = async () => {
     const date = new Date();
@@ -1522,7 +1748,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   FilterFunc(value?.value, value.label);
                   GLOBAL.FilterTime_name = value.label;
                 }}
-                                  style={[SelectDetailItem === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItem === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footertext_backgroundColor}] : Styles.FilterBoxItemstask]}>
                   <MaterialCommunityIcons name={value.Icon} size={20}
                                           color={SelectDetailItem === value.value ? GLOBAL.OFFICIAL_WITE_COLOR : GLOBAL.OFFICIAL_BLUE_COLOR} />
                   <Text
@@ -1547,7 +1773,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   setStatus(false);
                   GLOBAL.FilterStatus_name = value.label;
                 }}
-                                  style={[SelectDetailItemStatus === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItemStatus === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footertext_backgroundColor}] : Styles.FilterBoxItemstask]}>
                   <View style={[Styles.btntask,{backgroundColor:value.statusColorCode}]}/>
                   <Text
                     style={[SelectDetailItemStatus === value.value ? [Styles.txtCenter_filter]:Styles.txtCenter_filter2]}>
@@ -1571,7 +1797,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   setPriority(false);
                   GLOBAL.FilterPriority_name = value.label;
                 }}
-                                  style={[SelectDetailItemPriority === value.value ? [Styles.FilterBoxItemsSelecttasl,{backgroundColor:GLOBAL.footer_backgroundColor}] : Styles.FilterBoxItemstask]}>
+                                  style={[SelectDetailItemPriority === value.value ? Styles.FilterBoxItemsSelecttasl: Styles.FilterBoxItemstask]}>
                   <View style={[Styles.triangle, { borderBottomColor: value.taskPriorityColor }]} />
                   <Text
                     style={[SelectDetailItemPriority === value.value ? [Styles.txtCenter_filter] : Styles.txtCenter_filter2]}>
@@ -1587,7 +1813,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
             Start Date
           </Text>
-          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footertext_backgroundColor }]}>
             <Text style={Styles.txtFilter}>
               {selectedRange.firstDate}
             </Text>
@@ -1595,7 +1821,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
           End Date
           </Text>
-          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
+          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footertext_backgroundColor }]}>
             <Text style={Styles.txtFilter}>
               {selectedRange.secondDate}
             </Text>
@@ -1881,6 +2107,11 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     }
     setvisiblFilter(false);
   };
+
+
+  const FindCategoryId=async(item)=>{
+    setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
+  }
   return (
     <>
       <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
@@ -2024,6 +2255,9 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                 onChange={item => {
                   setcategoryName(item);
                   setCategoryId(item.value);
+                  Task_subcategory(item.value);
+
+                  setcategoryEntityShow(item.categoryEntityShow)
                 }}
                 renderSelectedItem={(item, unSelect) => (
                   <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
@@ -2034,7 +2268,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   </TouchableOpacity>
                 )}
               />
-              {categoryId === "1" &&
+              {categoryEntityShow === "y" &&
               <>
                 <View style={Styles.ItemModalFilter}>
                   <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Target Entity</Text>
@@ -2056,8 +2290,11 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
                   onChange={item => {
+                    FindCategoryId(item)
+                    setcategoryLevel(item.categoryLevel)
                     setselectedrelatedname(item);
                     setTaskRelatedNameId(item.value);
+                    setRelatedNameLvalue(item.label);
                   }}
                   renderSelectedItem={(item, unSelect) => (
                     <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
@@ -2068,47 +2305,52 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     </TouchableOpacity>
                   )}
                 />
-                <View style={Styles.ItemModalFilter}>
-                  <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Project Name</Text>
-                </View>
-                <Dropdown
-                  style={[Styles.dropdownModalFilter]}
-                  placeholderStyle={Styles.placeholderStyleModalFilter}
-                  selectedTextStyle={Styles.selectedTextModalFilter}
-                  iconStyle={Styles.iconStyle}
-                  itemTextStyle={Styles.itemTextStyle}
-                  data={TaskRelated}
-                  maxHeight={140}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!isFocus ? "Select Project Name" : "..."}
-                  value={selectedRelated}
-                  containerStyle={Styles.containerModalFilter}
-                  renderItem={renderItem_dropDown}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={item => {
-                    GLOBAL.ProjectId = item.value;
-                    if (TaskRelatedNameId === "0") {
-                      setSelectedrelated(item);
-                      setRelatedId(item.value);
-                    } else {
-                      getSites(item.value);
-                      setSelectedrelated(item);
-                      setTaskProjectId(item.value);
-                    }
+                {categoryEntityShow === 'y' &&
+                  <>
+                    <View style={Styles.ItemModalFilter}>
+                      <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Project Name</Text>
+                    </View>
+                    <Dropdown
+                      style={[Styles.dropdownModalFilter]}
+                      placeholderStyle={Styles.placeholderStyleModalFilter}
+                      selectedTextStyle={Styles.selectedTextModalFilter}
+                      iconStyle={Styles.iconStyle}
+                      itemTextStyle={Styles.itemTextStyle}
+                      data={TaskRelated}
+                      maxHeight={140}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocus ? "Select Project Name" : "..."}
+                      value={selectedRelated}
+                      containerStyle={Styles.containerModalFilter}
+                      renderItem={renderItem_dropDown}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={item => {
+                        GLOBAL.ProjectId = item.value;
+                        if (RelatedNameLvalue==='project') {
+                          setSelectedrelated(item);
+                          setRelatedId(item.value);
+                        } else {
+                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value
+                          getSites(categoryId,item.value);
+                          setSelectedrelated(item);
+                          setTaskProjectId(item.value);
+                        }
 
-                  }}
-                  renderSelectedItem={(item, unSelect) => (
-                    <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                      <View style={Styles.selectedStyle2}>
-                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                        <AntDesign color="#fff" name="delete" size={15} />
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                />
-                {parseInt(TaskRelatedNameId) >= 1 &&
+                      }}
+                      renderSelectedItem={(item, unSelect) => (
+                        <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                          <View style={Styles.selectedStyle2}>
+                            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                            <AntDesign color="#fff" name="delete" size={15} />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </>
+                }
+                {categoryLevellist.find((p)=>p?.label==='Site')&&
                 <>
                   <View style={Styles.ItemModalFilter}>
                     <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Site</Text>
@@ -2131,11 +2373,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     onBlur={() => setIsFocus(false)}
                     onChange={item => {
                       GLOBAL.SiteId = item.value;
-                      if (TaskRelatedNameId === "1") {
+                      if (RelatedNameLvalue==='Site') {
                         setselectedTaskSiteName(item);
                         setRelatedId(item.value);
                       } else {
-                        getUnits(item.value);
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
+                        getUnits(categoryId,item.value);
                         setselectedTaskSiteName(item);
                         setTaskSiteId(item.value);
                       }
@@ -2151,7 +2394,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   />
                 </>
                 }
-                {parseInt(TaskRelatedNameId) >= 2 &&
+                {categoryLevellist.find((p)=>p?.label==='Unit') &&
                 <>
                   <View style={Styles.ItemModalFilter}>
                     <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>unit</Text>
@@ -2175,11 +2418,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     onBlur={() => setIsFocus(false)}
                     onChange={item => {
                       GLOBAL.UnitId = item.value;
-                      if (TaskRelatedNameId === "2") {
+                      if (RelatedNameLvalue==='Unit') {
                         setselectedunitName(item);
                         setRelatedId(item.value);
                       } else {
-                        getSection();
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='4')?.value
+                        getSection(categoryId,item.value);
                         setselectedunitName(item);
                         setTaskunitId(item.value);
                       }
@@ -2187,7 +2431,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   />
                 </>
                 }
-                {parseInt(TaskRelatedNameId) >= 3 &&
+                {categoryLevellist.find((p)=>p?.label==='Section') &&
                 <>
                   <View style={Styles.ItemModalFilter}>
                     <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>section</Text>
@@ -2210,11 +2454,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     onBlur={() => setIsFocus(false)}
                     onChange={item => {
                       GLOBAL.SectionId = item.value;
-                      if (TaskRelatedNameId === "3") {
+                      if (RelatedNameLvalue==='Section') {
                         setselectedsectionName(item);
                         setRelatedId(item.value);
                       } else {
-                        getFeatures();
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='5')?.value
+                        getFeatures(categoryId,item.value);
                         setselectedsectionName(item);
                         setTasksectionId(item.value);
                       }
@@ -2222,7 +2467,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   />
                 </>
                 }
-                {TaskRelatedNameId === "4" &&
+                {categoryLevellist.find((p)=>p?.label==='Feature') &&
                 <>
                   <View style={Styles.ItemModalFilter}>
                     <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>feature</Text>
@@ -2244,7 +2489,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     onFocus={() => setIsFocus(true)}
                     onBlur={() => setIsFocus(false)}
                     onChange={item => {
-                      if (TaskRelatedNameId === "4") {
+                      if (RelatedNameLvalue==='Feature') {
                         setselectedfeatureName(item);
                         setRelatedId(item.value);
                       } else {

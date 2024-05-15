@@ -193,6 +193,7 @@ function Project_Sites({ navigation, navigation: { goBack } }) {
   //Get  Dyb===n site Total List from AsyncStorage///
   const getSites = async () => {
     let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
+
     let Site_List = [];
     if (json!==null) {
       let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)

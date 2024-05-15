@@ -170,21 +170,41 @@ function DYB_List_Item({
                           <Text style={[Styles.txtLightColor]}>{value?.postalCode}</Text>
                         </View>
                       </View>
-                      <TouchableOpacity onPress={()=>openMaps(value?.geoLat,value?.geoLong)} style={Styles.InputeRowItems}>
-                        <View style={Styles.InputeRowLocation}>
-                          <MaterialCommunityIcons style={Styles.icon_Location} color="#fff" name="map-search-outline" size={14} />
-                          <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                            <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                          </Text>
-                        </View>
-                        <View
-                          style={Styles.inputStyleLocation}>
-                          { value?.geoLat&&value?.geoLong?
-                            <Text style={Styles.txtLightColorLocation}>{value?.geoLat} , {value?.geoLong}</Text>:
-                            <Text style={Styles.txtLightColorLocation}></Text>
-                          }
-                        </View>
-                      </TouchableOpacity>
+                      {
+                        value?.geoLat && value?.geoLong ?
+                          <TouchableOpacity onPress={() => openMaps(value?.geoLat, value?.geoLong)}
+                                            style={Styles.InputeRowItems}>
+                            <View style={Styles.InputeRowLocation}>
+                              <MaterialCommunityIcons style={Styles.icon_Location} color="#fff"
+                                                      name="map-search-outline" size={14} />
+                              <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Lat
+                                & Long
+                                <Text style={Styles.txtLightColor_samall}> (click here)</Text>
+                              </Text>
+                            </View>
+                            <View
+                              style={Styles.inputStyleLocation}>
+                              {value?.geoLat && value?.geoLong ?
+                                <Text style={Styles.txtLightColorLocation}>{value?.geoLat} , {value?.geoLong}</Text> :
+                                <Text style={Styles.txtLightColorLocation}></Text>
+                              }
+                            </View>
+                          </TouchableOpacity> :
+                          <View
+                                            style={Styles.InputeRowItems}>
+                            <View style={Styles.InputeRowLocation}>
+                              <MaterialCommunityIcons style={Styles.icon_Location} color="#fff"
+                                                      name="map-search-outline" size={14} />
+                              <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Lat
+                                & Long
+                              </Text>
+                            </View>
+                            <View
+                              style={Styles.inputStyleLocation}>
+                                <Text style={Styles.txtLightColorLocation}></Text>
+                            </View>
+                          </View>
+                      }
                     </View>
                   </View>
                 </View>

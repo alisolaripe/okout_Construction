@@ -46,8 +46,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const modalizeRef =  React.createRef();
 
   const [ImageSourceviewarray, setImageSourceviewarray] = useState([]);
-  const [RelatedNameList, setRelatedNameList] = useState([{value:'0',label:'Project'},{value:'1',label:'Site'},
-    {value:'2',label:'Unit'},{value:'3',label:'Section'},{value:'4',label:'Feature'}]);
+  const [RelatedNameList, setRelatedNameList] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
   const [error, setErrors] = useState("");
@@ -81,69 +80,31 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
      Task_priority()
   }, []);
   const Task_priority = async () => {
-    if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_priority + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
-        let Filter = {
-          value: 10,
-          label: "All",
-          taskPriorityColor: "#bd04ae",
-          Icon: "prioriti",
-        };
-        let C = [];
-        for (let item in json?.priorities) {
-          let obj = json?.priorities?.[item];
-          A.push({
-            value: obj.priorityId,
-            label: obj.priorityTitle,
-          });
-        }
-        writeDataStorage(GLOBAL.priorities, json);
-        setTaskpriority(A);
-      });
-    } else {
       let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.priorities));
-
-      let C = [];
+      let A = [];
       for (let item in json?.priorities) {
         let obj = json?.priorities?.[item];
-
         A.push({
           value: obj.priorityId,
           label: obj.priorityTitle,
         });
       }
       setTaskpriority(A);
-    }
   };
   const Task_category =async () => {
-    if(GLOBAL.isConnected===true) {
-      readOnlineApi(Api.Task_category+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        let A = [];
-        console.log(json?.categories,'json?.categories')
-        for (let item in json?.categories) {
-          let obj = json?.categories?.[item];
-          A.push({
-            value: obj.categoryId,
-            label: obj.categoryTitle,
-            categoryEntityShow:obj.categoryEntityShow
-          });
-        }
-        setTaskcategory(A);
-      })
-      }
-    else {
+    let A=[];
       let json =JSON.parse( await AsyncStorage.getItem(GLOBAL.Task_Category));
       for (let item in json?.categories) {
         let obj = json?.categories?.[item];
         A.push({
           value: obj.categoryId,
           label: obj.categoryTitle,
+          categoryEntityShow:obj.categoryEntityShow
         });
       }
       setTaskcategory(A);
-    }
   };
+
   const Navigate_Url= (Url) => {
       navigation.navigate(Url);
   };
@@ -163,16 +124,13 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   };
   ///when user come to add task screen from project or Dyb after add get list from server///
   const DataStorage=async (tasks)=>{
-    if(GLOBAL.TaskName!==''){
       getAllProjectInfo();
       getAllProjectInfo_dyb();
-    }
     await writeDataStorage(GLOBAL.All_Task,tasks);
     navigation.navigate('Task_Management')
   }
   ///get  task list when user come from project or Dyb///
   const My_TaskList_server = async () => {
-
       readOnlineApi(Api.My_TaskList+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         DataStorage(json?.tasks)
       });
@@ -214,7 +172,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       formData.append("description", value?.TaskNote);
       formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
       formData.append("requestBy", GLOBAL?.UserInformation?.userId);
-      console.log(formData,'formData')
       if(GLOBAL.Subtask!=='')
       formData.append("parentTaskId", GLOBAL.Subtask);
       else
@@ -287,13 +244,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
         });
       }
     }
-    // writeDataStorage(GLOBAL.Category_Last_Info,categoryId)
-    // writeDataStorage(GLOBAL.WorkType_Last_Info,WorkTypeId)
-    // if(categoryId==='1') {
-    //   writeDataStorage(GLOBAL.RelatedId_Last_Info, relatedId);
-    //   writeDataStorage(GLOBAL.RelatedName_Last_Info, selectedrelatedname.label);
-    // }
-    // writeDataStorage(GLOBAL.priorityId_Last_Info,priorityId)
   };
 
   const onOpen = () => {
@@ -730,7 +680,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const getAllProjectInfo = async () => {
     if (GLOBAL.isConnected === true){
       readOnlineApi(Api.getAllProjectInfo+`userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        console.log(json,'json : getAllProjectInfo')
         writeDataStorage(GLOBAL.All_Lists, json?.projects);
       });
     }
@@ -776,13 +725,20 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
     markers?.splice(index, 1);
     setImageSourceviewarray(markers)
   }
-  const Back_navigate=()=>{
+  const Back_navigate=async ()=>{
     if (ShowBackBtn===false) {
       setShowWarningMessage(true);
       setShowBackBtn(true)
     }
     else {
       goBack()
+      await AsyncStorage.removeItem(GLOBAL.Category_Last_Info);
+      await AsyncStorage.removeItem(GLOBAL.projectId_Last_Info);
+      await AsyncStorage.removeItem(GLOBAL.siteId_Last_Info);
+      await AsyncStorage.removeItem(GLOBAL.unitId_Last_Info);
+      await AsyncStorage.removeItem(GLOBAL.sectionId_Last_Info);
+      await AsyncStorage.removeItem(GLOBAL.featureId_Last_Info);
+      GLOBAL.TaskRelatedNameId=''
     }
   }
 
@@ -821,7 +777,6 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                       You will lose all changes.Do you still want to leave?
                     </Text>
                   </View>
-
                 </View>
                 <View style={Styles.With100Row2}>
                   <LinearGradient colors={["#9ab3fd", "#82a2ff", "#4B75FCFF"]} style={Styles.btnListDelete}>
@@ -872,7 +827,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                             priorityId={priorityId} setpriorityId={setpriorityId} ShowBtn={ShowBtn} setShowBtn={setShowBtn}
                             setErrors={setErrors} setShowButton={setShowButton} WorkTypeId={WorkTypeId} relatedId={relatedId}
                             Add_Task_Offline2={Add_Task_Offline2} My_TaskList_server2={My_TaskList_server2} getAllProjectInfo={getAllProjectInfo}
-                            getAllProjectInfo_dyb={getAllProjectInfo_dyb} setMessage={setMessage} setShowMessage={setShowMessage}
+                            getAllProjectInfo_dyb={getAllProjectInfo_dyb} setMessage={setMessage} setShowMessage={setShowMessage} setRelatedNameList={setRelatedNameList}
                 />
               </View>
             </View>

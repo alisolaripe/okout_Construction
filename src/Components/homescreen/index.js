@@ -15,7 +15,8 @@ import {Dimensions} from "react-native";
 import Home_meno from "./Home_meno";
 import Voice_Search from "./Voice_Search";
 import AddNewTask2 from '../taskmanagementscreen/AddNewTask';
-import ThemChangeStack from '../colorChangescreen/index'
+import ThemChangeStack from '../colorChangescreen/index';
+import DocmanagementStack from '../docmanagement/index'
 const Drawer = createDrawerNavigator();
 const width = Dimensions.get("window").width;
 
@@ -31,6 +32,7 @@ function Home_Navigation() {
         <Stack.Screen name="VoiceSearch" component={Voice_Search} />
         <Stack.Screen name="AddNewTask2" component={AddNewTask2} />
         <Stack.Screen name="ThemChangeStack" component={ThemChangeStack} />
+        <Stack.Screen name="DocmanagementStack" component={DocmanagementStack} />
       </Stack.Navigator>
 
 

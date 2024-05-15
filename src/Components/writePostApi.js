@@ -74,7 +74,6 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
         else {
           AllList = [...List]
         }
-     console.log(AllList,'AllList')
         var returnData = saveAsynStorage(GLOBAL.offline_data,AllList);
         return returnData;
       }

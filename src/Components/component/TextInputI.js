@@ -45,6 +45,7 @@ import Geolocation from "react-native-geolocation-service";
 import Geocoder from "react-native-geocoder";
 import MapView, { Marker } from "react-native-maps";
 import { writePostApi } from "../writePostApi";
+import { readOnlineApi } from "../ReadPostApi";
 let numOfLinesCompany = 0;
 const screen = Dimensions.get('window');
 const ASPECT_RATIO = (screen.width / screen.height)/4;
@@ -80,7 +81,10 @@ function TextInputI({ GeoAddressCity,
                       selectedunitName,setselectedunitName,selectedsectionName,setselectedsectionName,
                       selectedfeatureName,setselectedfeatureName,TimeRelated,TimeRelatedselct, setTimeRelatedselct,dateDifferenceDays,
                       TaskWorkType,selectedWorkType, setselectedWorkType, setWorkTypeId,setTaskWorkType,setTaskpriority,ShowBtn, setShowBtn,
-                      My_TaskList_server2,getAllProjectInfo_dyb,getAllProjectInfo,setMessage,
+                      My_TaskList_server2,getAllProjectInfo_dyb,getAllProjectInfo,setMessage,setRelatedNameList,Parentlist,setselectparentId,
+                      selectparentname, setselectparentname,DirectoryUser,DirectoryUserName,setDirectoryUserName,setDirectoryUserId,
+                      setOpenEnd,DateFormat,DateFormatEnd,Status,StatusName,setStatusName,setStatusId,selectFile,filename,Recipient,
+                      RecipientName,setRecipientName,RecipientId,setRecipientId
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
@@ -109,9 +113,60 @@ function TextInputI({ GeoAddressCity,
   const [unitList, setunitList] = useState([]);
   const [sectionList, setsectionList] = useState([]);
   const [featureList, setfeatureList] = useState([]);
-  const [Category, setCategory] = useState('');
- const [categoryEntityShow, setcategoryEntityShow] = useState('');
+  const [categoryLevellist, setcategoryLevellist] = useState([]);
+  const [categoryLevel, setcategoryLevel] = useState('');
+ const [categoryEntityShow, setcategoryEntityShow] = useState('n');
+  const [RelatedNameLvalue, setRelatedNameLvalue] = useState('');
+  const Task_subcategory =async (value) => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.Task_subcategory + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${value}`).then(json => {
+        let A = [];
+        console.log(json?.subCategories,'json?.subCategories')
+        for (let item in json?.subCategories) {
+          let obj = json?.subCategories?.[item];
+          A.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow,
+            categoryLevel:obj.categoryLevel
+          });
+        }
+        setRelatedNameList(A);
+        if(GLOBAL.TaskRelatedNameId!==''){
+         if(GLOBAL.TaskRelatedNameId==='1') {
+            setcategoryLevellist(A.filter((p)=>parseInt(p?.categoryLevel)<=2))
 
+          }
+          else if(GLOBAL.TaskRelatedNameId==='2') {
+            setcategoryLevellist(A.filter((p)=>parseInt(p?.categoryLevel)<=3))
+
+          }
+          else if(GLOBAL.TaskRelatedNameId==='3') {
+            setcategoryLevellist(A.filter((p)=>parseInt(p?.categoryLevel)<=4))
+          }
+          else if(GLOBAL.TaskRelatedNameId==='4') {
+            setcategoryLevellist(A.filter((p)=>parseInt(p?.categoryLevel)<=5))
+
+          }
+        }
+        writeDataStorage(GLOBAL.Task_SubCategory, json);
+      })
+    }
+    else {
+      let A=[]
+        let json =JSON.parse( await AsyncStorage.getItem(GLOBAL.Task_SubCategory));
+        for (let item in json?.subCategories) {
+          let obj = json?.subCategories?.[item];
+          A.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow,
+            categoryLevel:obj.categoryLevel
+          });
+        }
+      setRelatedNameList(A);
+      }
+  }
   const getLocation =async (coordinate) => {
     requestLocationPermission().then(res => {
       if (res) {
@@ -217,6 +272,16 @@ function TextInputI({ GeoAddressCity,
       .required("ProjectName ! Please?")
 
   });
+  const validationSchema34 = Yup.object().shape({
+    DirectoryName: Yup.string()
+      .required("Directory Name ! Please?")
+
+  });
+  const validationSchema38 = Yup.object().shape({
+    Version: Yup.string()
+      .required("Version ! Please?")
+
+  });
   const validationSchema12 = Yup.object().shape({
     SectionName: Yup.string()
       .required("SectionName ! Please?")
@@ -267,8 +332,7 @@ function TextInputI({ GeoAddressCity,
     password: Yup.string()
       .required()
       .min(4, "pretty sure this will be hacked"),
-    orgkey: Yup.string().
-   matches(new RegExp("[0-9]")).required("please! Orgkey?").min(8, "too short").max(9,'too long')
+    orgkey: Yup.string().required("please! Orgkey?")
 
   });
   const validationSchema7 = Yup.object().shape({
@@ -461,7 +525,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     }
   };
   const CreateTask = (values) => {
-    console.log(values,'values')
     let idsArray = "";
     const date = new Date();
     const Year = date.getFullYear();
@@ -479,7 +542,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       formData.append("userId",  GLOBAL.UserInformation?.userId);
       formData.append("categoryId", categoryId);
       formData.append("workTypeId", WorkTypeId);
-      if(categoryId==='1') {
+      if(categoryId==='1'||categoryId==='2') {
         formData.append("relatedId", relatedId);
         formData.append("relatedName", selectedrelatedname.label);
       }
@@ -492,7 +555,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       formData.append("description", values?.TaskNote);
       formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
       formData.append("requestBy", GLOBAL?.UserInformation?.userId);
-      console.log(formData,'formData')
       if(GLOBAL.Subtask!=='')
         formData.append("parentTaskId", GLOBAL.Subtask);
       else
@@ -514,10 +576,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           if (json) {
             if (json?.status === true) {
               My_TaskList_server2();
-              if(GLOBAL.TaskName!==''){
-                getAllProjectInfo();
-                getAllProjectInfo_dyb();
-              }
+              getAllProjectInfo();
+              getAllProjectInfo_dyb();
               values.TaskNote=''
               values.Title=''
               setImageSourceviewarray([])
@@ -546,6 +606,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               values.TaskNote=''
               values.Title=''
               My_TaskList_server2();
+              getAllProjectInfo();
+              getAllProjectInfo_dyb();
               setMessage(json?.msg);
               setShowMessage(true);
               setShowButton(true)
@@ -624,195 +686,357 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       }
     }
 
-  }
-  const Task_RelatedList = (Id) => {
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              A.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-
-            if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-              setSelectedrelated({
-                label: A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.label,
-                value: A?.find(p =>parseInt (p.value )=== parseInt( GLOBAL.ProjectId))?.value,
-                _index: A?.findIndex(p => parseInt (p.value )=== parseInt( GLOBAL.ProjectId)),
-              });
-              if(GLOBAL.TaskRelatedNameId==='0') {
-                setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
-              }
-              else
-                getSites();
-            }
-            setTaskRelated(A);
-          })
-          .catch(error => console.log("error", error));
-      }
-    });
   };
   const Task_WorkTypeList =async (Id) => {
     let WorkType_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.WorkType_Last_Info));
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_WorkType + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
+    if (GLOBAL.isConnected === true){
+      readOnlineApi(Api.Task_WorkType+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`).then(json => {
+        let A = [];
 
-            for (let item in json?.workTypeList) {
-              let obj = json?.workTypeList?.[item];
-              A.push({
-                value: obj.workTypeId,
-                label: obj. workTypeName,
-              });
-            }
-if(WorkType_Info!==''||WorkType_Info!==null){
-  setselectedWorkType({
-    label:A?.find(p => parseInt(p.value) ===parseInt(WorkType_Info))?.label,
-    value:A?.find(p =>parseInt(p.value) ===parseInt(WorkType_Info))?.value,
-    _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(WorkType_Info)),
-  });
-  setWorkTypeId(WorkType_Info);
-}
-            setTaskWorkType(A);
-          })
-          .catch(error => console.log("error", error));
-      }
-    });
-  };
-  const getSites = async () => {
-    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-
-    let A = [];
-    if (json!==null) {
-      let Site= json?.find((p) => p?.projectId === GLOBAL.ProjectId)
-      Site?.sites?.forEach((obj) => {
-        A.push({
-          value: obj.siteId,
-          label: obj.siteName,
-        });
-      });
-      setSiteList(A)
-      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-
-        setselectedTaskSiteName({
-          label:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SiteId))?.label,
-          value:A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value,
-          _index:A?.findIndex(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId)),
-        });
-        if(GLOBAL.TaskRelatedNameId==='1') {
-          setRelatedId(A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value)
-        }
-        else {
-          getUnits()
-        }
-      }
-    }
-  }
-  const getUnits =async () => {
-    let json=JSON.parse (await AsyncStorage.getItem(GLOBAL.All_Lists))
-    if (json!==null) {
-      let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
-      let A = [];
-      Filter_units?.units?.forEach((obj) => {
-        A.push({
-          value: obj?.unitId,
-          label: obj?.unitName,
-
-        });
-      })
-      setunitList(A);
-      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-        setselectedunitName({
-          label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.UnitId))?.label,
-          value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value,
-          _index:A?.findIndex(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId)),
-        });
-        if(GLOBAL.TaskRelatedNameId==='2'){
-          setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value)
-        }
-        else
-          getSection()
-      }
-    }
-
-  };
-  const getSection = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
-    if (json!==null) {
-      let A = [];
-      let Filter_units = "";
-      let Filter_sites = "";
-      let Filter_section = "";
-      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
-      Filter_section?.sections?.forEach((obj) => {
-        A.push({
-          value: obj.sectionId,
-          label: obj.sectionName,
-        });
-      });
-      setsectionList(A);
-      if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-        setselectedsectionName({
-          label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId))?.label,
-          value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value,
-          _index:A?.findIndex(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId)),
-        });
-        if(GLOBAL.TaskRelatedNameId==='3'){
-          setRelatedId(A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value)
-        }
-        else
-          getFeatures()
-      }
-    }
-  };
-  const getFeatures = async () => {
-    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists))
-    if (json !== null) {
-      let A = [];
-      let Filter_units = "";
-      let Filter_sites = "";
-      let Filter_section = "";
-      let Filter_feature = "";
-      Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-      Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-      Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
-      Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
-
-      if (Filter_feature?.features) {
-        Filter_feature?.features?.forEach((obj) => {
-
+        for (let item in json?.workTypeList) {
+          let obj = json?.workTypeList?.[item];
           A.push({
-            value: obj.featureId,
-            label: obj.featureName,
-
+            value: obj.workTypeId,
+            label: obj. workTypeName,
           });
-        });
+        }
+        if(WorkType_Info!==''||WorkType_Info!==null){
+          setselectedWorkType({
+            label:A?.find(p => parseInt(p.value) ===parseInt(WorkType_Info))?.label,
+            value:A?.find(p =>parseInt(p.value) ===parseInt(WorkType_Info))?.value,
+            _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(WorkType_Info)),
+          });
+          setWorkTypeId(WorkType_Info);
+        }
+        setTaskWorkType(A);
+      });
+    }
+//
+//
+//     isNetworkConnected().then(status => {
+//       if (status) {
+//         fetch(GLOBAL.OrgAppLink_value + Api.Task_WorkType + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
+//           method: "GET",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//         })
+//           .then(resp => {
+//             return resp.json();
+//           })
+//           .then(json => {
+//             let A = [];
+//
+//             for (let item in json?.workTypeList) {
+//               let obj = json?.workTypeList?.[item];
+//               A.push({
+//                 value: obj.workTypeId,
+//                 label: obj. workTypeName,
+//               });
+//             }
+// if(WorkType_Info!==''||WorkType_Info!==null){
+//   setselectedWorkType({
+//     label:A?.find(p => parseInt(p.value) ===parseInt(WorkType_Info))?.label,
+//     value:A?.find(p =>parseInt(p.value) ===parseInt(WorkType_Info))?.value,
+//     _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(WorkType_Info)),
+//   });
+//   setWorkTypeId(WorkType_Info);
+// }
+//             setTaskWorkType(A);
+//           })
+//           .catch(error => console.log("error", error));
+//       }
+//     });
+  };
+  const Task_RelatedList = (Id,SubCategory_List) => {
+    if (GLOBAL.isConnected === true)
+    {
+      readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`).then(json => {
+        let A = [];
+        for (let item in json?.relatedList) {
+          let obj = json?.relatedList?.[item];
+          A.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
+
+        if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+          let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
+          const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
+          setSelectedrelated({
+            label: A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.label,
+            value: A?.find(p =>parseInt (p.value )=== parseInt( GLOBAL.ProjectId))?.value,
+            _index: A?.findIndex(p => parseInt (p.value )=== parseInt( GLOBAL.ProjectId)),
+          });
+          if(GLOBAL.TaskRelatedNameId==='0') {
+            setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
+          }
+          else
+            getSites(categoryId,seacrhId,SubCategory_List);
+        }
+        setTaskRelated(A);
+      })
+    }
+    else {
+
+    }
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //
+    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+    //           setSelectedrelated({
+    //             label: A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.label,
+    //             value: A?.find(p =>parseInt (p.value )=== parseInt( GLOBAL.ProjectId))?.value,
+    //             _index: A?.findIndex(p => parseInt (p.value )=== parseInt( GLOBAL.ProjectId)),
+    //           });
+    //           if(GLOBAL.TaskRelatedNameId==='0') {
+    //             setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
+    //           }
+    //           else
+    //             getSites();
+    //         }
+    //         setTaskRelated(A);
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
+  };
+  const FindCategoryId=async(item)=>{
+    setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
+  }
+  const getSites = async (TaskRelatedNameId,value,SubCategory_List) => {
+                 const json=await getEntityInfo(TaskRelatedNameId,value)
+                let A = [];
+                for (let item in json?.relatedList) {
+                  let obj = json?.relatedList?.[item];
+                  A.push({
+                    value: obj.relatedId,
+                    label: obj.relatedName,
+                  });
+                }
+                setSiteList(A);
+                  if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+                    let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value
+                    const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='3')?.value
+                    setselectedTaskSiteName({
+                      label:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SiteId))?.label,
+                      value:A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value,
+                      _index:A?.findIndex(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId)),
+                    });
+                    if(GLOBAL.TaskRelatedNameId==='1') {
+                      setRelatedId(A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value)
+                    }
+                    else {
+                      getUnits(categoryId,seacrhId,SubCategory_List)
+                    }
+                  }
+
+    }
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${7}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //         setSiteList(A);
+    //           if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+    //             setselectedTaskSiteName({
+    //               label:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SiteId))?.label,
+    //               value:A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value,
+    //               _index:A?.findIndex(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId)),
+    //             });
+    //             if(GLOBAL.TaskRelatedNameId==='1') {
+    //               setRelatedId(A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value)
+    //             }
+    //             else {
+    //               getUnits()
+    //             }
+    //           }
+    //
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
+  const getEntityInfo =async (categoryId,SearchId) => {
+    return (
+      readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${categoryId}&relatedSearchId=${SearchId}`).then(json => {
+        console.log(json,'json')
+       return json;
+      }));
+
+
+  };
+  const getUnits =async (TaskRelatedNameId,value,SubCategory_List) => {
+      const json=await getEntityInfo(TaskRelatedNameId,value)
+        let A = [];
+        for (let item in json?.relatedList) {
+          let obj = json?.relatedList?.[item];
+          A.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
+        setunitList(A);
+        if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+          let seacrhId=A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value;
+          const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='4')?.value
+          setselectedunitName({
+            label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.UnitId))?.label,
+            value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value,
+            _index:A?.findIndex(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId)),
+          });
+          if(GLOBAL.TaskRelatedNameId==='2'){
+            setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value)
+          }
+          else
+            getSection(categoryId,seacrhId,SubCategory_List)
+        }
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${8}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //         setunitList(A);
+    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+    //           setselectedunitName({
+    //             label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.UnitId))?.label,
+    //             value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value,
+    //             _index:A?.findIndex(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId)),
+    //           });
+    //           if(GLOBAL.TaskRelatedNameId==='2'){
+    //             setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value)
+    //           }
+    //           else
+    //             getSection()
+    //         }
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
+  };
+  const getSection = async (TaskRelatedNameId,value,SubCategory_List) => {
+    const json=await getEntityInfo(TaskRelatedNameId,value)
+        let A = [];
+        for (let item in json?.relatedList) {
+          let obj = json?.relatedList?.[item];
+          A.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
+        setsectionList(A);
+        if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+          let seacrhId=A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value;
+          const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='5')?.value
+          setselectedsectionName({
+            label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId))?.label,
+            value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value,
+            _index:A?.findIndex(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId)),
+          });
+          if(GLOBAL.TaskRelatedNameId==='3'){
+            setRelatedId(A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value)
+          }
+          else
+            getFeatures(categoryId,seacrhId)
+        }
+
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${9}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //         setsectionList(A);
+    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
+    //           setselectedsectionName({
+    //             label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId))?.label,
+    //             value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value,
+    //             _index:A?.findIndex(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId)),
+    //           });
+    //           if(GLOBAL.TaskRelatedNameId==='3'){
+    //             setRelatedId(A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value)
+    //           }
+    //           else
+    //             getFeatures()
+    //         }
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
+  };
+  const getFeatures = async (TaskRelatedNameId,value) => {
+    const json=await getEntityInfo(TaskRelatedNameId,value)
+        let A = [];
+        for (let item in json?.relatedList) {
+          let obj = json?.relatedList?.[item];
+          A.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
         setfeatureList(A);
         if(GLOBAL.TaskRelatedNameId==='4'||RelatedId_Info!=='') {
           setselectedfeatureName({
@@ -821,19 +1045,79 @@ if(WorkType_Info!==''||WorkType_Info!==null){
             _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID)),
           });
           if(GLOBAL.TaskRelatedNameId==='4')
-          setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
+            setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
         }
-      }
-    }
-  }
+
+    // isNetworkConnected().then(status => {
+    //   if (status) {
+    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${10}`, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //       .then(resp => {
+    //         return resp.json();
+    //       })
+    //       .then(json => {
+    //         let A = [];
+    //         for (let item in json?.relatedList) {
+    //           let obj = json?.relatedList?.[item];
+    //           A.push({
+    //             value: obj.relatedId,
+    //             label: obj.relatedName,
+    //           });
+    //         }
+    //         setfeatureList(A);
+    //         if(GLOBAL.TaskRelatedNameId==='4'||RelatedId_Info!=='') {
+    //           setselectedfeatureName({
+    //             label:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.label,
+    //             value:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.value,
+    //             _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID)),
+    //           });
+    //           if(GLOBAL.TaskRelatedNameId==='4')
+    //             setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
+    //         }
+    //       })
+    //       .catch(error => console.log("error", error));
+    //   }
+    // });
+  };
   const getInfo=async ()=>{
-    let Category_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.Category_Last_Info))
-    if(Category_Info||Category_Info!==null||Category_Info!==''){
-      setShowBtn(true)
+    let SubCategory_List =JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_SubCategory2))
+    setRelatedNameList(SubCategory_List);
+    setCategoryId(GLOBAL?.categoryId);
+    Task_WorkTypeList(GLOBAL?.categoryId);
+    Task_RelatedList('1',SubCategory_List);
+    console.log(SubCategory_List,'SubCategory_List')
+    setSelectedcategory({label:"Subcontract",value:"1",_index:0});
+    setcategoryEntityShow('y');
+    if(GLOBAL.TaskRelatedNameId==='0') {
+      setTaskRelatedNameId("0");
+      setselectedrelatedname({label:"Project",value:"0",_index:0})
+    }
+    else if(GLOBAL.TaskRelatedNameId==='1') {
+      setTaskRelatedNameId("1");
+      setselectedrelatedname({label:"Site",value:"1",_index:1})
+      setcategoryLevellist(SubCategory_List.filter((p)=>parseInt(p?.categoryLevel)<=2))
+    }
+    else if(GLOBAL.TaskRelatedNameId==='2') {
+      setTaskRelatedNameId("2");
+      setselectedrelatedname({label:"Unit",value:"2",_index:2})
+      setcategoryLevellist(SubCategory_List.filter((p)=>parseInt(p?.categoryLevel)<=3))
+    }
+    else if(GLOBAL.TaskRelatedNameId==='3') {
+      setTaskRelatedNameId("3");
+      setselectedrelatedname({label:"Section",value:"3",_index:3})
+      setcategoryLevellist(SubCategory_List.filter((p)=>parseInt(p?.categoryLevel)<=4))
+    }
+    else if(GLOBAL.TaskRelatedNameId==='4') {
+      setTaskRelatedNameId("4");
+      setselectedrelatedname({label:"Feature",value:"4",_index:4})
+      setcategoryLevellist(SubCategory_List.filter((p)=>parseInt(p?.categoryLevel)<=5))
     }
   }
   useEffect(()=>{
-
     if(location===undefined||location?.latitude==='') {
       if(location?.latitude==='') {
         requestLocationPermission().then(res => {
@@ -857,37 +1141,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
     }
 
     if( GLOBAL.TaskRelatedNameId!==''){
-      setCategoryId(GLOBAL?.categoryId)
-      Task_WorkTypeList(GLOBAL?.categoryId)
-      Task_RelatedList('1')
-      setSelectedcategory({label:"Subcontract",value:"1",_index:0})
-      console.log(GLOBAL.TaskRelatedNameId,'GLOBAL.TaskRelatedNameId')
-      if(GLOBAL.TaskRelatedNameId==='0') {
-        setTaskRelatedNameId("0");
-        setselectedrelatedname({label:"Project",value:"0",_index:0})
-
-      }
-      else if(GLOBAL.TaskRelatedNameId==='1') {
-        setTaskRelatedNameId("1");
-        setselectedrelatedname({label:"Site",value:"1",_index:1})
-      }
-      else if(GLOBAL.TaskRelatedNameId==='2') {
-        setTaskRelatedNameId("2");
-        setselectedrelatedname({label:"Unit",value:"2",_index:2})
-
-      }
-      else if(GLOBAL.TaskRelatedNameId==='3') {
-        setTaskRelatedNameId("3");
-        setselectedrelatedname({label:"Section",value:"3",_index:3})
-
-      }
-      else if(GLOBAL.TaskRelatedNameId==='4') {
-        setTaskRelatedNameId("4");
-        setselectedrelatedname({label:"Feature",value:"4",_index:4})
-      }
+      getInfo()
     }
 
   },[]);
+
   const ClearDate=()=>{
     setGeoAddressCity('')
   }
@@ -2479,7 +2737,6 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     if(values?.orgkey?.length===9)
                       checkOrgCode(values?.orgkey)
                   }}
-                  keyboardType={"numeric"}
                   placeholderTextColor={'#fff'} />
                 <View style={[{}]}>
                   <View>
@@ -3257,10 +3514,11 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   onChange={item=> {
                     setSelectedcategory(item);
                     setCategoryId(item.value);
-                    writeDataStorage(GLOBAL.Category_Last_Info,item.value)
-                    Task_RelatedList(item.value)
-                    Task_WorkTypeList(item.value)
-                    setcategoryEntityShow(item.categoryEntityShow)
+                    writeDataStorage(GLOBAL.Category_Last_Info,item.value);
+                    Task_RelatedList(item.value);
+                    Task_WorkTypeList(item.value);
+                    setcategoryEntityShow(item.categoryEntityShow);
+                    Task_subcategory(item.value)
                   }}
                   renderSelectedItem={(item, unSelect) => (
                     <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
@@ -3271,14 +3529,10 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     </TouchableOpacity>
                   )}
                 />
-
                 {error==='selectedcategory' && selectedcategory==='' ?
                   <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null
                 }
-
-
                 <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Work Type</Text>
-
                 <Dropdown
                   style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
                   placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
@@ -3344,6 +3598,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     </TouchableOpacity>
                   )}
                 />
+
                 {categoryEntityShow==='y'?
                   <>
                     <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Target Entity </Text>
@@ -3365,9 +3620,12 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       onFocus={() => setIsFocusrelated(true)}
                       onBlur={() => setIsFocusrelated(false)}
                       onChange={item=> {
+                        FindCategoryId(item)
                         setselectedrelatedname(item);
                         setTaskRelatedNameId(item.value);
-                        writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label)
+                        setcategoryLevel(item.categoryLevel);
+                        writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label);
+                        setRelatedNameLvalue(item.label);
                       }}
                     />
                     <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Project Name</Text>
@@ -3375,9 +3633,9 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
                       placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
                       selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                      inputSearchStyle={Styles.inputSearchStyle}
                       iconStyle={Styles.iconStyle}
                       itemTextStyle={Styles.itemTextStyle}
+                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                       data={TaskRelated}
                       search
                       maxHeight={300}
@@ -3386,20 +3644,22 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       placeholder={!isFocusrelated ? 'Select Project Name' : '...'}
                       searchPlaceholder="Search..."
                       value={selectedrelated}
-                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                       renderItem={renderItem}
                       onFocus={() => setIsFocusrelated(true)}
                       onBlur={() => setIsFocusrelated(false)}
                       onChange={item=> {
                         writeDataStorage(GLOBAL.projectId_Last_Info,item.value)
                         GLOBAL.ProjectId=item.value;
-                        if(TaskRelatedNameId==='0') {
+                        if(RelatedNameLvalue==='project') {
                           setSelectedrelated(item);
                           setRelatedId(item.value);
+                          // categoryLevel, setcategoryLevel
                           writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
                         }
+
                         else {
-                          getSites(item.value);
+                         const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value
+                          getSites(categoryId,item.value);
                           setSelectedrelated(item);
                           setTaskProjectId(item.value)
 
@@ -3408,16 +3668,16 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     />
                   </>:null
                 }
-                {parseInt(TaskRelatedNameId)>=1&&
+                {categoryLevellist.find((p)=>p?.label==='Site')&&
                 <>
                   <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Site</Text>
                   <Dropdown
                     style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
                     placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
                     selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                    inputSearchStyle={Styles.inputSearchStyle}
                     iconStyle={Styles.iconStyle}
                     itemTextStyle={Styles.itemTextStyle}
+                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                     data={SiteList}
                     search
                     maxHeight={300}
@@ -3426,28 +3686,30 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     placeholder={!isFocusrelated ? 'Select Site' : '...'}
                     searchPlaceholder="Search..."
                     value={selectedTaskSiteName}
-                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+
                     renderItem={renderItem}
                     onFocus={() => setIsFocusrelated(true)}
                     onBlur={() => setIsFocusrelated(false)}
                     onChange={item=> {
                       GLOBAL.SiteId=item.value;
                       writeDataStorage(GLOBAL.siteId_Last_Info,item.value)
-                      if(TaskRelatedNameId==='1') {
+                      if(RelatedNameLvalue==='Site') {
                         setselectedTaskSiteName(item);
                         setRelatedId(item.value)
                         writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
                       }
                       else {
-                        getUnits(item.value);
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
+                        getUnits(categoryId,item.value);
                         setselectedTaskSiteName(item);
                         setTaskSiteId(item.value)
                       }
                     }}
                   />
                 </>
+
                 }
-                {parseInt(TaskRelatedNameId)>=2&&
+                {categoryLevellist.find((p)=>p?.label==='Unit')&&
                 <>
                   <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>unit</Text>
                   <Dropdown
@@ -3456,28 +3718,29 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
                     iconStyle={Styles.iconStyle}
                     itemTextStyle={Styles.itemTextStyle}
-                    data={unitList}
-                    search
+                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
                     maxHeight={300}
                     labelField="label"
                     valueField="value"
-                    placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                    placeholder={!isFocusrelated ? 'Select unit' : '...'}
                     searchPlaceholder="Search..."
                     value={selectedunitName}
-                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+                    data={unitList}
+                    search
                     renderItem={renderItem}
                     onFocus={() => setIsFocusrelated(true)}
                     onBlur={() => setIsFocusrelated(false)}
                     onChange={item=> {
                       writeDataStorage(GLOBAL.unitId_Last_Info,item.value)
                       GLOBAL.UnitId=item.value
-                      if(TaskRelatedNameId==='2') {
+                      if(RelatedNameLvalue==='Unit') {
                         setselectedunitName(item);
                         setRelatedId(item.value)
                         writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
                       }
                       else {
-                        getSection();
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='4')?.value
+                        getSection(categoryId,item.value);
                         setselectedunitName(item);
                         setTaskunitId(item.value)
                       }
@@ -3485,7 +3748,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                   />
                 </>
                 }
-                {parseInt(TaskRelatedNameId)>=3&&
+                {categoryLevellist.find((p)=>p?.label==='Section')&&
                   <>
                     <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Section</Text>
                     <Dropdown
@@ -3500,7 +3763,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       maxHeight={300}
                       labelField="label"
                       valueField="value"
-                      placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                      placeholder={!isFocusrelated ? 'Select Section' : '...'}
                       searchPlaceholder="Search..."
                       value={selectedsectionName}
                       containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
@@ -3510,13 +3773,14 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                       onChange={item=> {
                         writeDataStorage(GLOBAL.sectionId_Last_Info,item.value)
                         GLOBAL.SectionId=item.value
-                        if(TaskRelatedNameId==='3') {
+                        if(RelatedNameLvalue==='Section') {
                           setselectedsectionName(item);
                           setRelatedId(item.value)
                           writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
                         }
                         else {
-                          getFeatures();
+                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='5')?.value
+                          getFeatures(categoryId,item.value);
                           setselectedsectionName(item);
                           setTasksectionId(item.value)
                         }
@@ -3524,7 +3788,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                     />
                   </>
                 }
-                {TaskRelatedNameId==='4'&&
+                {categoryLevellist.find((p)=>p?.label==='Feature')&&
                     <>
                       <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Feature</Text>
                       <Dropdown
@@ -3539,7 +3803,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
-                        placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                        placeholder={!isFocusrelated ? 'Select Feature' : '...'}
                         searchPlaceholder="Search..."
                         value={selectedfeatureName}
                         containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
@@ -3548,7 +3812,7 @@ if(WorkType_Info!==''||WorkType_Info!==null){
                         onBlur={() => setIsFocusrelated(false)}
                         onChange={item=> {
                           writeDataStorage(GLOBAL.featureId_Last_Info,item.value)
-                          if(TaskRelatedNameId==='4') {
+                          if(RelatedNameLvalue==='Feature') {
                             setselectedfeatureName(item);
                             setRelatedId(item.value)
                             writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
@@ -4584,8 +4848,8 @@ if(WorkType_Info!==''||WorkType_Info!==null){
         <Formik
           initialValues={{
             UserName:GLOBAL.UserInformation.Username,
-            password:GLOBAL.PASSWORD_value,
-            Confirmpassword:GLOBAL.PASSWORD_value,
+            password:GLOBAL.UserInformation.Password,
+            Confirmpassword:GLOBAL.UserInformation.Password,
             FullName:GLOBAL.UserInformation.FullName,
             OrgKey:GLOBAL.UserInformation.OrgAppKey
           }}
@@ -4960,6 +5224,572 @@ if(WorkType_Info!==''||WorkType_Info!==null){
   }
 
   ///////////////////Customer////////////////
+
+  if (numberValue === 34) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            DirectoryName: "",
+            Note:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema34}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+<View style={Styles.InputeRow}>
+  <View style={Styles.InputeRowItems}>
+    <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Directory Name</Text>
+    <TextInput
+      value={values.DirectoryName}
+      style={[inputStyle, { paddingVertical: 3 }]}
+      onChangeText={handleChange("DirectoryName")}
+      onFocus={() => setFieldTouched("DirectoryName")}
+      placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+    {touched.DirectoryName && errors.DirectoryName &&
+    <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.DirectoryName}</Text>
+    }
+  </View>
+  <View style={Styles.InputeRowItems}>
+    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Parent</Text>
+    <Dropdown
+      style={[Styles.dropdownLocation]}
+      placeholderStyle={Styles.placeholderStyle}
+      selectedTextStyle={Styles.selectedTextStyle}
+      iconStyle={Styles.iconStyle}
+      itemTextStyle={Styles.itemTextStyle}
+      data={Parentlist}
+      maxHeight={150}
+      labelField="label"
+      valueField="value"
+      inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+      placeholder={selectparentname}
+      value={selectparentname}
+      containerStyle={Styles.containerStyle}
+      renderItem={renderItem_Location}
+      onFocus={() => setIsFocus(true)}
+      onBlur={() => setIsFocus(false)}
+      onChange={item => {
+        setselectparentname(item.label);
+        setIsFocus(false);
+        setselectparentId(item.value);
+      }}
+      renderSelectedItem={(item, unSelect) => (
+        <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+          <View style={Styles.selectedStyle2}>
+            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+            <AntDesign color="#fff" name="delete" size={15} />
+          </View>
+        </TouchableOpacity>
+      )}
+    />
+  </View>
+</View>
+
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Notes</Text>
+              <TextInput
+                value={values.Note}
+                onChangeText={handleChange("Note")}
+                onFocus={() => setFieldTouched("Note")}
+                multiline={true}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+              {
+                ShowButton===true?
+                  <View style={[Styles.ViewItems_center]}>
+                    <ButtonI style={[Styles.btn, {
+                      //margin: normalize(15),
+                      flexDirection: "row",
+                      width: '100%',
+                      paddingVertical: 2,
+                      marginTop: normalize(30),
+                    }]}//handleSubmit
+                             onpress={handleSubmit}
+                             categoriIcon={""}
+                             title={tittlebtn}
+                             colorsArray={['#ffadad','#f67070','#FF0000']}
+                             styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+                  </View>:null
+              }
+
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+  if (numberValue === 35) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Note:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema34}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+              <View style={Styles.InputeRow}>
+                <View style={Styles.InputeRowItems}>
+                  <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Directory Name</Text>
+                  <View
+                    style={[inputStyle, { paddingVertical: 3 }]}
+                   >
+                    <Text style={Styles.textItem2}>
+                      {Name}
+                    </Text>
+                  </View>
+                </View>
+                <View style={Styles.InputeRowItems}>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Directory User</Text>
+                  <Dropdown
+                    style={[Styles.dropdownLocation]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={DirectoryUser}
+                    maxHeight={150}
+                    labelField="label"
+                    valueField="value"
+                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                    placeholder={DirectoryUserName}
+                    value={DirectoryUserName}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem_Location}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      setDirectoryUserName(item.label);
+                      setIsFocus(false);
+                      setDirectoryUserId(item.value);
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </View>
+              <View  style={Styles.dateBox}>
+                <View  style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setOpencompleted(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Approval Date start
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setOpencompleted(true)
+                  }} style={Styles.dateBoxItemtransparent}>
+                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>
+                      Approval Date end
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={Styles.dateBoxitems}>
+                  <TouchableOpacity onPress={()=> {
+                    setOpen(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate2}>
+                      {DateFormat}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=> {
+                    setOpenEnd(true)
+                  }} style={Styles.dateBoxItem}>
+                    <Text style={Styles.txtdate2}>
+                      {/*{dateendcompleted}*/}
+                      {DateFormatEnd}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Notes</Text>
+              <TextInput
+                value={values.Note}
+                onChangeText={handleChange("Note")}
+                onFocus={() => setFieldTouched("Note")}
+                multiline={true}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+
+                  <View style={[Styles.ViewItems_center]}>
+                    <ButtonI style={[Styles.btn, {
+                      //margin: normalize(15),
+                      flexDirection: "row",
+                      width: '100%',
+                      paddingVertical: 2,
+                      marginTop: normalize(30),
+                    }]}//handleSubmit
+                             onpress={handleSubmit}
+                             categoriIcon={""}
+                             title={tittlebtn}
+                             colorsArray={["#8bc3f8", "#4a7fb3", "#1c3045"]}
+                             styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+                  </View>
+
+
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+  if (numberValue === 36) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Note:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema34}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+              <View style={Styles.InputeRow}>
+
+
+                <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Tags</Text>
+                <Dropdown
+                  style={[Styles.dropdownLocation]}
+                  placeholderStyle={Styles.placeholderStyle}
+                  selectedTextStyle={Styles.selectedTextStyle}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={DirectoryUser}
+                  maxHeight={150}
+                  labelField="label"
+                  valueField="value"
+                  inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                  placeholder={DirectoryUserName}
+                  value={DirectoryUserName}
+                  containerStyle={Styles.containerStyle}
+                  renderItem={renderItem_Location}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    setDirectoryUserName(item.label);
+                    setIsFocus(false);
+                    setDirectoryUserId(item.value);
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={["#8bc3f8", "#4a7fb3", "#1c3045"]}
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+
+
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+
+  if (numberValue === 37) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Note:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema34}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+              <View style={Styles.InputeRow}>
+                  <Text style={[Styles.txtLightColor,{textAlign:"left"}]}>Status</Text>
+                  <Dropdown
+                    style={[Styles.dropdownLocation]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={Status}
+                    maxHeight={125}
+                    labelField="label"
+                    valueField="value"
+                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                    placeholder={StatusName}
+                    value={StatusName}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem_Location}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      setStatusName(item.label);
+                      setIsFocus(false);
+                      setStatusId(item.value);
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+              </View>
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(60),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={["#8bc3f8", "#4a7fb3", "#1c3045"]}
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+  if (numberValue === 38) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Version:'',
+            Note:""
+          }}
+          onSubmit={values => {
+            onChangeText(values);
+          }}
+          validationSchema={validationSchema38}
+        >
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+              <View style={Styles.InputeRow}>
+                <View style={Styles.InputeRowItems}>
+                  <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Document Title</Text>
+                  <View
+                    style={[inputStyle, { paddingVertical: 4 }]}
+                  >
+                    <Text style={Styles.textItem2}>
+                      {Name}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={Styles.InputeRowItems}>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Document Version</Text>
+                  <TextInput
+                    value={values.Version}
+                    onChangeText={handleChange("Version")}
+                    onFocus={() => setFieldTouched("Version")}
+                    multiline={true}
+                    style={[inputStyle,{paddingVertical:3}]}
+                    placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+                </View>
+                {touched.Version && errors.Version &&
+                <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Version}</Text>
+                }
+              </View>
+
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Notes</Text>
+              <TextInput
+                value={values.Note}
+                onChangeText={handleChange("Note")}
+                onFocus={() => setFieldTouched("Note")}
+                multiline={true}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>upload File</Text>
+              <TouchableOpacity onPress={()=>selectFile()}
+                style={[inputStyle, { paddingVertical: 3 }]}
+              >
+                {
+                  filename===''?
+                    <Text style={Styles.textItem2}>
+                      Choose
+
+                    </Text>:
+                    <Text style={Styles.textItem2}>
+                      {filename}
+                    </Text>
+                }
+
+              </TouchableOpacity>
+
+
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={["#8bc3f8", "#4a7fb3", "#1c3045"]}
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+
+
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
+  if (numberValue === 39) {
+    return (
+      <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+        <Formik
+          initialValues={{
+            Subject:'',
+            Message:""
+          }}
+          onSubmit={values => {
+          onChangeText(values);
+          }}
+          validationSchema={validationSchema38}>
+          {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
+            <View style={{width:'90%'}}>
+
+                  <Text style={[Styles.txtLightColor,{textAlign:"left"}]}>Recipient</Text>
+                  <Dropdown
+                    style={[Styles.dropdownLocation]}
+                    placeholderStyle={Styles.placeholderStyle}
+                    selectedTextStyle={Styles.selectedTextStyle}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={Recipient}
+                    maxHeight={125}
+                    labelField="label"
+                    valueField="value"
+                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                    placeholder={RecipientName}
+                    value={RecipientName}
+                    containerStyle={Styles.containerStyle}
+                    renderItem={renderItem_Location}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      setRecipientName(item.label);
+                      setIsFocus(false);
+                      setRecipientId(item.value);
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+
+                <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Subject</Text>
+                <TextInput
+                  value={values.Subject}
+                  onChangeText={handleChange("Subject")}
+                  onFocus={() => setFieldTouched("Subject")}
+                  multiline={true}
+                  style={[inputStyle,{paddingVertical:'4%'}]}
+                  placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Message</Text>
+              <TextInput
+                value={values.Note}
+                onChangeText={handleChange("Message")}
+                onFocus={() => setFieldTouched("Message")}
+                multiline={true}
+                style={[inputStyle,{paddingVertical:'4%'}]}
+                onContentSizeChange={(e) => {
+                  numOfLinesCompany = e.nativeEvent.contentSize.height / 14;
+                }}
+                placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
+
+              <View style={[Styles.ViewItems_center]}>
+                <ButtonI style={[Styles.btn, {
+                  //margin: normalize(15),
+                  flexDirection: "row",
+                  width: '100%',
+                  paddingVertical: 2,
+                  marginTop: normalize(30),
+                }]}//handleSubmit
+                         onpress={handleSubmit}
+                         categoriIcon={""}
+                         title={tittlebtn}
+                         colorsArray={["#8bc3f8", "#4a7fb3", "#1c3045"]}
+                         styleTxt={[Styles.txtbtn,{fontSize: normalize(16),}]} sizeIcon={27} />
+              </View>
+
+
+            </View>
+
+          )}
+        </Formik>
+
+      </View>
+    );
+  }
 }
 
 

@@ -41,7 +41,6 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
   const Assigned_TaskList = async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Assigned_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        console.log(json, "json:Assigned_TaskList");
         writeDataStorage(GLOBAL.Assigned_TaskList, json?.tasks);
       });
     }
@@ -68,7 +67,7 @@ function Taskstructure({ navigation, navigation: { goBack } }) {
               <View style={Styles.FlexWrapHome}>
                 {GLOBAL.Submodules?.map((value, key) => {
                   return (
-                    <LinearGradient key={key} colors={["#6598cd", "#5082ba", "#4a6e8e"]} style={Styles.ModuleBox}>
+                    <LinearGradient key={key} colors={GLOBAL.task_structurelistbackgroundColor} style={Styles.ModuleBox}>
                       <TouchableOpacity onPress={() => {
                         if (value?.constModule_Name === "My Tasks") {
                           GLOBAL.selectItem = 1;

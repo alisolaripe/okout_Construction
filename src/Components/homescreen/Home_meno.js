@@ -6,7 +6,7 @@ import { LogOutModal } from "../component/LogOutModal";
 import { DrawerActions } from "@react-navigation/native";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content, Button } from "native-base";
-import { removeDataStorage } from "../Get_Location";
+import { removeDataStorage, writeDataStorage } from "../Get_Location";
 
 const GLOBAL = require("../Global");
 const Api = require("../Api");
@@ -23,6 +23,7 @@ function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [modules, setmodules] = useState([]);
   useEffect(() => {
+    console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
     const unsubscribe = navigation.addListener("focus", () => {
       Usermodules();
       getAllProjectInfo();
@@ -31,10 +32,27 @@ function Home_meno({ navigation }) {
       My_TaskList();
       Task_category();
       getmapkey();
-
+      Task_subcategory()
     });
     return unsubscribe;
   }, []);
+
+  const Task_subcategory =async (value) => {
+      readOnlineApi(Api.Task_subcategory + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${1}`).then(json => {
+        let A = [];
+        for (let item in json?.subCategories) {
+          let obj = json?.subCategories?.[item];
+          A.push({
+            value: obj.categoryId,
+            label: obj.categoryTitle,
+            categoryEntityShow:obj.categoryEntityShow,
+            categoryLevel:obj.categoryLevel
+          });
+        }
+        writeDataStorage(GLOBAL.Task_SubCategory2, A);
+      })
+
+  }
   ///get Map key from AsyncStorage///
   const getmapkey = async () => {
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.mapKey));
@@ -156,6 +174,9 @@ function Home_meno({ navigation }) {
       GLOBAL.TaskName = "";
       Navigate_Url("Project_structureStack")
     }
+    else if (constModule_Id === "2") {
+      Navigate_Url("DocmanagementStack")
+    }
   };
   const Navigate_Url = (Url) => {
     navigation.navigate(Url);
@@ -193,10 +214,10 @@ function Home_meno({ navigation }) {
         <Content contentContainerStyle={{ alignItems: "center", justifyContent: "center"}}>
           <View style={Styles.ViewAbsoluteHome} >
             <ImageBackground source={Photoes.Waves} tintColor={GLOBAL.header_backgroundColor}
-                             style={{ width: "100%", flex: 1, alignItems: "center", justifyContent: "center",height:120 }} resizeMode="stretch">
-              <TouchableOpacity onPress={()=> Navigate_Url("VoiceSearch")} style={[Styles.VoiceCircle,{backgroundColor:GLOBAL.header_backgroundColor}]}>
-                <MaterialIcons name={"keyboard-voice"} size={35} color={GLOBAL.headertext_backgroundColor}  />
-              </TouchableOpacity>
+                             style={{ width: "100%", flex: 1, alignItems: "center", justifyContent: "center",height:80 }} resizeMode="stretch">
+              {/*<TouchableOpacity onPress={()=> Navigate_Url("VoiceSearch")} style={[Styles.VoiceCircle,{backgroundColor:GLOBAL.header_backgroundColor}]}>*/}
+              {/*  <MaterialIcons name={"keyboard-voice"} size={35} color={GLOBAL.headertext_backgroundColor}  />*/}
+              {/*</TouchableOpacity>*/}
             </ImageBackground>
           </View>
           {showModalDelete &&

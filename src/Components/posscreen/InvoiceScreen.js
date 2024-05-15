@@ -95,14 +95,10 @@ function InvoiceScreen({navigation,navigation:{goBack}}) {
       A = [...A];
     }
     else {
-      console.log('else')
       let markers = [...A];
-      console.log(markers,'markers')
-      console.log(Exist,'Exist')
       markers[Exist] = { ...markers[Exist], total: total,QTYNumber:QTYNumber};
       setSourceviewarray(markers);
     }
-    console.log(Sourceviewarray,'A:new')
   }
   return (
     <Container style={[Styles.Backcolor]}>

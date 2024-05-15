@@ -12,6 +12,7 @@ import java.util.List;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.devfd.RNGeocoder.RNGeocoderPackage;
 import com.wenkesj.voice.VoicePackage; // <------ Add this!
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =

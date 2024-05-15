@@ -171,7 +171,6 @@ function Task_management_Item({
       GLOBAL.TaskId = value.taskId;
       setchangestatus(true);
     } else if (id === "4") {
-      console.log(value?.taskPlanDueDate, "value?.taskPlanDueDate");
       setDateFormatplanendcompleted(value?.taskPlanDueDate);
       setDateFormatplanstartcompleted(value?.taskPlanStartDate);
       setDatecompleted(new Date(value?.taskPlanStartDate));
@@ -479,7 +478,7 @@ function Task_management_Item({
 
     writePostApi("POST", Api.ChangeStatusTask, formData).then(json => {
       if (json) {
-        console.log(json?.status, "?.status");
+
         if (json?.status === true) {
           setMessage(json?.msg);
           setShowMessage(true);
@@ -1186,12 +1185,11 @@ function Task_management_Item({
                         new Date(Moment(date)?.format("YYYY-MM-DD")),
                         new Date(Moment(DateFormatplanendcompleted)?.format("YYYY-MM-DD")),
                       );
-                      console.log(Days, "Days");
+
                       let hours = dateDifferenceInHours(
                         new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                         new Date(Moment(DateFormatplanendcompleted)?.format("YYYY-MM-DD H:mm")),
                       );
-                      console.log(hours, "hours");
                       if (Days !== 0) {
                         setdateDifferenceInHours(0);
                         setdateDifferenceInDays(parseInt(Days));
@@ -1215,7 +1213,6 @@ function Task_management_Item({
                     setOpenendcompleted(false);
                     setDateendcompleted(date);
                     setDateFormatplanendcompleted(Moment(date)?.format("YYYY-MM-DD H:mm"));
-                    console.log(DateFormatplanendcompleted, "DateFormatplanendcompleted");
                     setShowButton(true);
                     if (DateFormatplanstartcompleted === "") {
                       let Days = dateDifferenceInDays(
@@ -1226,7 +1223,6 @@ function Task_management_Item({
                         new Date(Moment(value?.taskPlanStartDate)?.format("YYYY-MM-DD H:mm")),
                         new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                       );
-                      console.log(hours, "hours");
                       if (Days !== 0) {
                         setdateDifferenceInHours(0);
                         setdateDifferenceInDays(parseInt(Days));
@@ -1241,12 +1237,10 @@ function Task_management_Item({
                         new Date(Moment(DateFormatplanstartcompleted)?.format("YYYY-MM-DD")),
                         new Date(Moment(date)?.format("YYYY-MM-DD")),
                       );
-                      console.log(Days, "Days");
                       let hours = dateDifferenceInHours(
                         new Date(Moment(DateFormatplanstartcompleted)?.format("YYYY-MM-DD H:mm")),
                         new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                       );
-                      console.log(hours, "hours");
                       if (Days !== 0) {
                         setdateDifferenceInHours(0);
                         setdateDifferenceInDays(parseInt(Days));

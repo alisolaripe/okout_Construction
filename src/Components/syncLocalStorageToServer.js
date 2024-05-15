@@ -313,11 +313,9 @@ export async function syncLocalStorageToServer()
   }
   const  removeItemValue=async (id)=> {
     let  get_MethodsList = await readDataStorage(GLOBAL.offline_data);
-    console.log(get_MethodsList,'removeItemValue')
     let index = get_MethodsList.findIndex((p) => p.id === id);
     let markers = [...get_MethodsList];
     markers.splice(index, 1);
-    console.log(markers,'removeItemValue:markers')
     await writeDataStorage(GLOBAL.offline_data,markers)
   }
   try{

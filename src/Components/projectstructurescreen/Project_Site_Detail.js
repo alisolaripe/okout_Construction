@@ -870,15 +870,15 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
             Start Date
           </Text>
-          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
+          <View style={[Styles.WeekFilterBoxItem]}>
             <Text style={Styles.txtFilternumber}>
               {selectedRange.firstDate}
             </Text>
           </View>
-          <Text style={[Styles.txtFilter3,{color:GLOBAL.headertext_backgroundColor}]}>
+          <Text style={[Styles.txtFilter3]}>
             End Date
           </Text>
-          <View style={[Styles.WeekFilterBoxItem,{backgroundColor:GLOBAL.footer_backgroundColor }]}>
+          <View style={[Styles.WeekFilterBoxItem]}>
             <Text style={Styles.txtFilternumber}>
               {selectedRange.secondDate}
             </Text>

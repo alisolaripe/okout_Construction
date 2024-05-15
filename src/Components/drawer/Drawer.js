@@ -29,6 +29,9 @@ function DrawerCustomize(props) {
       GLOBAL.TaskName = "";
       props.navigation.navigate("Project_structureStack", { screenMode: "Dyb" });
     }
+    else if (constModule_Id === "2") {
+      props.navigation.navigate("DocmanagementStack")
+    }
   };
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: GLOBAL.backgroundColor }}>
@@ -37,8 +40,8 @@ function DrawerCustomize(props) {
           <ImageBackground source={Photoes.abstract}
                            style={{ width: "100%", flex: 1,alignItems:'center'  }} resizeMode="stretch">
           <TouchableOpacity onPress={()=>  props.navigation.navigate('ProfileStack')} style={Styles.ViewAbsoluteDrawer}>
-            {  GLOBAL.PictureUrl === null ?
-                <EvilIcons name={"user"} size={130} color={Colors.Light} />:
+            {  GLOBAL.PictureUrl === null|| GLOBAL.PictureUrl ===''?
+                <EvilIcons name={"user"} size={130} color={Colors.button} />:
                 <Image style={Styles.imageProfileDrawer} source={{uri:GLOBAL.PictureUrl}}/>
             }
             <Text style={[Styles.txtMenu,{ margin: normalize(10) }]}>{GLOBAL.UserInformation?.Email}</Text>

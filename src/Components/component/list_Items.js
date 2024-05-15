@@ -25,6 +25,7 @@ import { writePostApi } from "../writePostApi";
 import MapView, { Marker } from "react-native-maps";
 import { geocodePosition, requestLocationPermission } from "../Get_Location";
 import Geolocation from "react-native-geolocation-service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 let City=[]
@@ -51,6 +52,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
   const [Message, setMessage] = useState("");
   const [ShowButton, setShowButton] = useState(true);
   const [showMap, setshowMap] = useState(false);
+  const [SubCategoryList, setSubCategoryList] = useState([]);
   const screen = Dimensions.get('window');
 
   const ASPECT_RATIO = (screen.width / screen.height)/4;
@@ -67,6 +69,12 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
       </View>
     );
   };
+  useEffect(()=>{
+
+
+
+  },[]);
+
   const onChangeText_Press=(value, Cheked)=>{
     if(tittlebtn==='Update Project'){
       UpdateProject(value, Cheked)
@@ -90,7 +98,6 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
     }
   }
   const ClickManagement =(id)=>{
-    console.log(id,'idididid')
     if (id === "1") {
 // if(GLOBAL.UserPermissionsList?.Project?.edit==='1') {
   GLOBAL.UpdateProjectId = value.projectId;
@@ -624,6 +631,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                         GLOBAL.RelatedId=value.projectId;
                         GLOBAL.TaskRelatedNameId='0';
                         GLOBAL.categoryId='1';
+                        GLOBAL.ProjectId=value.projectId;
                         GLOBAL.Url_Navigate='Project_structure2'
                         Navigate_Url("Task_managementStack3");
                       }} >
@@ -705,6 +713,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                             GLOBAL.RelatedId=value.unitId;
                             GLOBAL.TaskRelatedNameId='2';
                             GLOBAL.categoryId='1';
+                            GLOBAL.UnitId = value.unitId;
                             GLOBAL.Url_Navigate='Project_UnitsStack'
                           Navigate_Url("Task_managementStack3");
                         }} >
@@ -742,6 +751,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                             <TouchableOpacity onPress={()=> {
                             GLOBAL.TaskName=value.sectionName;
                               GLOBAL.RelatedName='section';
+                              GLOBAL.SectionId=value.sectionId;
                               GLOBAL.RelatedId=value.sectionId;
                               GLOBAL.TaskRelatedNameId='3';
                               GLOBAL.categoryId='1';
@@ -801,6 +811,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                                   GLOBAL.RelatedName='feature';
                                   GLOBAL.RelatedId=value.featureId;
                                   GLOBAL.TaskRelatedNameId='4';
+                                  GLOBAL.UpdateFeatureID=value.featureId;
                                   GLOBAL.categoryId='1';
                                   GLOBAL.Url_Navigate='Project_FeaturesStack'
                                   Navigate_Url("Task_managementStack3");
@@ -1000,28 +1011,49 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                     <Text style={[Styles.txtLightColor]}>{value?.postalCode}</Text>
                   </View>
                 </View>
+                {
+                  value?.geoLat&&value?.geoLong?
+                    <TouchableOpacity onPress={()=>openMaps(value?.geoLat,value?.geoLong)} style={Styles.InputeRowItems}>
+                      <View style={Styles.InputeRowLocation}>
+                        <MaterialCommunityIcons
+                          style={Styles.icon_Location}
+                          color="#fff"
+                          name="map-search-outline"
+                          size={14}
+                        />
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
 
-                <TouchableOpacity onPress={()=>openMaps(value?.geoLat,value?.geoLong)} style={Styles.InputeRowItems}>
-                  <View style={Styles.InputeRowLocation}>
-                    <MaterialCommunityIcons
-                      style={Styles.icon_Location}
-                      color="#fff"
-                      name="map-search-outline"
-                      size={14}
-                    />
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
-                      <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
-                    </Text>
-                  </View>
-                  <View
-                    style={Styles.inputStyleLocation}>
-                    { value?.geoLat&&value?.geoLong?
-                      <Text style={Styles.txtLightColorLocation}>{value?.geoLat} , {value?.geoLong}</Text>:
-                      <Text style={Styles.txtLightColorLocation}></Text>
-                    }
+                          <Text style={Styles.txtLightColor_samall}>  (click here)</Text>
+                        </Text>
+                      </View>
+                      <View
+                        style={Styles.inputStyleLocation}>
+                        { value?.geoLat&&value?.geoLong?
+                          <Text style={Styles.txtLightColorLocation}>{value?.geoLat} , {value?.geoLong}</Text>:
+                          <Text style={Styles.txtLightColorLocation}></Text>
+                        }
 
-                  </View>
-                </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>:
+
+                    <View  style={Styles.InputeRowItems}>
+                      <View style={Styles.InputeRowLocation}>
+                        <MaterialCommunityIcons
+                          style={Styles.icon_Location}
+                          color="#fff"
+                          name="map-search-outline"
+                          size={14}
+                        />
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Lat & Long
+                        </Text>
+                      </View>
+                      <View
+                        style={Styles.inputStyleLocation}>
+                          <Text style={Styles.txtLightColorLocation}></Text>
+                      </View>
+                    </View>
+                }
+
               </View>
             </View>
           </View>

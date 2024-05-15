@@ -111,7 +111,6 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
     const Minutes = date.getMinutes();
     const Seconds = date.getSeconds();
     Full = `${Year}-${Month}-${Day}`;
-    console.log(Full, "Full");
     YearFull = `${Year}-${Month}-${Day} ${Hour}:${Minutes}:${Seconds}`;
   }, []);
   const Navigate_Url = (Url) => {
@@ -540,7 +539,6 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
       formData.append("totaltime", dateDifferenceHours);
     writePostApi("POST", Api.ChangeStatusTask, formData).then(json => {
       if (json) {
-        console.log(json, "json");
         if (json?.status === true) {
           setMessage(json?.msg);
           setShowMessage(true);
@@ -758,7 +756,6 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   const My_TaskList_server2 = async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
-        console.log(json, "json");
         GLOBAL.buttonName = "My_TaskList";
         writeDataStorage(GLOBAL.All_Task, json?.tasks);
       });
@@ -1739,12 +1736,10 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
                                 new Date(Moment(date)?.format("YYYY-MM-DD")),
                                 new Date(Moment(dateend)?.format("YYYY-MM-DD")),
                               );
-                              console.log(Days, "Days");
                               let hours = dateDifferenceInHours(
                                 new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                                 new Date(Moment(dateend)?.format("YYYY-MM-DD H:mm")),
                               );
-                              console.log(hours, "hours");
                               if (Days !== 0) {
                                 setdateDifferenceInHours(0);
                                 setdateDifferenceInDays(parseInt(Days));
@@ -1778,7 +1773,6 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
                                 new Date(Moment(DateFormatplanstart)?.format("YYYY-MM-DD H:mm")),
                                 new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                               );
-                              console.log(hours, "hours");
                               if (Days !== 0) {
                                 setdateDifferenceInHours(0);
                                 setdateDifferenceInDays(parseInt(Days));
@@ -1793,12 +1787,11 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
                                 new Date(Moment(startdate)?.format("YYYY-MM-DD")),
                                 new Date(Moment(date)?.format("YYYY-MM-DD")),
                               );
-                              console.log(Days, "Days");
                               let hours = dateDifferenceInHours(
                                 new Date(Moment(startdate)?.format("YYYY-MM-DD H:mm")),
                                 new Date(Moment(date)?.format("YYYY-MM-DD H:mm")),
                               );
-                              console.log(hours, "hours");
+
                               if (Days !== 0) {
                                 setdateDifferenceInHours(0);
                                 setdateDifferenceInDays(parseInt(Days));

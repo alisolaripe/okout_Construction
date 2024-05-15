@@ -28,28 +28,24 @@ function InvoiceFactor({
       // }
       // Invoice(QTYCount,total,Id)
     }
-    console.log(QTYCount,'QTYCount')
   }
   const DecreaseCounter=(QTY,Price,Id,Discount)=>{
-    console.log('DecreaseCounter:DecreaseCounter')
+
     if(QTYCount<=QTY) {
       let discount=0;
-      console.log(QTYCount,'QTYCount before + 1')
          setQTYCount((prev) => prev+1);
       // setQTYNumber(String(QTYCount));
       // let total=parseInt(QTYCount)*parseInt(Price);
-       console.log(QTYCount,'QTYCount after + 1');
       // console.log(QTYNumber,'QTYNumber');
       // if(Discount!=='0'||Discount!==0) {
       // discount = percentage(total,Discount);
       // settotalPrice(total-discount);
-      // console.log(QTYNumber,'QTYNumber : DecreaseCounter')
       }
     // else {
     //      settotalPrice(total)
     //   }
     //    Invoice(QTYCount,total,Id)
-    console.log(QTYCount,'QTYCount')
+
     }
    // }
   const percentage=(num, per)=> {

@@ -6,6 +6,7 @@ module.exports = {
    getAllProjectInfo_dyb:`api/ApiConstruction/getAllProjectInfo?`,
    getBuildNotes:`api/ApiConstruction/getBuildNotes?`,
    Task_category:`api/ApiTask/getTaskCategory?`,
+   Task_subcategory:`api/ApiTask/getTaskSubCategory?`,
    Task_List:`api/ApiTask/getTaskComboList?`,
    My_TaskList:`api/ApiTask/getMyTask?`,
    Assigned_TaskList:`api/ApiTask/getassignedTask?`,
@@ -16,6 +17,7 @@ module.exports = {
    Task_Users:`api/ApiGetCommonInfo/getUsers?`,
    Task_WorkType:`api/ApiTask/getWorkTypeComboList?`,
    Task_Project:`api/ApiTask/getCategoryRelatedTableComboList?`,
+
    Task_detail:`api/ApiTask/getSingleTask?`,
    Reason_Code:`https://demorent.okout.net/api/ApiTask/getTaskReasonCombo?`,
    getCountry:`api/ApiGetCommonInfo/getCountry`,

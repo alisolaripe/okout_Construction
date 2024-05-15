@@ -51,38 +51,30 @@ function Voice_Search({navigation,navigation: { goBack } }) {
     };
   }, []);
   const onSpeechStart = (e) => {
-    console.log('onSpeechStart: ', e);
     setStarted('√');
   };
   const onSpeechRecognized = (e) => {
-    console.log('onSpeechRecognized: ', e);
     setRecognized('√');
   };
   const onSpeechEnd = (e) => {
-    console.log('onSpeechEnd: ', e);
     setEnd('√');
   };
   const onSpeechError = (e) => {
-    console.log('onSpeechError: ', e);
     setError(JSON.stringify(e.error));
   };
   const onSpeechResults = (e) => {
-    console.log('onSpeechResults: ', e);
     setResults(e.value);
   };
   const onSpeechPartialResults = (e) => {
-    console.log('onSpeechPartialResults: ', e);
     setPartialResults(e.value);
   };
   const onSpeechVolumeChanged = (e) => {
-    console.log('onSpeechVolumeChanged: ', e);
     setVolume(e.value);
   };
   const _startRecognizing = async () => {
     _clearState();
     try {
       await Voice.start('en-US');
-      console.log('called start');
     } catch (e) {
       console.error(e);
     }

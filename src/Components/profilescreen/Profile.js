@@ -36,7 +36,7 @@ function Profile( { navigation, navigation: { goBack }}) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [Message, setMessage] = useState("");
   useEffect( () => {
-    setVersionCheck('1.0.26');
+    setVersionCheck('1.0.28');
     const date=new Date();
     const Day=date.getDate();
     const Month=date.getMonth()+1;
@@ -49,6 +49,7 @@ function Profile( { navigation, navigation: { goBack }}) {
     const unsubscribe = navigation.addListener("focus", () => {
       setPictureUrl(GLOBAL.UserInformation?.profileImg);
     });
+    //418.08
       return unsubscribe;
 
   },[]);
@@ -97,9 +98,8 @@ const UpdateProfileInfo=(value)=>{
         name: idsArray.fileName,
       });
     }
-    console.log(formData,'formData')
     writePostApi("POST",Api.UpdateProfile, formData, ImageSourceviewarray).then(json => {
-      console.log(json,'json')
+
       if (json) {
         if (json?.status === true) {
           Update_async(value)
@@ -124,7 +124,7 @@ const UpdateProfileInfo=(value)=>{
   }
   else {
     writePostApi("POST",Api.UpdateProfile, formData).then(json => {
-      console.log(json,'json')
+
       if (json) {
         if (json?.status === true) {
           Update_async(value)
@@ -202,7 +202,6 @@ const UpdateProfileInfo=(value)=>{
             setPictureUrl(res)
             setImageSourceviewarray(photos)
           });
-          console.log(ImageSourceviewarray,'ImageSourceviewarray')
         }
     });
   };
@@ -299,9 +298,9 @@ const UpdateProfileInfo=(value)=>{
             }
               <View style={Styles.mainSystemDesignerProfile}>
                 {
-                  PictureUrl === null ?
+                  PictureUrl === null || GLOBAL.PictureUrl ===''?
                     <EvilIcons name={"user"} size={170} color={GLOBAL.headertext_backgroundColor} /> :
-                    <FastImage  style={[Styles.imageProfile,{borderColor: GLOBAL.headertext_backgroundColor}]} source={{uri:PictureUrl}}/>
+                    <FastImage   style={[Styles.imageProfile,{borderColor: GLOBAL.headertext_backgroundColor}]} source={{uri:PictureUrl}}/>
                 }
                 <TouchableOpacity
                   style={Styles.btnSelectImage}

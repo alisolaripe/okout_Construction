@@ -26,10 +26,11 @@ function ThemChange({ navigation,navigation: { goBack }  }) {
   const [selectcolor, setselectcolor] = useState('');
   const [coloroptions,setcoloroptions] = useState([
     {id:0,name1:'#f6f9f9',name2:'#fff',textcolor:'#4a6e8e',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]},
-    {id:1,name1:'#2A3052FF',name2:'#4a6e8e',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]}
-  ,{id:3,name1:'#EED3D9',name2:'#F5E8DD',textcolor:'#4a6e8e',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]},
-    {id:4,name1:'#9AD0C2',name2:'#2D9596',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]}
-    ,{id:5,name1:'#AAD7D9',name2:'#92C7CF',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]}
+    {id:1,name1:'#fff',name2:'#4a6e8e',textcolor:'#fff',
+      taskstructurelist:["#f6f9f9", "#b8b8b8", "#8b8b8b"]}
+  ,{id:3,name1:'#fff',name2:'#67C6E3',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]},
+    {id:4,name1:'#fff',name2:'#000fff',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]}
+    ,{id:5,name1:'#fff',name2:'#92C7CF',textcolor:'#fff',taskstructurelist:["#6598cd", "#5082ba", "#4a6e8e"]}
   ]);
   const { navigate} = useNavigation();
   useEffect(()=>{
@@ -52,7 +53,10 @@ function ThemChange({ navigation,navigation: { goBack }  }) {
     GLOBAL.footer_backgroundColor=value.name2;
     GLOBAL.footertext_backgroundColor=value.textcolor;
     GLOBAL.filter_backgroundColor=value.textcolor;
-    GLOBAL.taskstructurelist_backgroundColor=[]
+    GLOBAL.input_titleColor=value.textcolor;
+    GLOBAL.input_textColor=value.textcolor;
+    GLOBAL.input_borderColor=value.textcolor;
+    GLOBAL.task_structurelistbackgroundColor=value.taskstructurelist
   };
   const LogOut = () => {
     removeDataStorage(GLOBAL.PASSWORD_KEY);

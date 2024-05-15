@@ -412,7 +412,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
             Months = Month;
           }
           if (ImageList?.length !== 0) {
-            buildid = parseInt(A?.[A?.length - 1]?.buildId) + 1;
+            buildid = parseInt(ImageList?.[ImageList?.length - 1]?.buildId) + 1;
           } else {
             buildid = buildid + 1;
           }

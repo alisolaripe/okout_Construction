@@ -77,6 +77,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
         endDate = tomorrow?.toLocaleDateString();
       }
       let newString = endDate.split("/");
+
       endDate_Format = newString?.[2] + "-" + newString?.[1] + "-" + newString?.[0];
       Exist = B?.findIndex((p) => p.endDate === endDate_Format);
       if (Exist === -1) {
@@ -101,11 +102,12 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
         let B = "";
         let attachements = [];
         json?.buildNotes?.forEach((obj) => {
+          console.log(obj,'objobjobj')
           if (obj?.attachements?.length !== 0) {
             const Day = obj?.attachements?.[0]?.postDate?.split(" ")?.[0]?.split("-")?.[2];
             const Month = obj?.attachements?.[0]?.postDate?.split(" ")?.[0]?.split("-")?.[1];
             B = "folder-multiple-image";
-
+            let WeekDay= getDayOfWeek(obj?.attachements?.[0]?.postDate?.split(" ")?.[0])
             A.push({
               buildId: obj?.buildId,
               title: obj?.buildIdTitle,
@@ -115,7 +117,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
               FullYear: obj?.attachements?.[0]?.postDate?.split(" ")?.[0],
               relatedId: obj?.buildIdRelatedId,
               Type: "Image",
-              WeekDay: getDayOfWeek(obj?.attachements?.[0]?.postDate?.split(" ")?.[0]),
+              WeekDay:WeekDay
             });
             obj?.attachements?.forEach((obj2) => {
               let Address = obj2?.geoAddress?.split(",");
@@ -135,11 +137,13 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
                 });
               }
             });
-          } else if (obj?.notes?.length !== 0 && GLOBAL.DYB !== "n") {
+          }
+    else if (obj?.notes?.length !== 0 && GLOBAL.DYB !== "n") {
             B = "clipboard-text-outline";
             let FullYear = obj?.notes?.postDate?.split(" ");
             const Day = FullYear?.[0]?.split("-")?.[2];
             const Month = FullYear?.[0]?.split("-")?.[1];
+            let WeekDay= getDayOfWeek(FullYear?.[0])
             A.push({
               buildId: obj?.buildId,
               title: obj?.buildIdTitle,
@@ -149,7 +153,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
               FullYear: FullYear?.[0],
               relatedId: obj?.buildIdRelatedId,
               Type: "Note",
-              WeekDay: getDayOfWeek(obj?.attachements?.[0]?.postDate?.split(" ")?.[0]),
+              WeekDay:WeekDay
             });
             attachements.push({
               buildId: obj?.notes.buildId,
@@ -268,7 +272,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
         </View>
         <View style={Styles.With50List}>
           <ButtonI
-            style={Styles.btnFilter}
+            style={Styles.btnFilterfeature}
             onpress={() => {
               setshowModalCalender(false);
               setShowDateRange(false);
@@ -276,7 +280,7 @@ function Project_Feature_List({ navigation, navigation: { goBack } }) {
             categoriIcon={"Nopadding"}
             title={"Close"}
             colorsArray={["#b9a4ff", "#9f83ff", "#7953FAFF"]}
-            styleTxt={[Styles.txt, { fontSize: normalize(13) }]} sizeIcon={27} />
+            styleTxt={[Styles.txtbtn2, { fontSize: normalize(13) }]} sizeIcon={27} />
         </View>
       </SafeAreaView>
     );
