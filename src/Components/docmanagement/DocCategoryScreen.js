@@ -11,6 +11,7 @@ import { readOnlineApi } from "../ReadPostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
+
 const GLOBAL = require("../Global");
 function DocCategoryScreen({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
