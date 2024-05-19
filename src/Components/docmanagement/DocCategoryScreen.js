@@ -8,7 +8,6 @@ import { Footer1 } from "../component/Footer";
 import { removeDataStorage,writeDataStorage } from "../Get_Location";
 import Doc_List_Item from "../component/Doc_List_Item";
 import { readOnlineApi } from "../ReadPostApi";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
