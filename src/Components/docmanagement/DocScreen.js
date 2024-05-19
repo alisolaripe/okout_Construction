@@ -1,22 +1,24 @@
 import { Container } from "native-base";
 import { Header } from "../component/Header";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, ImageBackground, Text, View } from "react-native";
 import { Styles } from "../Styles";
 import { LogOutModal } from "../component/LogOutModal";
 import { Footer1 } from "../component/Footer";
 import { removeDataStorage } from "../Get_Location";
 import Doc_List_Item from "../component/Doc_List_Item";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 function Doc_Management({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [modules, setmodules] = useState([{id:0,name:'St Albans'}]);
+  const [modules, setmodules] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [ShowMessageDelete, setShowMessageDelete] = useState(false);
   const [Message, setMessage] = useState("");
-  const [categorylist, setcategorylist] = useState([{  value: '1',name: 'St Albans',Code:'Demo5',
+  const [data, setdata] = useState(['']);
+  const [categorylist, setcategorylist] = useState([{ value: '1',name: 'St Albans',Code:'Demo5',
     Reference:'07/05/2024',Notes:'07/05/2024',CreatedOn:'Okout Admin',CreatedBy:'07/05/2024'}]);
   const LogOut = () => {
     removeDataStorage(GLOBAL.PASSWORD_KEY);
@@ -32,7 +34,7 @@ function Doc_Management({ navigation, navigation: { goBack } }) {
   };
   const renderItem = ({ item, index }) => (
     <Doc_List_Item key={index}  value={item} SeeDetail={SeeDetail} categorylist={categorylist} Screen={'Doc'}
-                Navigate_Url={Navigate_Url} Message={Message} data={GLOBAL.Docdata}
+                Navigate_Url={Navigate_Url} Message={Message} data={data}
     />
   );
   const renderSectionHeader = () => (
@@ -69,10 +71,34 @@ function Doc_Management({ navigation, navigation: { goBack } }) {
     <View style={Styles.SectionFooter} />
   );
   const SeeDetail = (value) => {
+    console.log(value.Id,'value.Id')
     GLOBAL.DocID = value.Id;
     GLOBAL.DocSubCategoryTitle=value.name
     navigation.navigate("DocCategoryScreen");
   };
+  useEffect(() => {
+    getDoc()
+  }, []);
+  const getDoc=async ()=>{
+    let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Get_Docmanage));
+    let getDoc = [];
+    let data = [];
+    json?.sections?.forEach((obj) => {
+      getDoc.push({
+        Id: obj?.sectionId,
+        name: obj?.sectionTitle,
+      });
+    });
+    json?.sectionMenu?.forEach((obj) => {
+      data.push({
+        value: obj?.id,
+        label: obj?.name,
+      });
+    });
+
+    setdata(data)
+    setmodules(getDoc)
+  }
   return (
     <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header colors={["#8bc3f8", "#4a7fb3", "#1c3045"]}

@@ -316,7 +316,7 @@ const UpdateProfileInfo=(value)=>{
               </View>
           </View>
         </Content>
-      <Modalize ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
+      <Modalize avoidKeyboardLikeIOS={true}  ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
         {renderContent()}
       </Modalize>
       <Footer1 onPressHome={Navigate_Url}  onPressdeleteAsync={logout_Url}/>

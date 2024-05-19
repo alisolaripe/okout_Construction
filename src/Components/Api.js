@@ -9,6 +9,7 @@ module.exports = {
    Task_subcategory:`api/ApiTask/getTaskSubCategory?`,
    Task_List:`api/ApiTask/getTaskComboList?`,
    My_TaskList:`api/ApiTask/getMyTask?`,
+   get_document:`api/ApiDirectory/getDirectory?`,
    Assigned_TaskList:`api/ApiTask/getassignedTask?`,
    getUserPermissions:`api/ApiGetCommonInfo/getUserPermissions?`,
    Task_priority:`api/ApiTask/getTaskPriority?`,

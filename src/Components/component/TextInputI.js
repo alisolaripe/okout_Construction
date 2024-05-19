@@ -38,7 +38,6 @@ import LinearGradient from "react-native-linear-gradient";
 import { Colors } from "../Colors";
 import Carousel from "react-native-snap-carousel";
 import Task_Edit_Image from "./Task_Edit_Image";
-import { isNetworkConnected } from "../GlobalConnected";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { geocodePosition, requestLocationPermission, writeDataStorage } from "../Get_Location";
 import Geolocation from "react-native-geolocation-service";
@@ -88,11 +87,13 @@ function TextInputI({ GeoAddressCity,
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
+  const [securetTextConfirm, setSecuretTextConfirm] = useState(true);
   const [slider1ActiveSlide,setslider1ActiveSlide] = useState(0);
   let _slider1Ref = useRef(null);
   const [attachmentId, setattachmentId] = useState(true);
   const [taskId, settaskId] = useState(true);
   const [iconsecuret, setIconsecuret] = useState("eye-off");
+  const [iconsecuret2, setIconsecuret2] = useState("eye-off");
   const [isFocus, setIsFocus] = useState(false);
   const [switchDYB, setswitchDYB] = useState(false);
   const [switchDYB2, setswitchDYB2] = useState(false);
@@ -211,9 +212,7 @@ function TextInputI({ GeoAddressCity,
       getCity3(Default_countryId,adminArea);
     }
   };
-
   const getCity3 = async (value,adminArea) => {
-
     let A = [];
     let City_filter=City?.cities?.filter((p)=>p?.coutryId===value)
     City_filter?.forEach((obj) => {
@@ -232,7 +231,6 @@ function TextInputI({ GeoAddressCity,
     }
   };
   const _renderItem_Carousel = ({item, index}) => {
-
     return (
       <Task_Edit_Image item={item} key={index} onOpen={onOpen}
                        colors={ ['#a39898','#786b6b','#382e2e'] }
@@ -313,13 +311,10 @@ function TextInputI({ GeoAddressCity,
   const validationSchema32 = Yup.object().shape({
     taskNote: Yup.string()
       .required("Reason ! Please?"),
-
-
   });
   const validationSchema15 = Yup.object().shape({
     FeatureName: Yup.string()
       .required("FeatureName ! Please?")
-
   });
   const validationSchema4 = Yup.object().shape({
     sitename: Yup.string()
@@ -327,13 +322,11 @@ function TextInputI({ GeoAddressCity,
   });
   const validationSchema6 = Yup.object().shape({
     username: Yup.string()
-      .required("please! username?")
-     ,
+      .required("please! username?"),
     password: Yup.string()
       .required()
       .min(4, "pretty sure this will be hacked"),
     orgkey: Yup.string().required("please! Orgkey?")
-
   });
   const validationSchema7 = Yup.object().shape({
     password: Yup.string()
@@ -348,11 +341,9 @@ function TextInputI({ GeoAddressCity,
       .required("Description ! Please?"),
   });
   const validationSchema24 = Yup.object().shape({
-
     TaskNote: Yup.string()
       .required("Description ! Please?"),
   });
-
   const _showModalDelete = () => {
     return (
       <View style={Styles.bottomModal}>
@@ -524,6 +515,16 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       setIconsecuret("eye");
     }
   };
+  const onpressConfirm = () => {
+
+    if (securetTextConfirm === false) {
+      setSecuretTextConfirm(true);
+      setIconsecuret2("eye-off");
+    } else {
+      setSecuretTextConfirm(false);
+      setIconsecuret2("eye");
+    }
+  };
   const CreateTask = (values) => {
     let idsArray = "";
     const date = new Date();
@@ -625,7 +626,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
             setRelatedId(0)
             setShowBtn(true)
              setTimeout(function(){ setShowMessage(false)}, 4000)
-            // navigation.navigate('Task_Management')
           }
         });
       }
@@ -711,42 +711,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         setTaskWorkType(A);
       });
     }
-//
-//
-//     isNetworkConnected().then(status => {
-//       if (status) {
-//         fetch(GLOBAL.OrgAppLink_value + Api.Task_WorkType + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
-//           method: "GET",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//         })
-//           .then(resp => {
-//             return resp.json();
-//           })
-//           .then(json => {
-//             let A = [];
-//
-//             for (let item in json?.workTypeList) {
-//               let obj = json?.workTypeList?.[item];
-//               A.push({
-//                 value: obj.workTypeId,
-//                 label: obj. workTypeName,
-//               });
-//             }
-// if(WorkType_Info!==''||WorkType_Info!==null){
-//   setselectedWorkType({
-//     label:A?.find(p => parseInt(p.value) ===parseInt(WorkType_Info))?.label,
-//     value:A?.find(p =>parseInt(p.value) ===parseInt(WorkType_Info))?.value,
-//     _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(WorkType_Info)),
-//   });
-//   setWorkTypeId(WorkType_Info);
-// }
-//             setTaskWorkType(A);
-//           })
-//           .catch(error => console.log("error", error));
-//       }
-//     });
   };
   const Task_RelatedList = (Id,SubCategory_List) => {
     if (GLOBAL.isConnected === true)
@@ -781,44 +745,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     else {
 
     }
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //
-    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-    //           setSelectedrelated({
-    //             label: A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.label,
-    //             value: A?.find(p =>parseInt (p.value )=== parseInt( GLOBAL.ProjectId))?.value,
-    //             _index: A?.findIndex(p => parseInt (p.value )=== parseInt( GLOBAL.ProjectId)),
-    //           });
-    //           if(GLOBAL.TaskRelatedNameId==='0') {
-    //             setRelatedId(A?.find(p => p.value === GLOBAL.ProjectId)?.value);
-    //           }
-    //           else
-    //             getSites();
-    //         }
-    //         setTaskRelated(A);
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
+
   };
   const FindCategoryId=async(item)=>{
     setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
@@ -849,48 +776,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       getUnits(categoryId,seacrhId,SubCategory_List)
                     }
                   }
-
     }
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${7}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //         setSiteList(A);
-    //           if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-    //             setselectedTaskSiteName({
-    //               label:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SiteId))?.label,
-    //               value:A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value,
-    //               _index:A?.findIndex(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId)),
-    //             });
-    //             if(GLOBAL.TaskRelatedNameId==='1') {
-    //               setRelatedId(A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value)
-    //             }
-    //             else {
-    //               getUnits()
-    //             }
-    //           }
-    //
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
   const getEntityInfo =async (categoryId,SearchId) => {
     return (
       readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${categoryId}&relatedSearchId=${SearchId}`).then(json => {
@@ -925,43 +811,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           else
             getSection(categoryId,seacrhId,SubCategory_List)
         }
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${8}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //         setunitList(A);
-    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-    //           setselectedunitName({
-    //             label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.UnitId))?.label,
-    //             value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value,
-    //             _index:A?.findIndex(p => parseInt(p.value) ===parseInt(  GLOBAL.UnitId)),
-    //           });
-    //           if(GLOBAL.TaskRelatedNameId==='2'){
-    //             setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UnitId))?.value)
-    //           }
-    //           else
-    //             getSection()
-    //         }
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
   };
   const getSection = async (TaskRelatedNameId,value,SubCategory_List) => {
     const json=await getEntityInfo(TaskRelatedNameId,value)
@@ -988,44 +837,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           else
             getFeatures(categoryId,seacrhId)
         }
-
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${9}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //         setsectionList(A);
-    //         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
-    //           setselectedsectionName({
-    //             label:A?.find(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId))?.label,
-    //             value:A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value,
-    //             _index:A?.findIndex(p => parseInt(p.value) ===parseInt( GLOBAL.SectionId)),
-    //           });
-    //           if(GLOBAL.TaskRelatedNameId==='3'){
-    //             setRelatedId(A?.find(p => parseInt(p.value) ===parseInt(  GLOBAL.SectionId))?.value)
-    //           }
-    //           else
-    //             getFeatures()
-    //         }
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
   };
   const getFeatures = async (TaskRelatedNameId,value) => {
     const json=await getEntityInfo(TaskRelatedNameId,value)
@@ -1047,41 +858,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           if(GLOBAL.TaskRelatedNameId==='4')
             setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
         }
-
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${10}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //         setfeatureList(A);
-    //         if(GLOBAL.TaskRelatedNameId==='4'||RelatedId_Info!=='') {
-    //           setselectedfeatureName({
-    //             label:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.label,
-    //             value:A?.find(p => parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID))?.value,
-    //             _index:A?.findIndex(p =>parseInt(p.value) ===parseInt(GLOBAL.UpdateFeatureID)),
-    //           });
-    //           if(GLOBAL.TaskRelatedNameId==='4')
-    //             setRelatedId(A?.find(p =>parseInt(p.value) ===parseInt(  GLOBAL.UpdateFeatureID))?.value)
-    //         }
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
   };
   const getInfo=async ()=>{
     let SubCategory_List =JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_SubCategory2))
@@ -1145,7 +921,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     }
 
   },[]);
-
   const ClearDate=()=>{
     setGeoAddressCity('')
   }
@@ -1164,7 +939,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   };
-
   const renderItem = item => {
     return (
       <View style={Styles.item}>
@@ -1350,6 +1124,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
   }
 
 /////////////Project////////////////
+
   else if (numberValue === 2) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -1800,7 +1575,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
+
   /////////////Site////////////////
+
   if (numberValue === 11) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -4557,7 +4334,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
-
   if (numberValue === 33) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -4722,6 +4498,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
+
   ///////////////////Task////////////////
 
   if (numberValue === 20) {
@@ -4855,22 +4632,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           }}
           onSubmit={values => {
             onChangeText(values);
-
           }}
-          validationSchema={validationSchema2}
-        >
+          validationSchema={validationSchema2}>
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={{width:'90%'}}>
-              {/*<Text style={[Styles.txtLightColor,{marginTop: normalize(20),}]}>Full Name</Text>*/}
-              {/*<TextInput*/}
-              {/*  value={values.FullName}*/}
-              {/*  style={[inputStyleProfile,]}*/}
-              {/*  onChangeText={handleChange("FullName")}*/}
-              {/*  onFocus={() => setFieldTouched("FullName")}*/}
-              {/*  placeholderTextColor={'#fff'} />*/}
-              {/*{touched.FullName && errors.FullName &&*/}
-              {/*<Text style={{ fontSize: 12, color: "#FF0D10",fontWeight:'bold' }}>{errors.FullName}</Text>*/}
-              {/*}*/}
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor }]}>User Name</Text>
               <TextInput
                 value={values.UserName}
@@ -4882,22 +4647,70 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.UserName}</Text>
               }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor}]}>Password</Text>
-              <TextInput
-                value={values.password}
-                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
-                onChangeText={handleChange("password")}
-                onFocus={() => setFieldTouched("password")}
-                placeholderTextColor={'#fff'} />
+              <View style={[{
+                borderWidth: 1,
+                borderColor: GLOBAL.OFFICIAL_Button,
+                borderRadius: normalize(6),
+                padding: 12,
+                marginBottom: 5,
+                width: '100%',
+                paddingVertical: 4,
+                color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                justifyContent: "center",
+                flexDirection: "row",
+                alignItems: "center",
+              }]}>
+                <TextInput
+                  value={values.password}
+                  style={[{
+                    width: '97%',
+                    paddingVertical: 3, color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                    fontFamily:'TisaSansProBoldItalic',
+                  }]}
+                  onChangeText={handleChange("password")}
+                  onFocus={() => setFieldTouched("password")}
+                  secureTextEntry={securetText}
+                  placeholderTextColor={'#fff'} />
+                <View style={[{}]}>
+                  <TouchableOpacity onPress={onpress}>
+                    <Feather name={iconsecuret} size={15} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
+                  </TouchableOpacity>
+                </View>
+              </View>
               {touched.password && errors.password &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.password}</Text>
               }
               <Text style={[Styles.txtLightColor,{marginTop: normalize(20),color:GLOBAL.input_titleColor}]}>Confirm Password</Text>
+              <View style={[{
+                borderWidth: 1,
+                borderColor: GLOBAL.OFFICIAL_Button,
+                borderRadius: normalize(6),
+                padding: 12,
+                marginBottom: 5,
+                width: '100%',
+                paddingVertical: 4,
+                color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                justifyContent: "center",
+                flexDirection: "row",
+                alignItems: "center",
+              }]}>
               <TextInput
                 value={values.Confirmpassword}
-                style={[inputStyle,{color:GLOBAL.input_titleColor,borderColor:GLOBAL.input_borderColor}]}
+                style={[{
+                  width: '97%',
+                  paddingVertical: 3, color: GLOBAL.OFFICIAL_BLUE_COLOR,
+                  fontFamily:'TisaSansProBoldItalic',
+                }]}
                 onChangeText={handleChange("Confirmpassword")}
                 onFocus={() => setFieldTouched("Confirmpassword")}
+                secureTextEntry={securetTextConfirm}
                 placeholderTextColor={'#fff'} />
+              <View style={[{}]}>
+                <TouchableOpacity onPress={onpressConfirm}>
+                  <Feather name={iconsecuret2} size={15} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
+                </TouchableOpacity>
+              </View>
+            </View>
               {touched.Confirmpassword && errors.Confirmpassword &&
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Confirmpassword}</Text>
               }
@@ -5531,7 +5344,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
-
   if (numberValue === 37) {
     return (
       <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -5790,8 +5602,8 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   }
-}
 
+}
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -5799,7 +5611,7 @@ const styles = StyleSheet.create({
 width:'95%'
   },
   formContainer2: {
-width:'100%'
+    width:'100%'
   },
   linearView: {
     flexDirection: "row",
@@ -5821,6 +5633,7 @@ width:'100%'
     right: normalize(20),
   },
 });
+
 console.disableYellowBox = true;
 
 export { TextInputI };

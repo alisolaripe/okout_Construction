@@ -24,7 +24,7 @@ function Home_meno({ navigation }) {
   const [modules, setmodules] = useState([]);
   useEffect(() => {
     console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
-    const unsubscribe = navigation.addListener("focus", () => {
+    const unsubscribe = navigation.addListener("focus",() => {
       Usermodules();
       getAllProjectInfo();
       getAllProjectInfo_dyb();
@@ -32,7 +32,8 @@ function Home_meno({ navigation }) {
       My_TaskList();
       Task_category();
       getmapkey();
-      Task_subcategory()
+      Task_subcategory();
+      get_document();
     });
     return unsubscribe;
   }, []);
@@ -148,6 +149,13 @@ function Home_meno({ navigation }) {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Assigned_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         writeDataStorage(GLOBAL.Assigned_TaskList, json?.tasks);
+      });
+    }
+  };
+  const get_document= async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.get_document + `userId=${GLOBAL.UserInformation?.userId}&sectionId=${null}`).then(json => {
+        writeDataStorage(GLOBAL.Get_Docmanage, json);
       });
     }
   };

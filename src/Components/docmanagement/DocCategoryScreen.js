@@ -1,23 +1,75 @@
 import { Container } from "native-base";
 import { Header } from "../component/Header";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, ImageBackground, Text, View } from "react-native";
 import { Styles } from "../Styles";
 import { LogOutModal } from "../component/LogOutModal";
 import { Footer1 } from "../component/Footer";
-import { removeDataStorage } from "../Get_Location";
+import { removeDataStorage,writeDataStorage } from "../Get_Location";
 import Doc_List_Item from "../component/Doc_List_Item";
+import { readOnlineApi } from "../ReadPostApi";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 function DocCategoryScreen({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [modules, setmodules] = useState([{id:0,name:'Architect'}]);
+  const [modules, setmodules] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [ShowMessageDelete, setShowMessageDelete] = useState(false);
   const [Message, setMessage] = useState("");
   const [categorylist, setcategorylist] = useState([{  value: '1',name: ' Architect',Code:'Demo5',
     Reference:'07/05/2024',Notes:'07/05/2024',CreatedOn:'Okout Admin',CreatedBy:'07/05/2024'}]);
+  const [data, setdata] = useState(['']);
+  useEffect(() => {
+    get_document()
+  }, []);
+  const get_document= async () => {
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.get_document + `userId=${GLOBAL.UserInformation?.userId}&sectionId=${GLOBAL.DocID}`).then(json => {
+        console.log(json,'json')
+        let getDoc = [];
+        let data = [];
+        json?.sections?.forEach((obj) => {
+          getDoc.push({
+            Id: obj?.sectionId,
+            name: obj?.sectionTitle,
+            documents:obj?.documents
+          });
+        });
+        json?.sectionMenu?.forEach((obj) => {
+          data.push({
+            value: obj?.id,
+            label: obj?.name,
+          });
+        });
+        setdata(data)
+        setmodules(getDoc)
+        writeDataStorage(GLOBAL.Get_Docmanagecategory, json);
+      });
+    }
+    else {
+      let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Get_Docmanage));
+      let getDoc = [];
+      let data = [];
+      json?.sections?.forEach((obj) => {
+        getDoc.push({
+          Id: obj?.sectionId,
+          name: obj?.sectionTitle,
+          documents:obj?.documents
+        });
+      });
+      json?.sectionMenu?.forEach((obj) => {
+        data.push({
+          value: obj?.id,
+          label: obj?.name,
+        });
+      });
+      setdata(data)
+      setmodules(getDoc)
+    }
+  };
   const LogOut = () => {
     removeDataStorage(GLOBAL.PASSWORD_KEY);
     setshowModalDelete(false);
@@ -32,7 +84,7 @@ function DocCategoryScreen({ navigation, navigation: { goBack } }) {
   };
   const renderItem = ({ item, index }) => (
     <Doc_List_Item key={index}  value={item} SeeDetail={SeeDetail} categorylist={categorylist} Screen={'category'}
-                   Navigate_Url={Navigate_Url} Message={Message} data={GLOBAL.Doccategorydata}
+                   Navigate_Url={Navigate_Url} Message={Message} data={data}
     />
   );
   const renderSectionHeader = () => (
@@ -69,6 +121,7 @@ function DocCategoryScreen({ navigation, navigation: { goBack } }) {
     <View style={Styles.SectionFooter} />
   );
   const SeeDetail = (value) => {
+    GLOBAL.documents= modules.find((p)=>p.Id===value.Id)?.documents;
     GLOBAL.SubCategoryTitle=GLOBAL.DocSubCategoryTitle+' / '+value.name
     navigation.navigate("DocSubCategoryScreen");
   };

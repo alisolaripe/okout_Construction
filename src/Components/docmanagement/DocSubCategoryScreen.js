@@ -7,30 +7,67 @@ import { LogOutModal } from "../component/LogOutModal";
 import { Footer1 } from "../component/Footer";
 import { removeDataStorage } from "../Get_Location";
 import Doc_List_Item from "../component/Doc_List_Item";
-import Entypo from "react-native-vector-icons/Entypo";
-import normalize from "react-native-normalize/src/index";
 import FileViewer from "react-native-file-viewer";
-
-import { Colors } from "../Colors";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
 const GLOBAL = require("../Global");
 import RNFetchBlob from 'rn-fetch-blob';
 function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
-  const [modules, setmodules] = useState([{id:0,name:'Level 00 GA 1 of 2'}]);
+  const [modules, setmodules] = useState([]);
   const [ShowMessage, setShowMessage] = useState(false);
   const [ShowMessageDelete, setShowMessageDelete] = useState(false);
   const [Message, setMessage] = useState("");
+  const [data, setdata] = useState(['']);
+  useEffect(() => {
+    get_document()
+  }, []);
+  const get_document= async () => {
+    console.log(GLOBAL.doc_sectionId,'GLOBAL.doc_sectionId')
 
+        let getDoc = [];
+      GLOBAL.documents?.forEach((obj) => {
+          getDoc.push({
+            Id: obj?.documentId,
+            name: obj?.documentTitle,
+            documentStatusTitle:obj.documentStatusTitle,
+            documentVersion:obj.documentVersion,
+            documentMenu:obj?.documentMenu,
+            documentStatus:obj?.documentStatus,
+            documentUrl:obj.documentUrl,
+            documentName:obj.documentUrl.split("/")?.[4]
+          });
+        });
+    const NewDoc =  getDoc.map((obj, i) => {
+      const dataList=[];
+      const statusList=[]
+      obj?.documentMenu?.forEach((obj) => {
+        dataList.push({
+              value: obj?.id,
+              label: obj?.name,
+        });
+      });
+      obj?.documentStatus?.forEach((obj) => {
+        statusList.push({
+              value: obj?.id,
+              label: obj?.name,
+        });
+      });
+      return {
+        ...obj,data:dataList,status:statusList
+      };
+    });
+    console.log(NewDoc,'NewDoc')
+        setmodules(NewDoc)
+
+
+  };
   const LogOut = () => {
     removeDataStorage(GLOBAL.PASSWORD_KEY);
     setshowModalDelete(false);
     navigation.navigate("LogIn");
   };
-  useEffect(() => {
 
-  }, []);
   /// Bottom menu click On LogOut button///
   const logout_Url = () => {
     setshowModalDelete(true);
@@ -40,7 +77,7 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
   };
   const renderItem = ({ item, index }) => (
     <Doc_List_Item key={index}  value={item} SeeDetail={SeeDetail} Screen={'Sub'} download={download}
-                   Navigate_Url={Navigate_Url} Message={Message} data={GLOBAL.Docsubcategorydata} />
+                   Navigate_Url={Navigate_Url} Message={Message}/>
   );
   const renderSectionHeader = () => (
     <>
@@ -82,9 +119,10 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
     GLOBAL.UnitId = Id;
     navigation.navigate("Project_Section2");
   };
-  const download=async()=> {
-      const downloadUrl = 'https://jtg.okout.net/uploads/profile/1715002611761.jpg';
-    const FilePath = "https://github.com/vinzscam/react-native-file-viewer/raw/master/docs/react-native-file-viewer-certificate.pdf";
+  const download=async(documentUrl,documentName)=> {
+
+    const FilePath =documentUrl;
+    const Filename=documentName
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -103,10 +141,10 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
           .config({
             addAndroidDownloads: {
               useDownloadManager: true,
-              title: "certificate.pdf",
+              title: Filename,
               description: "File will be Downloaded",
               notification: true,
-              path: dirs.DownloadDir+ "/certificate.pdf",
+              path: dirs.DownloadDir+`/${Filename}`,
             },
           })
           .fetch('GET',FilePath, {
@@ -114,23 +152,11 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
           })
           .then((res) => {
             // the path should be dirs.DocumentDir + 'path-to-file.anything'
-            console.log('res ', res);
             android.actionViewIntent(
               res.path(),
               "application/vnd.android.package-archive"
             );
-            FileViewer.open(dirs.DownloadDir+ "/certificate.pdf")
-            // try {
-            //   console.log('The file saved to ', res.path());
-            //   if (res.path() === null) {
-            //
-            //   } else {
-            //
-            //   }
-            //
-            // } catch (e) {
-            //
-            // }
+            FileViewer.open(dirs.DownloadDir+ `/${Filename}`)
             console.log(res.path());
           });
       } else {

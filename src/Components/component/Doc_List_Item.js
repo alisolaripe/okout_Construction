@@ -18,7 +18,7 @@ import Moment from "moment";
 import DocumentPicker from 'react-native-document-picker';
 import ImagePicker from "react-native-image-crop-picker";
 const GLOBAL = require("../Global");
-function DYB_List_Item({
+function Doc_List_Item({
                               value,
                               SeeDetail,
                                data,
@@ -27,9 +27,7 @@ function DYB_List_Item({
   const [isFocus, setIsFocus] = useState(false);
   const [visible,setvisible] = useState(false);
   const [DirectoryUser,setDirectoryUser]=useState([{value: '1',label: 'Demo5'}]);
-  const [Status,setStatus]=useState([{value: '1',label: 'Darft'},{value: '2',label: 'Send Comments'},{value: '3',label: 'Send For Edit'},
-    {value: '4',label: 'Inactive'},{value: '5',label: 'Delete'}
-  ]);
+  const [Status,setStatus]=useState([]);
   const [Recipient,setRecipient]=useState([{value: '1',label: 'Okout Admin'},{value: '2',label: 'Demo5'}]);
   const [StatusId,setStatusId]=useState('')
   const [StatusName,setStatusName]=useState('');
@@ -54,68 +52,59 @@ function DYB_List_Item({
     setDateFormatEnd(Moment(date)?.format('YYYY-MM-DD H:mm:ss'))
   }, [value]);
 
-  const ClickManagement = (id,Id) => {
-    if(id=== "32"||id=== "36") {
+  const ClickManagement = (item) => {
+
+    if(item?.label=== "Auto Approval") {
       setName(value.name)
       setmodaldata(false)
       setvisible(true)
-
     }
-    if(id=== "33"||id=== "37") {
+    if(item?.label=== "Approval List") {
       setmodaldata(true)
       setvisible(true)
     }
-    else if(id=== "30") {
-      GLOBAL.DocCategoryID = value.Id;
-      GLOBAL.DocSubCategoryTitle=value.name
-     Navigate_Url('DocCategoryScreen');
+    else if(item?.label=== 'Open Folder') {
+      SeeDetail(value)
     }
-    else if(id=== "34") {
-      GLOBAL.DocSubCategoryID = value.Id;
-      GLOBAL.SubCategoryTitle=GLOBAL.DocSubCategoryTitle+' / '+value.name
-        Navigate_Url("DocSubCategoryScreen");
-    }
-    else if(id=== "35") {
-      GLOBAL.DocID = value.Id;
-      GLOBAL.screenName='SubDoc'
-      Navigate_Url("DocDetail");
-    }
-    else if(id=== "31") {
-      GLOBAL.DocID = value.Id;
-      GLOBAL.screenName='Doc'
+    else if(item?.label=== "Directory Info") {
+        GLOBAL.DocID = value.Id;
+        GLOBAL.screenName='SubDoc'
         Navigate_Url("DocDetail");
     }
-    else if(id=== "42"||id==='38') {
-      download()
+
+    else if(item?.label=== "Open"||item?.label==='Download') {
+      download(value.documentUrl,value.documentName)
     }
-    else if(id=== "43") {
+    else if(item?.label=== "Pick Up Link") {
       setName(value.name);
       settype('link');
       setmodaldata(false);
       setvisible(true);
     }
-    else if(id=== "39") {
+    else if(item?.label=== "Info") {
       settype('Info')
       setvisible(true)
     }
-    else if(id=== "40") {
+    else if(item?.label=== "Add Tag") {
       settype('tag')
       setvisible(true)
     }
-    else if(id=== "44") {
-      settype('status')
-      setvisible(true)
-    }
-    else if(id=== "45") {
+    else if(item?.label=== "Edit Version") {
       setName(value.name)
       settype('upload')
       setvisible(true)
     }
-    else if(id=== "46") {
+    else if(item?.label=== "View More") {
       GLOBAL.DocID = value.Id;
       GLOBAL.screenName='sub'
       Navigate_Url("DocDetail");
     }
+    else if(item?.label=== "status") {
+      setStatus(value.status)
+      settype('status')
+      setvisible(true)
+    }
+
   };
   const selectFile=async () => {
     let FileList=[]
@@ -146,7 +135,7 @@ function DYB_List_Item({
     return (
       <View key={index} style={Styles.renderItemDetailStyle}>
         <View style={{paddingLeft:7}}>
-          <Entypo size={normalize(12)} color={Colors.button} name={item.Icon}/>
+          {/*<Entypo size={normalize(12)} color={Colors.button} name={item.Icon}/>*/}
         </View>
         <Text style={Styles.txt_leftDropdown}>{item.label}</Text>
       </View>
@@ -172,28 +161,20 @@ function DYB_List_Item({
 
             <Text onPress={() => SeeDetail(value)} style={[Styles.txt_left]}>{value.name}</Text>
             <View style={Styles.TaskListStyle}>
-              <Text style={[Styles.txt_left_task]}>Status : Released</Text>
+              <Text style={[Styles.txt_left_task]}>Status : {value.documentStatusTitle}</Text>
             </View>
             <View style={Styles.TaskListStyle}>
-              <Text style={[Styles.txt_left_task]}>Version : 00</Text>
+              <Text style={[Styles.txt_left_task]}>Version : {value.documentVersion}</Text>
             </View>
-            <View style={Styles.TaskListStyle}>
-              <Text style={[Styles.txt_left_task]}>Author : bwelsh</Text>
-            </View>
-            <View style={Styles.TaskListStyle}>
-              <Text style={[Styles.txt_left_task]}>type : pdf</Text>
-            </View>
-
-
           </View>
           <View style={{ width: "45%" }}>
-            {(data?.length !== 0 &&
+            {(value?.data?.length !== 0 &&
               <Dropdown
                 containerStyle={Styles.DropDown}
                 selectedTextStyle={Styles.selectedTextStyle}
                 labelField="label"
                 valueField="value"
-                data={data}
+                data={value?.data}
                 activeColor={Colors.Light}
                 maxHeight={300}
                 renderItem={renderItem}
@@ -205,13 +186,13 @@ function DYB_List_Item({
                 onFocus={() => setIsFocus(true)}
                 onBlur={()  => setIsFocus(false)}
                 onChange={item=>{
-                  ClickManagement(item.value, value.Id);
+                  ClickManagement(item);
                 }}
               />
             )}
-            <View style={{marginLeft:'auto',marginTop:15 }}>
-            <Entypo size={normalize(25)} color={Colors.button} name={'heart-outlined'}/>
-            </View>
+            {/*<View style={{marginLeft:'auto',marginTop:15 }}>*/}
+            {/*<Entypo size={normalize(25)} color={Colors.button} name={'heart-outlined'}/>*/}
+            {/*</View>*/}
           </View>
         </View>
         <Modal
@@ -314,7 +295,7 @@ function DYB_List_Item({
                 onFocus={() => setIsFocus(true)}
                 onBlur={()  => setIsFocus(false)}
                 onChange={item=>{
-                  ClickManagement(item.value, value.Id);
+                  ClickManagement(item);
                 }}
               />
             )}
@@ -411,4 +392,4 @@ function DYB_List_Item({
   );
 }
 
-export default DYB_List_Item;
+export default Doc_List_Item;
