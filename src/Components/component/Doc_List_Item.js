@@ -168,28 +168,28 @@ function Doc_List_Item({
             </View>
           </View>
           <View style={{ width: "45%" }}>
-            {(value?.data?.length !== 0 &&
-              <Dropdown
-                containerStyle={Styles.DropDown}
-                selectedTextStyle={Styles.selectedTextStyle}
-                labelField="label"
-                valueField="value"
-                data={value?.data}
-                activeColor={Colors.Light}
-                maxHeight={300}
-                renderItem={renderItem}
-                renderRightIcon={()=>(
-                  <View style={Styles.DropDownIcon}>
-                    <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>
-                  </View>
-                )}
-                onFocus={() => setIsFocus(true)}
-                onBlur={()  => setIsFocus(false)}
-                onChange={item=>{
-                  ClickManagement(item);
-                }}
-              />
-            )}
+            {/*{(value?.data?.length !== 0 &&*/}
+            {/*  <Dropdown*/}
+            {/*    containerStyle={Styles.DropDown}*/}
+            {/*    selectedTextStyle={Styles.selectedTextStyle}*/}
+            {/*    labelField="label"*/}
+            {/*    valueField="value"*/}
+            {/*    data={value?.data}*/}
+            {/*    activeColor={Colors.Light}*/}
+            {/*    maxHeight={300}*/}
+            {/*    renderItem={renderItem}*/}
+            {/*    renderRightIcon={()=>(*/}
+            {/*      <View style={Styles.DropDownIcon}>*/}
+            {/*        <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>*/}
+            {/*      </View>*/}
+            {/*    )}*/}
+            {/*    onFocus={() => setIsFocus(true)}*/}
+            {/*    onBlur={()  => setIsFocus(false)}*/}
+            {/*    onChange={item=>{*/}
+            {/*      ClickManagement(item);*/}
+            {/*    }}*/}
+            {/*  />*/}
+            {/*)}*/}
             {/*<View style={{marginLeft:'auto',marginTop:15 }}>*/}
             {/*<Entypo size={normalize(25)} color={Colors.button} name={'heart-outlined'}/>*/}
             {/*</View>*/}
@@ -277,28 +277,28 @@ function Doc_List_Item({
             <Text style={[Styles.txt_left]}>{value.name}</Text>
           </TouchableOpacity>
           <View style={{ width: "45%" }}>
-            {(data?.length !== 0 &&
-              <Dropdown
-                containerStyle={Styles.DropDown}
-                selectedTextStyle={Styles.selectedTextStyle}
-                labelField="label"
-                valueField="value"
-                data={data}
-                activeColor={Colors.Light}
-                maxHeight={300}
-                renderItem={renderItem}
-                renderRightIcon={()=>(
-                  <View style={Styles.DropDownIcon}>
-                    <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>
-                  </View>
-                )}
-                onFocus={() => setIsFocus(true)}
-                onBlur={()  => setIsFocus(false)}
-                onChange={item=>{
-                  ClickManagement(item);
-                }}
-              />
-            )}
+            {/*{(data?.length !== 0 &&*/}
+            {/*  <Dropdown*/}
+            {/*    containerStyle={Styles.DropDown}*/}
+            {/*    selectedTextStyle={Styles.selectedTextStyle}*/}
+            {/*    labelField="label"*/}
+            {/*    valueField="value"*/}
+            {/*    data={data}*/}
+            {/*    activeColor={Colors.Light}*/}
+            {/*    maxHeight={300}*/}
+            {/*    renderItem={renderItem}*/}
+            {/*    renderRightIcon={()=>(*/}
+            {/*      <View style={Styles.DropDownIcon}>*/}
+            {/*        <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>*/}
+            {/*      </View>*/}
+            {/*    )}*/}
+            {/*    onFocus={() => setIsFocus(true)}*/}
+            {/*    onBlur={()  => setIsFocus(false)}*/}
+            {/*    onChange={item=>{*/}
+            {/*      ClickManagement(item);*/}
+            {/*    }}*/}
+            {/*  />*/}
+            {/*)}*/}
           </View>
         </View>
         <Modal
