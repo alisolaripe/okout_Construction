@@ -10,7 +10,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Body,Button,Container,Content,Header,Left,Right } from "native-base";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
 import { Styles } from "../Styles";
-import { Colors } from "../Colors";
 const GLOBAL = require("../Global");
 const Photoes=require('../Photoes');
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -19,12 +18,9 @@ import { TextInputI } from "../component/TextInputI";
 import { Footer1 } from "../component/Footer";
 import { LogOutModal } from "../component/LogOutModal";
 import { Modalize } from "react-native-modalize";
-import ImagePicker from "react-native-image-crop-picker";
 import { Image } from "react-native-compressor";
-import { writePostApi } from "../writePostApi";
-import { isNetworkConnected } from "../GlobalConnected";
+import { selectPhotocamera, selectPhotoGallery, writePostApi } from "../writePostApi";
 const Api = require("../Api");
-const serialize = require("../GlobalSerialize");
 function Profile( { navigation, navigation: { goBack }}) {
   const modalizeRef = React.createRef();
   const [Cheked,setCheked] = useState(false);
@@ -177,13 +173,7 @@ const UpdateProfileInfo=(value)=>{
   };
   const selectPhotoFromGallery = () => {
     onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: false,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
@@ -208,11 +198,7 @@ const UpdateProfileInfo=(value)=>{
   const selectPhoto = () => {
     onClose();
     let photos=[]
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
-
+    selectPhotocamera().then(response => {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       Image.compress(response.path, {

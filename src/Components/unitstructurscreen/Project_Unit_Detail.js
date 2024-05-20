@@ -8,7 +8,6 @@ import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
@@ -16,7 +15,7 @@ import Geocoder from "react-native-geocoder";
 import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { writePostApi } from "../writePostApi";
+import { writePostApi,selectPhotocamera,selectPhotoGallery } from "../writePostApi";
 import { Header } from "../component/Header";
 import { Filter } from "../component/Filter";
 import { Footer1 } from "../component/Footer";
@@ -377,13 +376,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
   };
   const selectPhotoFromGallery = () => {
     onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
@@ -479,10 +472,7 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
   };
   const selectPhoto = () => {
     onClose();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       setImageSource(response.path);
@@ -549,7 +539,6 @@ function Project_Unit_Detail({ navigation, navigation: { goBack } }) {
         ImageList = [...ImageList];
         ImageListUpload = [...ImageListUpload];
       });
-
     });
   };
   /// sort photos by week ///

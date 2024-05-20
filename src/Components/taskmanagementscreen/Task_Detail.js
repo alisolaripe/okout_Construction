@@ -15,15 +15,13 @@ import { readOnlineApi } from "../ReadPostApi";
 import Carousel, { Pagination } from "react-native-snap-carousel";
 import TaskDetailImage from "../component/Task_Detail_Image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { UserPermission } from "../CheckPermission";
 import { Warningmessage } from "../component/Warningmessage";
 import { TextInputI } from "../component/TextInputI";
 import Moment from "moment";
 import DatePicker from "react-native-date-picker";
-import { writePostApi } from "../writePostApi";
+import { selectPhotocamera, selectPhotoGallery, writePostApi } from "../writePostApi";
 import { Dropdown } from "react-native-element-dropdown";
 import { ButtonI } from "../component/ButtonI";
-import ImagePicker from "react-native-image-crop-picker";
 import { Formik } from "formik";
 import ToggleSwitch from "toggle-switch-react-native";
 import Task_Edit_Image from "../component/Task_Edit_Image";
@@ -1436,13 +1434,7 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   };
   const selectPhotoFromGallery = () => {
     onClosetask();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
@@ -1519,10 +1511,7 @@ function TaskDetail({ navigation, navigation: { goBack } }) {
   };
   const selectPhoto = () => {
     onClosetask();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       if (ImageSourceviewarray) {

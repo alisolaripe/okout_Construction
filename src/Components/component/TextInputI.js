@@ -13,6 +13,7 @@ import { Styles } from "../Styles";
 import { CheckBox } from "native-base";
 import normalize from "react-native-normalize";
 import { ButtonI } from "./ButtonI";
+import {Taskdropdown} from './Taskdropdown'
 const { width: viewportWidth } = Dimensions.get('window');
 const GLOBAL = require("../Global");
 const Api = require("../Api");
@@ -724,7 +725,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
             label: obj.relatedName,
           });
         }
-
+        categoryLevellist.find((p)=>p.value===Id).data=A
         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
           let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
           const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
@@ -748,7 +749,14 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
 
   };
   const FindCategoryId=async(item)=>{
-    setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
+    const list =RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel)
+    const NewRelatedNameList =  list.map((obj, i) => {
+      const dataList=[];
+      return {
+        ...obj,data:dataList,
+      };
+    });
+    setcategoryLevellist(NewRelatedNameList)
   }
   const getSites = async (TaskRelatedNameId,value,SubCategory_List) => {
                  const json=await getEntityInfo(TaskRelatedNameId,value)
@@ -3292,7 +3300,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     setSelectedcategory(item);
                     setCategoryId(item.value);
                     writeDataStorage(GLOBAL.Category_Last_Info,item.value);
-                    Task_RelatedList(item.value);
                     Task_WorkTypeList(item.value);
                     setcategoryEntityShow(item.categoryEntityShow);
                     Task_subcategory(item.value)
@@ -3402,9 +3409,17 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                         setTaskRelatedNameId(item.value);
                         setcategoryLevel(item.categoryLevel);
                         writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label);
+                        Task_RelatedList(item.value);
                         setRelatedNameLvalue(item.label);
                       }}
                     />
+
+                    {/*{categoryLevellist?.map((value, key) => {*/}
+                    {/*  return (*/}
+                    {/*         <Taskdropdown value={value} key={key}/>*/}
+                    {/*);*/}
+                    {/*})}*/}
+
                     <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Project Name</Text>
                     <Dropdown
                       style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}

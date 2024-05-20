@@ -9,7 +9,7 @@ import { Styles } from "../Styles";
 import { Container, Content } from "native-base";
 import normalize from "react-native-normalize/src/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { writePostApi } from "../writePostApi";
+import { selectPhotocamera, selectPhotoGallery, writePostApi } from "../writePostApi";
 import { Footer1 } from "../component/Footer";
 import { Header } from "../component/Header";
 import DYB_List_Details_Image_Item from "../component/DYB_List_Details_Image_Item";
@@ -19,7 +19,6 @@ import { Image } from "react-native-compressor";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
 import LinearGradient from "react-native-linear-gradient";
-import ImagePicker from "react-native-image-crop-picker";
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -348,13 +347,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
   };
   const selectPhotoFromGallery = () => {
     onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
 
@@ -449,10 +442,7 @@ function Project_Feature_List_Detail({ navigation, navigation: { goBack } }) {
       setGeoAddress("");
       setCountry("");
     }
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       if (FeatureSelectDetail) {

@@ -8,7 +8,7 @@ import { Styles } from "../Styles";
 import normalize from "react-native-normalize/src/index";
 import { Container, Content } from "native-base";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import ImagePicker from "react-native-image-crop-picker";
+
 import Geolocation from "react-native-geolocation-service";
 import { Modalize } from "react-native-modalize";
 import { ButtonI } from "../component/ButtonI";
@@ -17,7 +17,7 @@ import { LogOutModal } from "../component/LogOutModal";
 import { removeDataStorage, requestLocationPermission, geocodePosition } from "../Get_Location";
 import List_Item_Detail_Images from "../component/List_Item_Detail_Images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { writePostApi } from "../writePostApi";
+import { writePostApi,selectPhotocamera,selectPhotoGallery } from "../writePostApi";
 import { Header } from "../component/Header";
 import { Footer1 } from "../component/Footer";
 import { Filter } from "../component/Filter";
@@ -60,6 +60,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
 
   useEffect(() => {
     Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
+    console.log('useEffect')
     getSitesDetail();
     getLocation();
     const date = new Date();
@@ -457,18 +458,14 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
 
   const selectPhotoFromGallery = () => {
     onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
+
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
         alert(response.customButton);
-      } else {
+      }
+      else {
         if (ImageSourceviewarray)
           ImageList = [...ImageSourceviewarray];
         if (ImageSourceviewarrayUpload)
@@ -554,14 +551,11 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
           });
         }
       }
-    });
+    })
   };
   const selectPhoto = () => {
     onClose();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response?.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       setImageSource(response.path);
@@ -629,8 +623,8 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
         setShowBackBtn(false);
         ImageList = [...ImageList];
         ImageListUpload = [...ImageListUpload];
-      });
-    });
+    })
+    })
   };
   ///Add new Photos for Site and sent to server////
   const AddSitesImage = () => {
@@ -994,7 +988,7 @@ function Project_Site_Detail({ navigation, navigation: { goBack } }) {
             }
           </> : null
       }
-      <Modalize ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
+      <Modalize avoidKeyboardLikeIOS={true}  ref={modalizeRef} withHandle={false} modalStyle={Styles.ModalizeDetalStyle}>
         {renderContent()}
       </Modalize>
       <Footer1 onPressHome={Navigate_Url} onPressdeleteAsync={logout_Url} />

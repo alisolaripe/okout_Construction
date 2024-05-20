@@ -239,7 +239,6 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const getSites = async (TaskRelatedNameId,value,SubCategory_List) => {
 
     const json=await getEntityInfo(TaskRelatedNameId,value)
-
     let A = [];
     for (let item in json?.relatedList) {
       let obj = json?.relatedList?.[item];
@@ -251,7 +250,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     setSiteList(A);
 
     if(GLOBAL.TaskRelatedNameId!=='') {
-      let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.SiteId))?.value
+      let seacrhId=A?.find(p =>p.label === GLOBAL.FilterSite_name)?.value
       const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='3')?.value
       setselectedTaskSiteName({
         label: A?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
@@ -266,266 +265,81 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       }
     }
 
-
-    // if (GLOBAL.TaskRelatedNameId !== "") {
-    //
-    //   if (GLOBAL.TaskRelatedNameId === "1") {
-    //     setRelatedId(A?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
-    //   } else {
-    //     getUnits();
-    //   }
-    // }
-    // else {
-    //
-    //   getUnits();
-    // }
-    // isNetworkConnected().then(status => {
-    //   if (status) {
-    //     fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${7}`, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //       .then(resp => {
-    //         return resp.json();
-    //       })
-    //       .then(json => {
-    //
-    //         let A = [];
-    //         for (let item in json?.relatedList) {
-    //           let obj = json?.relatedList?.[item];
-    //           A.push({
-    //             value: obj.relatedId,
-    //             label: obj.relatedName,
-    //           });
-    //         }
-    //         setSiteList(A);
-    //         if (GLOBAL.TaskRelatedNameId !== "") {
-    //           setselectedTaskSiteName({
-    //             label: A?.find(p => p.label === GLOBAL.FilterSite_name)?.label,
-    //             value: A?.find(p => p.label === GLOBAL.FilterSite_name)?.value,
-    //             _index: A?.findIndex(p => p.label === GLOBAL.FilterSite_name),
-    //           });
-    //           if (GLOBAL.TaskRelatedNameId === "1") {
-    //             setRelatedId(A?.find(p => p.label === GLOBAL.FilterSite_name)?.value);
-    //           } else {
-    //             getUnits();
-    //           }
-    //         } else {
-    //
-    //           getUnits();
-    //         }
-    //
-    //       })
-    //       .catch(error => console.log("error", error));
-    //   }
-    // });
   };
-  const getUnits = async () => {
-    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    // if (json !== null) {
-    //   let Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-    //   let Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId);
-    //   let unit_List = [];
-    //   Filter_units?.units?.forEach((obj) => {
-    //     unit_List.push({
-    //       value: obj?.unitId,
-    //       label: obj?.unitName,
-    //     });
-    //   });
-    //   setunitList(unit_List);
-    //   if (GLOBAL.TaskRelatedNameId !== "") {
-    //     setselectedunitName({
-    //       label: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
-    //       value: unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
-    //       _index: unit_List?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
-    //     });
-    //     if (GLOBAL.TaskRelatedNameId === "2") {
-    //       setRelatedId(unit_List?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
-    //     } else {
-    //
-    //       getSection();
-    //     }
-    //   }
-    //   else {
-    //     getSection();
-    //   }
-    // }
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${8}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              A.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-            setunitList(A);
-            if (GLOBAL.TaskRelatedNameId !== "") {
-              setselectedunitName({
-                label: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
-                value: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
-                _index: A?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
-              });
-              if (GLOBAL.TaskRelatedNameId === "2") {
-                setRelatedId(A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
-              } else {
+  const getUnits = async (categoryId,value,SubCategory_List) => {
+    const json=await getEntityInfo(categoryId,value)
+    let A = [];
+    for (let item in json?.relatedList) {
+      let obj = json?.relatedList?.[item];
+      A.push({
+        value: obj.relatedId,
+        label: obj.relatedName,
+      });
+    }
+    setunitList(A);
 
-                getSection();
-              }
-            }
-            else {
-              getSection();
-            }
-          })
-          .catch(error => console.log("error", error));
-      }
-    });
-  };
-  const getSection = async () => {
-    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    // if (json !== null) {
-    //   let Section_List = [];
-    //   let Filter_units = "";
-    //   let Filter_sites = "";
-    //   let Filter_section = "";
-    //   Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-    //   Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-    //   Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId);
-    //   Filter_section?.sections?.forEach((obj) => {
-    //     Section_List.push({
-    //       value: obj.sectionId,
-    //       label: obj.sectionName,
-    //     });
-    //   });
-    //   setsectionList(Section_List);
-    //   if (GLOBAL.TaskRelatedNameId !== "") {
-    //     setselectedsectionName({
-    //       label: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
-    //       value: Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
-    //       _index: Section_List?.findIndex(p => p.label === GLOBAL.FilterSection_name),
-    //     });
-    //     if (GLOBAL.TaskRelatedNameId === "3") {
-    //       setRelatedId(Section_List?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
-    //     } else
-    //       getFeatures();
-    //   } else
-    //     getFeatures();
-    // }
+    //console.log(categoryId,'categoryId',seacrhId,'seacrhId')
+    if (GLOBAL.TaskRelatedNameId !== "") {
+      let seacrhId=A?.find(p =>p.label ===GLOBAL.FilterUnit_name)?.value;
+      const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='4')?.value
+      setselectedunitName({
+        label: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.label,
+        value: A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value,
+        _index: A?.findIndex(p => p.label === GLOBAL.FilterUnit_name),
+      });
+      if (GLOBAL.TaskRelatedNameId === "2") {
+        setRelatedId(A?.find(p => p.label === GLOBAL.FilterUnit_name)?.value);
+      } else {
 
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${9}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              A.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-            setsectionList(A);
-            if (GLOBAL.TaskRelatedNameId !== "") {
-              setselectedsectionName({
-                label: A?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
-                value: A?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
-                _index: A?.findIndex(p => p.label === GLOBAL.FilterSection_name),
-              });
-              if (GLOBAL.TaskRelatedNameId === "3") {
-                setRelatedId(A?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
-              } else
-                getFeatures();
-            } else
-              getFeatures();
-          })
-          .catch(error => console.log("error", error));
+        getSection(categoryId,seacrhId,SubCategory_List);
       }
-    });
+    }
   };
-  const getFeatures = async () => {
-    // let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.All_Lists));
-    // if (json !== null) {
-    //   let Feature_List = [];
-    //   let Filter_units = "";
-    //   let Filter_sites = "";
-    //   let Filter_section = "";
-    //   let Filter_feature = "";
-    //   Filter_sites = json?.find((p) => p?.projectId === GLOBAL.ProjectId)?.sites;
-    //   Filter_units = Filter_sites?.find((p) => p?.siteId === GLOBAL.SiteId)?.units;
-    //   Filter_section = Filter_units?.find((p) => p?.unitId === GLOBAL.UnitId)?.sections;
-    //   Filter_feature = Filter_section?.find((p) => p?.sectionId === GLOBAL.SectionId);
-    //   if (Filter_feature?.features) {
-    //     Filter_feature?.features?.forEach((obj) => {
-    //       Feature_List.push({
-    //         value: obj.featureId,
-    //         label: obj.featureName,
-    //       });
-    //     });
-    //     setfeatureList(Feature_List);
-    //     if (GLOBAL.TaskRelatedNameId === "4") {
-    //       setselectedfeatureName({
-    //         label: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
-    //         value: Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
-    //         _index: Feature_List?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
-    //       });
-    //       setRelatedId(Feature_List?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
-    //     }
-    //   }
-    // }
-    isNetworkConnected().then(status => {
-      if (status) {
-        fetch(GLOBAL.OrgAppLink_value + Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${10}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then(resp => {
-            return resp.json();
-          })
-          .then(json => {
-            let A = [];
-            for (let item in json?.relatedList) {
-              let obj = json?.relatedList?.[item];
-              A.push({
-                value: obj.relatedId,
-                label: obj.relatedName,
-              });
-            }
-            setfeatureList(A);
-            if (GLOBAL.TaskRelatedNameId === "4") {
-              setselectedfeatureName({
-                label: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
-                value: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
-                _index: A?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
-              });
-              setRelatedId(A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
-            }
-          })
-          .catch(error => console.log("error", error));
+  const getSection = async (categoryId,value,SubCategory_List) => {
+    const json=await getEntityInfo(categoryId,value)
+    let A = [];
+    for (let item in json?.relatedList) {
+      let obj = json?.relatedList?.[item];
+      A.push({
+        value: obj.relatedId,
+        label: obj.relatedName,
+      });
+    }
+    setsectionList(A);
+    if (GLOBAL.TaskRelatedNameId !== "") {
+      let seacrhId=A?.find(p => p.label ===GLOBAL.FilterSection_name)?.value;
+      const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='5')?.value
+      setselectedsectionName({
+        label: A?.find(p => p.label === GLOBAL.FilterSection_name)?.label,
+        value: A?.find(p => p.label === GLOBAL.FilterSection_name)?.value,
+        _index: A?.findIndex(p => p.label === GLOBAL.FilterSection_name),
+      });
+      if (GLOBAL.TaskRelatedNameId === "3") {
+        setRelatedId(A?.find(p => p.label === GLOBAL.FilterSection_name)?.value);
       }
-    });
+      else
+        getFeatures(categoryId,seacrhId);
+    }
+  };
+  const getFeatures = async (categoryId,value) => {
+    const json=await getEntityInfo(categoryId,value)
+    let A = [];
+    for (let item in json?.relatedList) {
+      let obj = json?.relatedList?.[item];
+      A.push({
+        value: obj.relatedId,
+        label: obj.relatedName,
+      });
+    }
+    setfeatureList(A);
+      if (GLOBAL.TaskRelatedNameId === "4") {
+        setselectedfeatureName({
+          label: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.label,
+          value: A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value,
+          _index: A?.findIndex(p => p.label === GLOBAL.FilterFeature_name),
+        });
+        setRelatedId(A?.find(p => p.label === GLOBAL.FilterFeature_name)?.value);
+      }
   };
   const Task_category = async () => {
     let Category_List = [];
@@ -2295,6 +2109,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                     setselectedrelatedname(item);
                     setTaskRelatedNameId(item.value);
                     setRelatedNameLvalue(item.label);
+                    GLOBAL.TaskRelatedName=item.categoryLevel
                   }}
                   renderSelectedItem={(item, unSelect) => (
                     <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
@@ -2332,7 +2147,8 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                           setSelectedrelated(item);
                           setRelatedId(item.value);
                         } else {
-                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value
+                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value;
+                          console.log(categoryId,'categoryId : getSites')
                           getSites(categoryId,item.value);
                           setSelectedrelated(item);
                           setTaskProjectId(item.value);
@@ -2378,6 +2194,9 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                         setRelatedId(item.value);
                       } else {
                         const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
+                        console.log(categoryId,'categoryId : getUnits')
+                        console.log(categoryLevellist,'categoryLevellist')
+                        console.log(item.value,'item.value')
                         getUnits(categoryId,item.value);
                         setselectedTaskSiteName(item);
                         setTaskSiteId(item.value);
@@ -2423,6 +2242,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                         setRelatedId(item.value);
                       } else {
                         const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='4')?.value
+                        console.log(categoryId,'categoryId : getSection')
                         getSection(categoryId,item.value);
                         setselectedunitName(item);
                         setTaskunitId(item.value);
@@ -2459,6 +2279,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                         setRelatedId(item.value);
                       } else {
                         const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='5')?.value
+                        console.log(categoryId,'categoryId : getFeatures')
                         getFeatures(categoryId,item.value);
                         setselectedsectionName(item);
                         setTasksectionId(item.value);

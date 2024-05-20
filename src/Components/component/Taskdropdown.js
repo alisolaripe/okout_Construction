@@ -5,8 +5,8 @@ import React, {useEffect,useState} from "react";
 import {Dropdown} from "react-native-element-dropdown";
 import AntDesign from "react-native-vector-icons/AntDesign";
 const GLOBAL = require("../Global");
-function Taskdropdown({ DateItems,setDateItems,Status,setStatus,Priority,setPriority,FilterList,setFilterList}) {
-  const [SelectItem,setSelectItem]=useState(4);
+function Taskdropdown({value,setFilterList}) {
+  const [selectedTaskName,setselectedTaskName]=useState('');
   const [isFocusrelated, setIsFocusrelated] = useState(false);
   const renderItem = item => {
     return (
@@ -25,7 +25,7 @@ function Taskdropdown({ DateItems,setDateItems,Status,setStatus,Priority,setPrio
   };
   return(
     <>
-      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Site</Text>
+      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>{value.label}</Text>
       <Dropdown
         style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
         placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
@@ -33,14 +33,14 @@ function Taskdropdown({ DateItems,setDateItems,Status,setStatus,Priority,setPrio
         iconStyle={Styles.iconStyle}
         itemTextStyle={Styles.itemTextStyle}
         containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
-        data={SiteList}
+        data={value.data}
         search
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!isFocusrelated ? 'Select Site' : '...'}
+        placeholder={!isFocusrelated ? 'Select item' : '...'}
         searchPlaceholder="Search..."
-        value={selectedTaskSiteName}
+        value={selectedTaskName}
 
         renderItem={renderItem}
         onFocus={() => setIsFocusrelated(true)}

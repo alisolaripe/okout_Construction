@@ -107,9 +107,6 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
         :
         null
       }
-      {/*<View style={Styles.link}>*/}
-      {/*<Entypo size={normalize(22)} color={Colors.button} name={'attachment'}/>*/}
-      {/*</View>*/}
     </>
   );
   const renderSectionFooter = () => (

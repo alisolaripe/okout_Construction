@@ -147,6 +147,7 @@ module.exports = {
   buttonName:'',
   TaskName:"",
   TaskRelatedNameId:"",
+  TaskRelatedName:"",
   categoryId:'',
   TaskRelatedId:'',
   Subtask:'',

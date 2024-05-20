@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import FastImage from 'react-native-fast-image'
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import LinearGradient from "react-native-linear-gradient";
@@ -17,8 +16,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { Modalize } from "react-native-modalize";
 import { Footer1 } from "../component/Footer";
 import { Header } from "../component/Header";
-import { writePostApi } from "../writePostApi";
-import ImagePicker from "react-native-image-crop-picker";
+import { selectPhotocamera, selectPhotoGallery, writePostApi } from "../writePostApi";
 import { readOnlineApi } from "../ReadPostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Warningmessage } from "../component/Warningmessage";
@@ -261,11 +259,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   }
   const selectPhotoFromGallery = async () => {
     onClose();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
 
@@ -302,10 +296,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   };
   const selectPhoto =async () => {
     onClose();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response.path.split("/");
       var imgName = getFilename[getFilename.length - 1];
       if (ImageSourceviewarray)

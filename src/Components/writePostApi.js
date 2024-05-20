@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ImagePicker from "react-native-image-crop-picker";
 let List=[]
 const GLOBAL = require("./Global");
 export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUpload)
@@ -92,5 +93,30 @@ export async function writePostApi(type, Url, formdata, ImageSourceviewarrayUplo
     json=undefined;
     return json;
   }
+export async function selectPhotocamera()
+{
 
+  return (
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+    }).then(response => {
+      return response;
+    })
+  )
+};
 
+  export async function selectPhotoGallery()
+  {
+  return (
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      multiple: true,
+      mediaType: "photo",
+      includeExif: true,
+    }).then(response => {
+      return response;
+    })
+   );
+};

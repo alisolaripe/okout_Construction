@@ -12,12 +12,11 @@ import { Dropdown } from "react-native-element-dropdown";
 import { Content } from "native-base";
 import Entypo from "react-native-vector-icons/Entypo";
 import { Colors } from "../Colors";
-import ImagePicker from "react-native-image-crop-picker";
 import { writeDataStorage } from "../Get_Location";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { Image } from "react-native-compressor";
 import FastImage from "react-native-fast-image";
-import { writePostApi } from "../writePostApi";
+import { selectPhotocamera, selectPhotoGallery, writePostApi } from "../writePostApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
 import DatePicker from "react-native-date-picker";
@@ -994,13 +993,7 @@ function Task_management_Item({
   };
   const selectPhotoFromGallery = () => {
     onClosetask();
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      multiple: true,
-      mediaType: "photo",
-      includeExif: true,
-    }).then(response => {
+    selectPhotoGallery().then(response => {
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
@@ -1068,10 +1061,7 @@ function Task_management_Item({
   };
   const selectPhoto = () => {
     onClosetask();
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(response => {
+    selectPhotocamera().then(response => {
       var getFilename = response.path?.split("/");
       writeDataStorage(GLOBAL.ImageSourceviewarray, response);
       var imgName = getFilename[getFilename.length - 1];
