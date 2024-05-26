@@ -39,14 +39,16 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
           });
         });
     const NewDoc =  getDoc.map((obj, i) => {
-      const dataList=[];
+      const dataList=[{ value: 0,
+        label:'Open',},{ value:1,
+        label:'Download'}];
       const statusList=[]
-      obj?.documentMenu?.forEach((obj) => {
-        dataList.push({
-              value: obj?.id,
-              label: obj?.name,
-        });
-      });
+      // obj?.documentMenu?.forEach((obj) => {
+      //   dataList.push({
+      //         value: obj?.id,
+      //         label: obj?.name,
+      //   });
+      // });
       obj?.documentStatus?.forEach((obj) => {
         statusList.push({
               value: obj?.id,
@@ -154,7 +156,6 @@ function DocSubCategoryScreen({ navigation, navigation: { goBack } }) {
               "application/vnd.android.package-archive"
             );
             FileViewer.open(dirs.DownloadDir+ `/${Filename}`)
-            console.log(res.path());
           });
       } else {
         console.log("please grant permission");

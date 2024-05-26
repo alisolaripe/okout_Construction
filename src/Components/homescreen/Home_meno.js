@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, ImageBackground, TouchableOpacity, StatusBar, Image, Modal } from "react-native";
+import { Text, View, ImageBackground, TouchableOpacity, StatusBar, Image, Modal,LogBox  } from "react-native";
 import { Colors } from "../Colors";
 import { Styles } from "../Styles";
 import { LogOutModal } from "../component/LogOutModal";
@@ -23,7 +23,7 @@ function Home_meno({ navigation }) {
   const [showModalDelete, setshowModalDelete] = useState(false);
   const [modules, setmodules] = useState([]);
   useEffect(() => {
-    console.log(GLOBAL.UserInformation,'GLOBAL.UserInformation')
+
     const unsubscribe = navigation.addListener("focus",() => {
       Usermodules();
       getAllProjectInfo();

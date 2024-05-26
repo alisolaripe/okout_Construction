@@ -38,8 +38,8 @@ function Project_Units({ navigation, navigation: { goBack } }) {
   const [GeoAddressPostalCode, setGeoAddressPostalCode] = useState("");
   const [GeoAddressStreet, setGeoAddressStreet] = useState("");
   const [location, setLocation] = useState(false);
-  const [GeoAddressCountry, setGeoAddressCountry] = useState("");
-  const [GeoAddressCity, setGeoAddressCity] = useState("");
+  const [GeoAddressCountry, setGeoAddressCountry] = useState("select item");
+  const [GeoAddressCity, setGeoAddressCity] = useState("select item");
   const [validatemsg, setvalidatemsg] = useState("");
   const [touch, settouch] = useState("");
   const [visibleAddModal, setvisibleAddModal] = useState(false);

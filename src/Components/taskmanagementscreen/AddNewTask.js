@@ -38,6 +38,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
   const [dateType, setdateType] = useState(false);
   const [categoryId, setCategoryId] = useState(0);
   const [relatedId, setRelatedId] = useState(0);
+  const [relatedName, setRelatedName] = useState('');
   const [SelectedParentTask, setSelectedParentTask] = useState(0);
   const [ParentTaskId, setParentTaskId] = useState(0);
   const [ShowBtn, setShowBtn] = useState(false);
@@ -157,7 +158,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
       formData.append("userId",  GLOBAL.UserInformation?.userId);
       formData.append("categoryId", categoryId);
       formData.append("workTypeId", WorkTypeId);
-      if(categoryId==='1') {
+      if(categoryId==='1'||categoryId==='2') {
         formData.append("relatedId", relatedId);
         formData.append("relatedName", selectedrelatedname.label);
       }
@@ -797,7 +798,7 @@ function AddNewTask({ navigation, navigation: { goBack } }) {
                 <TextInputI onChangeText={(value) => {
                   AddTask(value);
                 }} numberValue={24} modules={modules} Taskpriority={Taskpriority}  setTaskpriority={setTaskpriority}
-                            ChangeChecked={(value) => ChangeChecked(value)} Cheked={Cheked}
+                            ChangeChecked={(value) => ChangeChecked(value)} Cheked={Cheked} setRelatedName={setRelatedName}
                             tittlebtn={"Add Task"} onOpen={onOpen} DeleteImage={DeleteImage}
                             value={value} ImageSourceviewarray={ImageSourceviewarray} setImageSourceviewarray={setImageSourceviewarray}
                             setSelectedcategory={setSelectedcategory} selectedcategory={selectedcategory}

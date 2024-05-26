@@ -20,6 +20,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { TextInputI } from "../component/TextInputI";
 import { isNetworkConnected } from "../GlobalConnected";
 import { Dropdown } from "react-native-element-dropdown";
+import { Taskdropdown } from "../component/Taskdropdown";
 
 const GLOBAL = require("../Global");
 const Api = require("../Api");
@@ -72,6 +73,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [Taskcategory, setTaskcategory] = useState([]);
   const [categoryId, setCategoryId] = useState(0);
   const [categoryName, setcategoryName] = useState("");
+  const [entityIdList, setEntityIdList] = useState([]);
   const [FilterTimeList, setFilterTimeList] = useState([{ value: 0, label: "All", Icon: "calendar-month" },
     { value: 1, label: "Week", Icon: "calendar-week" }, { value: 2, label: "Today", Icon: "calendar-today" }]);
   const [FilterList, setFilterList] = useState([{ id: 0, Filtername: "Date: َAll", Icon: "calendar-month" },
@@ -102,6 +104,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const [categoryEntityShow, setcategoryEntityShow] = useState('n');
   const [categoryLevellist, setcategoryLevellist] = useState([]);
   const [categoryLevel, setcategoryLevel] = useState('');
+  const [relatedName, setRelatedName] = useState('');
   const [RelatedNameLvalue, setRelatedNameLvalue] = useState('');
   useEffect(() => {
 
@@ -369,10 +372,10 @@ function Task_Management({ navigation, navigation: { goBack } }) {
       setTaskcategory(Category_List);
     }
   };
-  const Task_RelatedList =async () => {
+  const Task_RelatedList =async (value,list) => {
     let SubCategory_List =JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_SubCategory2))
     if (GLOBAL.isConnected === true) {
-      readOnlineApi(Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${1}`).then(json => {
+      readOnlineApi(Api.Task_Project + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${value}`).then(json => {
         let RelatedList = [];
         for (let item in json?.relatedList) {
           let obj = json?.relatedList?.[item];
@@ -380,10 +383,15 @@ function Task_Management({ navigation, navigation: { goBack } }) {
             value: obj.relatedId,
             label: obj.relatedName,
           });
+          if(list?.length!==0) {
+            list?.find((p) => p?.value ===value)?.data?.push({
+              value: obj.relatedId,
+              label: obj.relatedName,
+            });
+          }
         }
         setTaskRelated(RelatedList);
         writeDataStorage(GLOBAL.RelatedList, json);
-
         if(GLOBAL.TaskRelatedNameId!=='') {
           let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
           const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
@@ -409,10 +417,18 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           value: obj.relatedId,
           label: obj.relatedName,
         });
+        if(list?.length!==0) {
+          list?.find((p) => p?.value ===value)?.data?.push({
+            value: obj.relatedId,
+            label: obj.relatedName,
+          });
+        }
       }
       setTaskRelated(RelatedList);
       writeDataStorage(GLOBAL.RelatedList, json);
       if (GLOBAL.TaskRelatedNameId !== "") {
+        let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
+        const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
         setSelectedrelated({
           label: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.label,
           value: RelatedList?.find(p => p.label === GLOBAL.FilterProject_name)?.value,
@@ -822,7 +838,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                           Assigned_TaskList_server={Assigned_TaskList_server} Update_Off_Assigned={Update_Off_Assigned}
                           DeleteImage={DeleteImage} Taskstatus={Taskstatus} DeleteAttachment={DeleteAttachment}
                           ShowWarningMessage={ShowWarningMessage} setShowWarningMessage={setShowWarningMessage}
-                          ShowBackBtn={ShowBackBtn} setShowBackBtn={setShowBackBtn}
+                          ShowBackBtn={ShowBackBtn} setShowBackBtn={setShowBackBtn} setShowMessage={setShowMessage} setMessage={setMessage}
                           setshowModalReject={setshowModalReject} data3={data3} reasons={reasons}
     />
   );
@@ -942,14 +958,17 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const Task_subcategory =async (value) => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Task_subcategory + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${value}`).then(json => {
+        console.log(json,'json : Task_subcategory')
         let A = [];
+        let dataList=[]
         for (let item in json?.subCategories) {
           let obj = json?.subCategories?.[item];
           A.push({
             value: obj.categoryId,
             label: obj.categoryTitle,
             categoryEntityShow:obj.categoryEntityShow,
-            categoryLevel:obj.categoryLevel
+            categoryLevel:obj.categoryLevel,
+            data:dataList,
           });
         }
         setRelatedNameList(A);
@@ -958,6 +977,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     }
     else {
       let A=[]
+      let dataList=[]
       let json =JSON.parse( await AsyncStorage.getItem(GLOBAL.Task_SubCategory));
       for (let item in json?.subCategories) {
         let obj = json?.subCategories?.[item];
@@ -965,18 +985,26 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           value: obj.categoryId,
           label: obj.categoryTitle,
           categoryEntityShow:obj.categoryEntityShow,
-          categoryLevel:obj.categoryLevel
+          categoryLevel:obj.categoryLevel,
+          data:dataList,
         });
       }
       setRelatedNameList(A);
     }
   }
   ///get user add task list from server///
-  const My_TaskList_server = async () => {
+  const My_TaskList_server = async (msg,type) => {
+    console.log(msg,type,'msg,type',ShowMessage,'ShowMessage')
+    if(type==='Cancell')
+    {
+      setShowMessage(true);
+      setMessage(msg);
+    }
     const date = new Date();
     const Day = date.getDate();
     const Month = date.getMonth();
     let Task_List = [];
+
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.My_TaskList + `userId=${GLOBAL.UserInformation?.userId}`).then(json => {
         for (let item in json?.tasks) {
@@ -1048,9 +1076,12 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           } else {
             setmodules(Task_List?.filter((p) => p?.taskPriorityName === "Normal" && p?.taskStatusName !== "Completed" && p?.taskStatusName !== "Cancelled"));
           }
+
         } else {
           setmodules("");
         }
+        setShowMessage(false);
+        console.log(ShowMessage,'ShowMessageShowMessage')
       });
     }
   };
@@ -1498,6 +1529,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
   const renderSectionHeader = () => (
     <>
       {showWarning === true && <Warningmessage />}
+
       <View style={Styles.infobox}>
         {
           modules !== "" && <TouchableOpacity style={Styles.Width30} onPress={() => setvisibleguide(!visibleguide)}>
@@ -1921,10 +1953,62 @@ function Task_Management({ navigation, navigation: { goBack } }) {
     }
     setvisiblFilter(false);
   };
+  const ApplyFilter2 = () => {
+    let index = 3;
+    setmodules(MudolList);
+    let lable = "";
+    GLOBAL.FilterCategory = true;
+    GLOBAL.FilterCategory_name = "subcontract";
+    GLOBAL.categoryId = "1";
+    if (categoryName !== ""&& selectedrelatedname===''&&relatedName==='') {
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: categoryName?.label };
+      setFilterList(markers);
+      modules.filter((p) => p.taskCategoryName === categoryName.label);
+      setmodules(modules.filter((p) => p.taskCategoryName === categoryName.label));
+      GLOBAL.FilterList = modules;
+      GLOBAL.TaskRelatedNameId = "6";
+    }
+    else if ( selectedrelatedname !== ""&&relatedName==='') {
+      let markers = [...FilterList];
+      lable = categoryName.label + "/" + selectedrelatedname?.label;
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedName === selectedrelatedname.label));
+      GLOBAL.FilterList = modules;
+      GLOBAL.TaskRelatedNameId = "5";
+      GLOBAL.TaskRelatedId = selectedrelatedname?.value;
+    }
+    else if ( relatedName !== "") {
+      lable =relatedName;
+      GLOBAL.FilterEntity_name =  GLOBAL.SelectName;
+      GLOBAL.FilterProject_name = relatedName;
+      GLOBAL.TaskRelatedNameId = GLOBAL.SelectId;
+      let markers = [...FilterList];
+      markers[index] = { ...markers[index], Filtername: lable };
+      setFilterList(markers);
+      setmodules(modules.filter((p) => p.taskRelatedNameRef ===relatedName));
+      GLOBAL.FilterList = modules;
+    }
+    setvisiblFilter(false);
+  };
 
 
   const FindCategoryId=async(item)=>{
+    const list =RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel)
     setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
+    const first = list.find((_, index) => !index);
+    Task_RelatedList(first.value,list);
+
+  }
+  const getLists=async(TaskRelatedNameId,value)=>{
+    const json=await getEntityInfo(TaskRelatedNameId,value)
+     RelatedNameList.find((p)=>p.value===TaskRelatedNameId).data=[];
+    for (let item in json.relatedList) {
+      let obj = json.relatedList?.[item];
+      RelatedNameList.find((p)=>p.value===TaskRelatedNameId).data?.push({value: obj.relatedId,
+        label: obj.relatedName,})
+    }
   }
   return (
     <>
@@ -1934,6 +2018,19 @@ function Task_Management({ navigation, navigation: { goBack } }) {
 
         {showModalDelete &&
         <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
+        }
+        {ShowMessage === true ?
+          <View style={Styles.flashMessageSuccsess}>
+            <View style={{ width: "10%" }} />
+            <View style={{ width: "80%" }}>
+              <Text style={Styles.AlertTxt}>
+                {Message}
+              </Text>
+            </View>
+            <View style={{ width: "10%" }} />
+          </View>
+          :
+          null
         }
         {
           showModalReject &&
@@ -2035,7 +2132,7 @@ function Task_Management({ navigation, navigation: { goBack } }) {
           visible={visiblFilter}>
           <Content contentContainerStyle={[Styles.centeredView,
             { flexGrow: 1, backgroundColor: "rgba(0,0,0, 0.5)", justifyContent: "center" }]}>
-            <View style={[Styles.ModalTaskStyle2]}>
+            { GLOBAL.TaskRelatedNameId!==''?   <View style={[Styles.ModalTaskStyle2]}>
               <View style={[{ width: "89%", marginBottom: "4%" }]}>
                 <TouchableOpacity onPress={() => {
                   setvisiblFilter(false);
@@ -2121,50 +2218,50 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   )}
                 />
                 {categoryEntityShow === 'y' &&
-                  <>
-                    <View style={Styles.ItemModalFilter}>
-                      <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Project Name</Text>
-                    </View>
-                    <Dropdown
-                      style={[Styles.dropdownModalFilter]}
-                      placeholderStyle={Styles.placeholderStyleModalFilter}
-                      selectedTextStyle={Styles.selectedTextModalFilter}
-                      iconStyle={Styles.iconStyle}
-                      itemTextStyle={Styles.itemTextStyle}
-                      data={TaskRelated}
-                      maxHeight={140}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={!isFocus ? "Select Project Name" : "..."}
-                      value={selectedRelated}
-                      containerStyle={Styles.containerModalFilter}
-                      renderItem={renderItem_dropDown}
-                      onFocus={() => setIsFocus(true)}
-                      onBlur={() => setIsFocus(false)}
-                      onChange={item => {
-                        GLOBAL.ProjectId = item.value;
-                        if (RelatedNameLvalue==='project') {
-                          setSelectedrelated(item);
-                          setRelatedId(item.value);
-                        } else {
-                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value;
-                          console.log(categoryId,'categoryId : getSites')
-                          getSites(categoryId,item.value);
-                          setSelectedrelated(item);
-                          setTaskProjectId(item.value);
-                        }
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Project Name</Text>
+                  </View>
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    data={TaskRelated}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select Project Name" : "..."}
+                    value={selectedRelated}
+                    containerStyle={Styles.containerModalFilter}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      GLOBAL.ProjectId = item.value;
+                      if (RelatedNameLvalue==='project') {
+                        setSelectedrelated(item);
+                        setRelatedId(item.value);
+                      } else {
+                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value;
+                        console.log(categoryId,'categoryId : getSites')
+                        getSites(categoryId,item.value);
+                        setSelectedrelated(item);
+                        setTaskProjectId(item.value);
+                      }
 
-                      }}
-                      renderSelectedItem={(item, unSelect) => (
-                        <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                          <View style={Styles.selectedStyle2}>
-                            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                            <AntDesign color="#fff" name="delete" size={15} />
-                          </View>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </>
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </>
                 }
                 {categoryLevellist.find((p)=>p?.label==='Site')&&
                 <>
@@ -2340,7 +2437,131 @@ function Task_Management({ navigation, navigation: { goBack } }) {
                   <Text style={[Styles.txt_CenterModalFilter]}> Apply</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </View>:
+
+              <View style={[Styles.ModalTaskStyle2]}>
+                <View style={[{ width: "89%", marginBottom: "4%" }]}>
+                  <TouchableOpacity onPress={() => {
+                    setvisiblFilter(false);
+                  }} style={Styles.CancelBtnLeftAlign}>
+                    <AntDesign name={"closecircleo"} size={20} color={GLOBAL.OFFICIAL_BLUE_COLOR} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={Styles.FilterText}>
+                  Filter
+                </Text>
+                <View style={Styles.ItemModalFilter}>
+                  <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Category</Text>
+                </View>
+                <Dropdown
+                  style={[Styles.dropdownModalFilter]}
+                  showsVerticalScrollIndicator={true}
+                  placeholderStyle={Styles.placeholderStyleModalFilter}
+                  selectedTextStyle={Styles.selectedTextModalFilter}
+                  iconStyle={Styles.iconStyle}
+                  itemTextStyle={Styles.itemTextStyle}
+                  data={Taskcategory}
+                  maxHeight={140}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "Select Category" : "..."}
+                  value={categoryName}
+                  containerStyle={Styles.containerModalFilter}
+                  renderItem={renderItem_dropDown}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    setcategoryName(item);
+                    setCategoryId(item.value);
+                    Task_subcategory(item.value);
+                    setcategoryEntityShow(item.categoryEntityShow)
+                  }}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                      <View style={Styles.selectedStyle2}>
+                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                        <AntDesign color="#fff" name="delete" size={15} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+                {categoryEntityShow === "y" &&
+                <>
+                  <View style={Styles.ItemModalFilter}>
+                    <Text style={[Styles.txt_leftModalFilter, { marginTop: normalize(15) }]}>Target Entity</Text>
+                  </View>
+                  <Dropdown
+                    style={[Styles.dropdownModalFilter]}
+                    placeholderStyle={Styles.placeholderStyleModalFilter}
+                    selectedTextStyle={Styles.selectedTextModalFilter}
+                    iconStyle={Styles.iconStyle}
+                    itemTextStyle={Styles.itemTextStyle}
+                    containerStyle={Styles.containerModalFilter}
+                    data={RelatedNameList}
+                    maxHeight={140}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "Select Target Entity" : "..."}
+                    value={selectedrelatedname}
+                    renderItem={renderItem_dropDown}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      FindCategoryId(item)
+                      setcategoryLevel(item.categoryLevel)
+                      setselectedrelatedname(item);
+                      setTaskRelatedNameId(item.value);
+                      setRelatedNameLvalue(item.label);
+                      GLOBAL.TaskRelatedName=item.categoryLevel
+                    }}
+                    renderSelectedItem={(item, unSelect) => (
+                      <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                        <View style={Styles.selectedStyle2}>
+                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
+                          <AntDesign color="#fff" name="delete" size={15} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  />
+
+                </>
+
+
+                  // style={[Styles.dropdownModalFilter]}
+                  // placeholderStyle={Styles.placeholderStyleModalFilter}
+                  // selectedTextStyle={Styles.selectedTextModalFilter}
+                  // iconStyle={Styles.iconStyle}
+                  // itemTextStyle={Styles.itemTextStyle}
+                  // containerStyle={Styles.containerModalFilter}
+                }
+                {categoryLevellist?.map((value, key) => {
+                  return (
+                    <Taskdropdown  value={value} key={key} getLists={getLists} SubCategory_List={categoryLevellist} setRelatedId={setRelatedId} entityIdList={entityIdList}  setEntityIdList={setEntityIdList}
+                                   dropdownStyle={Styles.dropdownModalFilter} textStyle={Styles.txt_leftModalFilter} placeholderStyle={Styles.placeholderStyleModalFilter}
+                                   selectedTextStyle={Styles.selectedTextModalFilter} containerStyle={Styles.containerModalFilter} setRelatedName={setRelatedName}
+
+                    />
+                  );
+                })}
+                <View style={Styles.With95Row2}>
+                  <TouchableOpacity style={Styles.btnModalFilter1} onPress={() => {
+                    setTaskRelatedNameId("");
+                    setcategoryName("");
+                    setCategoryId(0);
+                    setmodules(MudolList);
+                    setvisiblFilter(false);
+                  }}>
+                    <Text style={[Styles.txt_CenterModalFilter]}> Reset</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={Styles.btnModalFilter1} onPress={() => {
+                    ApplyFilter2();
+                  }}>
+                    <Text style={[Styles.txt_CenterModalFilter]}> Apply</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            }
+
           </Content>
         </Modal>
         {GLOBAL.selectItem === 1 || GLOBAL.TaskName !== "" ?

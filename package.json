@@ -21,6 +21,7 @@
     "@react-navigation/native-stack": "^6.9.13",
     "deprecated-react-native-prop-types": "^5.0.0",
     "formik": "^2.4.5",
+    "haversine": "^1.1.1",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.4",
     "moti": "^0.28.1",

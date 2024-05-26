@@ -17,6 +17,7 @@ import Voice_Search from "./Voice_Search";
 import AddNewTask2 from '../taskmanagementscreen/AddNewTask';
 import ThemChangeStack from '../colorChangescreen/index';
 import DocmanagementStack from '../docmanagement/index'
+import DocmanagementStack2 from '../docmanagement/index2'
 const Drawer = createDrawerNavigator();
 const width = Dimensions.get("window").width;
 
@@ -33,9 +34,9 @@ function Home_Navigation() {
         <Stack.Screen name="AddNewTask2" component={AddNewTask2} />
         <Stack.Screen name="ThemChangeStack" component={ThemChangeStack} />
         <Stack.Screen name="DocmanagementStack" component={DocmanagementStack} />
+        <Stack.Screen name="DocmanagementStack2" component={DocmanagementStack2} />
+
       </Stack.Navigator>
-
-
   );
 }
 
@@ -54,6 +55,7 @@ const HomeStack  = () =>{
         })}>
         <Drawer.Screen  options={{headerShown: false}}  name="HomeStack" component={Home_Navigation} initialParams={Home_Navigation}  />
         <Drawer.Screen  options={{headerShown: false}}  name="DoshboardStack" component={DoshboardStack}   />
+
       </Drawer.Navigator>
     </NavigationContainer>
   );

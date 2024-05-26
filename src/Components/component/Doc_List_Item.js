@@ -156,10 +156,11 @@ function Doc_List_Item({
       Screen==='Sub'?
       <View  style={Styles.ItemDetailBox}>
         <View style={Styles.With90}>
-
           <View   style={{ width: "55%" }}>
-
+            <View   style={{ width: "100%",flexDirection:'row' }}>
+            <AntDesign size={normalize(18)} color={Colors.button} name={'filetext1'} style={{ marginTop: 7,marginRight:5}}/>
             <Text onPress={() => SeeDetail(value)} style={[Styles.txt_left]}>{value.name}</Text>
+            </View>
             <View style={Styles.TaskListStyle}>
               <Text style={[Styles.txt_left_task]}>Status : {value.documentStatusTitle}</Text>
             </View>
@@ -168,28 +169,28 @@ function Doc_List_Item({
             </View>
           </View>
           <View style={{ width: "45%" }}>
-            {/*{(value?.data?.length !== 0 &&*/}
-            {/*  <Dropdown*/}
-            {/*    containerStyle={Styles.DropDown}*/}
-            {/*    selectedTextStyle={Styles.selectedTextStyle}*/}
-            {/*    labelField="label"*/}
-            {/*    valueField="value"*/}
-            {/*    data={value?.data}*/}
-            {/*    activeColor={Colors.Light}*/}
-            {/*    maxHeight={300}*/}
-            {/*    renderItem={renderItem}*/}
-            {/*    renderRightIcon={()=>(*/}
-            {/*      <View style={Styles.DropDownIcon}>*/}
-            {/*        <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>*/}
-            {/*      </View>*/}
-            {/*    )}*/}
-            {/*    onFocus={() => setIsFocus(true)}*/}
-            {/*    onBlur={()  => setIsFocus(false)}*/}
-            {/*    onChange={item=>{*/}
-            {/*      ClickManagement(item);*/}
-            {/*    }}*/}
-            {/*  />*/}
-            {/*)}*/}
+            {(value?.data?.length !== 0 &&
+              <Dropdown
+                containerStyle={Styles.DropDown}
+                selectedTextStyle={Styles.selectedTextStyle}
+                labelField="label"
+                valueField="value"
+                data={value?.data}
+                activeColor={Colors.Light}
+                maxHeight={300}
+                renderItem={renderItem}
+                renderRightIcon={()=>(
+                  <View style={Styles.DropDownIcon}>
+                    <AntDesign name="ellipsis1" size={normalize(25)} color={GLOBAL.OFFICIAL_BLUE_COLOR}/>
+                  </View>
+                )}
+                onFocus={() => setIsFocus(true)}
+                onBlur={()  => setIsFocus(false)}
+                onChange={item=>{
+                  ClickManagement(item);
+                }}
+              />
+            )}
             {/*<View style={{marginLeft:'auto',marginTop:15 }}>*/}
             {/*<Entypo size={normalize(25)} color={Colors.button} name={'heart-outlined'}/>*/}
             {/*</View>*/}
@@ -273,7 +274,8 @@ function Doc_List_Item({
       </View>:
       <View  style={Styles.ItemDetailBox}>
         <View style={Styles.With90}>
-          <TouchableOpacity  onPress={() => SeeDetail(value)} style={{ width: "55%" }}>
+          <TouchableOpacity  onPress={() => SeeDetail(value)} style={{ width: "55%" ,flexDirection:'row'}}>
+            <Entypo size={normalize(18)} color={Colors.button} name={'folder'} style={{ margin: 7,}}/>
             <Text style={[Styles.txt_left]}>{value.name}</Text>
           </TouchableOpacity>
           <View style={{ width: "45%" }}>

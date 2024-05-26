@@ -82,6 +82,7 @@ module.exports = {
   Theme_Color:'@MySuperStore:Theme',
   RelatedList:'@MySuperStore:RelatedList',
   categories:'@MySuperStore:categories',
+  EntityList:'@MySuperStore:EntityList',
   PASSWORD_value:"",
   OrgAppLink_value:"",
   OrgAppKey_value:"",
@@ -162,7 +163,8 @@ module.exports = {
   ],
   Unitdata_dyb:[{label: "Photos",value: "2",Icon: "images" },
     {label: "Location",value: "14",Icon: "location" },],
-  Task_data:[{ label: "Edit", value: "1", Icon: "edit" }, { label: "Cancel Task", value: "2", Icon: "cross" }],
+// { label: "Document", value: "3", Icon: "attachment" }
+  Task_data:[{ label: "Edit", value: "1", Icon: "edit" }, { label: "Cancel Task", value: "2", Icon: "cross" }, ],
   Task_data_assigned : [ { label: "Complete Task", value: "4", Icon: "check" }],
   Section_Data:[
     {label: "Edit",value: "7",Icon: "edit" },
@@ -213,5 +215,10 @@ module.exports = {
   DocSubCategoryTitle:'',
   screenName:'',
   doc_sectionId:'',
-  documents:''
+  documents:'',
+  Projectdocinfo:'',
+  SelectId:'',
+  SelectName:'',
+  RelatedNameLvalue:""
+
 };

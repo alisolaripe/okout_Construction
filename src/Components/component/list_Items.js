@@ -71,8 +71,6 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
   };
   useEffect(()=>{
 
-
-
   },[]);
 
   const onChangeText_Press=(value, Cheked)=>{
@@ -134,7 +132,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
       Navigate_Url('Project_Site_Detail');
     }
     if (id === "4"||id==='15') {
-      if(id==='4'){
+      if(id==='15'){
         // if(GLOBAL.UserPermissionsList?.Project?.edit==='1') {
           GLOBAL.UpdateUnitID = value.unitId;
           setShowUpdateModal(true);
@@ -605,13 +603,13 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
       <View style={[Styles.With90]}>
         {
           numberValue===3?
-            <View   style={Styles.With65}>
+            <View   style={Styles.With70}>
               <Text onPress={() => {
                 GLOBAL.ProjectId=value.projectId;
                 Navigate_Url('Project_Sites');
               }}  style={[Styles.txt_left]}>{value.projectName}</Text>
               <View style={Styles.BtnListStyle}>
-                <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnList}>
+                <LinearGradient colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnListfirst}>
                   <TouchableOpacity  onPress={() => {
                     GLOBAL.ProjectId=value.projectId;
                     Navigate_Url('Project_Sites');
@@ -619,7 +617,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                     <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Site : {value.siteCount}</Text>
                   </TouchableOpacity>
                 </LinearGradient>
-                <LinearGradient  colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnList1}>
+                <LinearGradient  colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnListfirst}>
                   {
                     value.task==='0'||value.task===0?
                       <View>
@@ -641,17 +639,26 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                   }
 
                 </LinearGradient>
+                <LinearGradient colors={["#86449e", "#663378", "#4e275c"]} style={Styles.btnListfirst}>
+                  <TouchableOpacity  onPress={() => {
+                    GLOBAL.Projectdocinfo='project';
+                    GLOBAL.SelectId=value.projectId;
+                    Navigate_Url('DocmanagementStack2');
+                  }}>
+                    <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Doc   </Text>
+                  </TouchableOpacity>
+                </LinearGradient>
               </View>
 
             </View>:
             numberValue===4?
-              <View   style={Styles.With65}>
+              <View   style={Styles.With70}>
                 <Text onPress={() => {
                   GLOBAL.SiteId =value.siteId
                   Navigate_Url('Project_UnitsStack');
                 }} style={[Styles.txt_left]}>{value.siteName}</Text>
                 <View style={Styles.BtnListStyle}>
-                    <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnList}>
+                    <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnListfirst}>
                       <TouchableOpacity onPress={() => {
                         GLOBAL.SiteId =value.siteId
                         Navigate_Url('Project_UnitsStack');
@@ -659,7 +666,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                         <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> unit : {value.unitCount}</Text>
                       </TouchableOpacity>
                     </LinearGradient>
-                    <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnList1}>
+                    <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnListfirst}>
                       {
                         value.task==='0'||value.task===0?
                           <View >
@@ -679,20 +686,26 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                       }
 
                     </LinearGradient>
-                  {/*// <View style={Styles.btnList2}>*/}
-                  {/*//   <Text style={[Styles.txt_left2, { fontSize: normalize(12) }]}> Other : 2</Text>*/}
-                  {/*// </View>*/}
+                  <LinearGradient colors={["#86449e", "#663378", "#4e275c"]} style={Styles.btnListfirst}>
+                    <TouchableOpacity  onPress={() => {
+                      GLOBAL.Projectdocinfo='site';
+                      GLOBAL.SelectId=value.siteId
+                      Navigate_Url('DocmanagementStack2');
+                    }}>
+                      <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Doc   </Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
                 </View>
               </View>:
               numberValue===12?
-                <View   style={Styles.With65}>
+                <View   style={Styles.With70}>
                   <Text onPress={() => {
                     GLOBAL.UnitId = value.unitId
                     Navigate_Url('Project_Section2');
                   }} style={[Styles.txt_left]}>{value.unitName}</Text>
                   <View style={Styles.BtnListStyle}>
 
-                      <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnList}>
+                      <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnListfirst}>
                         <TouchableOpacity onPress={() => {
                           GLOBAL.UnitId = value.unitId
                           Navigate_Url('Project_Section2');
@@ -700,7 +713,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                           <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> section : {value.sectionCount}</Text>
                         </TouchableOpacity>
                       </LinearGradient>
-                      <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnList1}>
+                      <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnListfirst}>
                         {
                           value.task==='0'||value.task===0?
 
@@ -722,17 +735,26 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                         }
 
                       </LinearGradient>
+                    <LinearGradient colors={["#86449e", "#663378", "#4e275c"]} style={Styles.btnListfirst}>
+                      <TouchableOpacity  onPress={() => {
+                        GLOBAL.Projectdocinfo='unit';
+                        GLOBAL.SelectId=value.unitId;
+                        Navigate_Url('DocmanagementStack2');
+                      }}>
+                        <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Doc  </Text>
+                      </TouchableOpacity>
+                    </LinearGradient>
                   </View>
                 </View>:
                 numberValue===14?
-                  <View   style={Styles.With65}>
+                  <View   style={Styles.With70}>
                     <Text onPress={()=> {
                       GLOBAL.SectionId=value.sectionId;
                       Navigate_Url('Project_Features2');
                     }} style={[Styles.txt_left]}>{value.sectionName}</Text>
                     <View style={Styles.BtnListStyle}>
 
-                        <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnList}>
+                        <LinearGradient   colors={["#4d78a5", "#375e89", "#27405c"]} style={Styles.btnListfirst}>
                           <TouchableOpacity onPress={()=> {
                             GLOBAL.SectionId=value.sectionId;
                             Navigate_Url('Project_Features2');
@@ -741,7 +763,7 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                           </TouchableOpacity>
                         </LinearGradient>
 
-                        <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnList1}>
+                        <LinearGradient   colors={['#a39898','#786b6b','#382e2e']} style={Styles.btnListfirst}>
                           {
                             value.task==='0'||value.task===0?
                               <View >
@@ -763,11 +785,19 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                           }
 
                         </LinearGradient>
-
+                      <LinearGradient colors={["#86449e", "#663378", "#4e275c"]} style={Styles.btnListfirst}>
+                        <TouchableOpacity  onPress={() => {
+                          GLOBAL.Projectdocinfo='section';
+                          GLOBAL.SelectId=value.sectionId
+                          Navigate_Url('DocmanagementStack2');
+                        }}>
+                          <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Doc  </Text>
+                        </TouchableOpacity>
+                      </LinearGradient>
                     </View>
                   </View>:
                   numberValue===16?
-                    <View   style={Styles.With65}>
+                    <View   style={Styles.With70}>
                       {
                         value.DYB!=='n'?
                           <Text onPress={()=> {
@@ -821,11 +851,20 @@ function List_Items({index,value,ShowMessage,ChangeChecked,setShowMessage,data,n
                             }
 
                           </LinearGradient>
+                        <LinearGradient colors={["#86449e", "#663378", "#4e275c"]} style={Styles.btnList4}>
+                          <TouchableOpacity  onPress={() => {
+                            GLOBAL.Projectdocinfo='feature'
+                            GLOBAL.SelectId=value.featureId
+                            Navigate_Url('DocmanagementStack2');
+                          }}>
+                            <Text style={[Styles.txt_left2, { fontSize: normalize(14) }]}> Doc  </Text>
+                          </TouchableOpacity>
+                        </LinearGradient>
                       </View>
                     </View>
                     :null
         }
-        <View style={{width:"35%"}}>
+        <View style={{width:"30%"}}>
           <Dropdown
             containerStyle={Styles.DropDown}
             selectedTextStyle={Styles.selectedTextStyle}

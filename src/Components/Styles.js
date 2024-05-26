@@ -278,6 +278,13 @@ const Styles = StyleSheet.create({
     margin: 7,
     fontFamily:'OpenSansBold',
   },
+  txtLightColor22: {
+    fontSize: normalize(14),
+    margin: 7,
+    fontFamily:'OpenSansBold',
+    marginTop:normalize(15),
+    color:GLOBAL.footertext_backgroundColor
+  },
   txtLightColorLeft: {
     color: GLOBAL.OFFICIAL_BLUE_COLOR,
     fontSize: normalize(14),
@@ -1322,7 +1329,8 @@ paddingHorizontal:7,
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    marginTop: normalize(8),},
+    marginTop: normalize(8),
+  },
   BtnListStyle3:{width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -1353,9 +1361,23 @@ paddingHorizontal:7,
     marginTop: normalize(7),},
   btnList:
     {
-      backgroundColor: "#7953FAFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(7),
+      backgroundColor: "#7953FAFF", filter: "blur(15)", width: "36%", paddingVertical: normalize(7),
       borderRadius: normalize(6),
-      marginRight: normalize(7),
+      marginRight: normalize(5),
+
+    },
+  btnListfirst:
+    {
+     paddingHorizontal: normalize(10), paddingVertical: normalize(7),
+      borderRadius: normalize(6),
+      marginRight: normalize(5),
+
+    },
+  btnList4:
+    {
+      backgroundColor: "#7953FAFF", filter: "blur(15)", width: "25%", paddingVertical: normalize(7),
+      borderRadius: normalize(6),
+      marginRight: normalize(2),
 
     },
   btnsubcategory:
@@ -1397,9 +1419,9 @@ paddingHorizontal:7,
     },
   btnList1:
     {
-      backgroundColor: "#4B75FCFF", filter: "blur(15)", width: "37%", paddingVertical: normalize(7),
+      backgroundColor: "#4B75FCFF", filter: "blur(15)", width: "36%", paddingVertical: normalize(7),
       borderRadius: normalize(6),
-      marginRight: normalize(7),
+      marginRight: normalize(5),
 
     },
  btntask:
@@ -1687,7 +1709,7 @@ paddingHorizontal:7,
  With93_row:{width:'93%',flexDirection:'row'},
   With100_row:{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'center'},
   With65:{width:'65%'},
-
+  With70:{width:'70%'},
   With35:{width:'35%'},
   With90_zIndex:{width:'90%',flexDirection:'row',zIndex:-1},
   With90Center:{width:'90%',alignItems:'center'},

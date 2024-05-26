@@ -437,7 +437,7 @@ function Task_management_Item({
         if (json?.status === true) {
           setMessage(json?.msg);
           setShowMessage(true);
-          My_TaskList_server();
+          My_TaskList_server(json.msg,'Cancell');
           let index = GLOBAL?.FilterList.findIndex((p) => p.taskId === GLOBAL.TaskId);
           let mark = [...GLOBAL?.FilterList];
           mark[index] = { ...mark[index], taskStatusColor: "#5a5a5a", taskStatusName: "Cancelled", taskUpdated: "y" };

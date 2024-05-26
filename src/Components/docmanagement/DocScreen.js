@@ -8,6 +8,7 @@ import { Footer1 } from "../component/Footer";
 import { removeDataStorage } from "../Get_Location";
 import Doc_List_Item from "../component/Doc_List_Item";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { readOnlineApi } from "../ReadPostApi";
 const Photoes = require("../Photoes");
 const Api = require("../Api");
 const GLOBAL = require("../Global");
@@ -77,7 +78,9 @@ function Doc_Management({ navigation, navigation: { goBack } }) {
     navigation.navigate("DocCategoryScreen");
   };
   useEffect(() => {
-    getDoc()
+
+    getDoc();
+
   }, []);
   const getDoc=async ()=>{
     let json = JSON.parse(await AsyncStorage.getItem(GLOBAL.Get_Docmanage));

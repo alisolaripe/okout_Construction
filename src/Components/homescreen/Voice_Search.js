@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image, StyleSheet, StatusBar, ImageBackground, TouchableOpacity,
+  Image, StyleSheet, StatusBar, ImageBackground, TouchableOpacity, LogBox,
 } from "react-native";
 import {Easing} from 'react-native-reanimated'
  import { Styles } from "../Styles";
@@ -16,14 +16,10 @@ import { Button, Container, Content } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Voice, {
-  SpeechRecognizedEvent,
-  SpeechResultsEvent,
-  SpeechErrorEvent,
 } from '@react-native-voice/voice';
 import { MotiView } from 'moti';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import normalize from "react-native-normalize/src/index";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { removeDataStorage } from "../Get_Location";
 import { LogOutModal } from "../component/LogOutModal";
 function Voice_Search({navigation,navigation: { goBack } }) {
@@ -39,6 +35,7 @@ function Voice_Search({navigation,navigation: { goBack } }) {
   const [ShowMessage, setShowMessage] = useState(false);
   const [showModalDelete, setshowModalDelete] = useState(false);
   useEffect( ()=>{
+    LogBox.ignoreLogs(['new NativeEventEmitter']);
     Voice.onSpeechStart = onSpeechStart;
     Voice.onSpeechRecognized = onSpeechRecognized;
     Voice.onSpeechEnd = onSpeechEnd;

@@ -22,12 +22,43 @@ function DocCategoryScreen({ navigation, navigation: { goBack } }) {
     Reference:'07/05/2024',Notes:'07/05/2024',CreatedOn:'Okout Admin',CreatedBy:'07/05/2024'}]);
   const [data, setdata] = useState(['']);
   useEffect(() => {
-    get_document()
+    if(GLOBAL.Projectdocinfo==='')
+      get_document();
+    else
+      getDocstructor()
   }, []);
+  const getDocstructor=async ()=>{
+
+    if (GLOBAL.isConnected === true) {
+      readOnlineApi(Api.get_document_structor + `userId=${GLOBAL.UserInformation?.userId}&relatedName=${GLOBAL.Projectdocinfo}&relatedId=${GLOBAL.SelectId}`).then(json => {
+
+        let getDoc = [];
+        let data = [];
+        console.log(json,'json get_document_structor')
+        json?.sections?.forEach((obj) => {
+          getDoc.push({
+            Id: obj?.sectionId,
+            name: obj?.sectionTitle,
+            documents:obj?.documents
+          });
+        });
+        json?.sectionMenu?.forEach((obj) => {
+          data.push({
+            value: obj?.id,
+            label: obj?.name,
+          });
+        });
+        setdata(data)
+        setmodules(getDoc)
+      });
+
+    }
+
+  }
   const get_document= async () => {
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.get_document + `userId=${GLOBAL.UserInformation?.userId}&sectionId=${GLOBAL.DocID}`).then(json => {
-        console.log(json,'json')
+
         let getDoc = [];
         let data = [];
         json?.sections?.forEach((obj) => {
@@ -124,10 +155,14 @@ function DocCategoryScreen({ navigation, navigation: { goBack } }) {
     GLOBAL.SubCategoryTitle=GLOBAL.DocSubCategoryTitle+' / '+value.name
     navigation.navigate("DocSubCategoryScreen");
   };
+  const backnavigate=()=>{
+    GLOBAL.Projectdocinfo='';
+    goBack()
+  }
   return (
     <Container  style={{backgroundColor:GLOBAL.backgroundColor}}>
       <Header colors={["#8bc3f8", "#4a7fb3", "#1c3045"]}
-              StatusColor={"#8bc3f8"} onPress={goBack} Title={GLOBAL.DocSubCategoryTitle+' '+'SubCategory'} />
+              StatusColor={"#8bc3f8"} onPress={backnavigate} Title={GLOBAL.DocSubCategoryTitle+' '+'SubCategory'} />
       <View style={Styles.containerList}>
         {showModalDelete &&
         <LogOutModal setshowModalDelete={setshowModalDelete} showModalDelete={showModalDelete} LogOut={LogOut} />
@@ -160,5 +195,4 @@ function DocCategoryScreen({ navigation, navigation: { goBack } }) {
     </Container>
   )
 }
-
 export default DocCategoryScreen;

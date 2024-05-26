@@ -46,6 +46,7 @@ import Geocoder from "react-native-geocoder";
 import MapView, { Marker } from "react-native-maps";
 import { writePostApi } from "../writePostApi";
 import { readOnlineApi } from "../ReadPostApi";
+import { DropDownItems } from "./DropDownItems";
 let numOfLinesCompany = 0;
 const screen = Dimensions.get('window');
 const ASPECT_RATIO = (screen.width / screen.height)/4;
@@ -84,7 +85,7 @@ function TextInputI({ GeoAddressCity,
                       My_TaskList_server2,getAllProjectInfo_dyb,getAllProjectInfo,setMessage,setRelatedNameList,Parentlist,setselectparentId,
                       selectparentname, setselectparentname,DirectoryUser,DirectoryUserName,setDirectoryUserName,setDirectoryUserId,
                       setOpenEnd,DateFormat,DateFormatEnd,Status,StatusName,setStatusName,setStatusId,selectFile,filename,Recipient,
-                      RecipientName,setRecipientName,RecipientId,setRecipientId
+                      RecipientName,setRecipientName,RecipientId,setRecipientId,setRelatedName
                     }) {
   const { navigate } = useNavigation();
   const [securetText, setSecuretText] = useState(true);
@@ -116,24 +117,33 @@ function TextInputI({ GeoAddressCity,
   const [sectionList, setsectionList] = useState([]);
   const [featureList, setfeatureList] = useState([]);
   const [categoryLevellist, setcategoryLevellist] = useState([]);
+  const [entityIdList, setEntityIdList] = useState([]);
   const [categoryLevel, setcategoryLevel] = useState('');
  const [categoryEntityShow, setcategoryEntityShow] = useState('n');
   const [RelatedNameLvalue, setRelatedNameLvalue] = useState('');
+  const [tasktitleerro, settasktitleerro] = useState(false);
+  const [tasknoteerro, settasknoteerro] = useState(false);
   const Task_subcategory =async (value) => {
+
+    writeDataStorage(GLOBAL.Category_Last_Info,value);
     if (GLOBAL.isConnected === true) {
       readOnlineApi(Api.Task_subcategory + `userId=${GLOBAL.UserInformation?.userId}&categoryId=${value}`).then(json => {
         let A = [];
-        console.log(json?.subCategories,'json?.subCategories')
+
+        const dataList=[];
         for (let item in json?.subCategories) {
           let obj = json?.subCategories?.[item];
           A.push({
             value: obj.categoryId,
             label: obj.categoryTitle,
             categoryEntityShow:obj.categoryEntityShow,
-            categoryLevel:obj.categoryLevel
+            categoryLevel:obj.categoryLevel,
+            data:dataList,
           });
         }
+
         setRelatedNameList(A);
+
         if(GLOBAL.TaskRelatedNameId!==''){
          if(GLOBAL.TaskRelatedNameId==='1') {
             setcategoryLevellist(A.filter((p)=>parseInt(p?.categoryLevel)<=2))
@@ -527,163 +537,119 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     }
   };
   const CreateTask = (values) => {
-    let idsArray = "";
-    const date = new Date();
-    const Year = date.getFullYear();
-    const Day = date.getDate();
-    const Month = date.getMonth() + 1;
-    const Hour=date.getHours();
-    const Minute=date.getMinutes()
-    const Second=date.getSeconds()
-    const TodayDate = `${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
-    const formData = new FormData();
-    if (categoryId === 0) {
-      setErrors("selectedcategory");
-    } else {
-      setShowButton(false)
-      formData.append("userId",  GLOBAL.UserInformation?.userId);
-      formData.append("categoryId", categoryId);
-      formData.append("workTypeId", WorkTypeId);
-      if(categoryId==='1'||categoryId==='2') {
-        formData.append("relatedId", relatedId);
-        formData.append("relatedName", selectedrelatedname.label);
+    if(values?.Title===''){
+      settasktitleerro(true)
+    }
+    else if(values?.TaskNote===''){
+      settasknoteerro(true)
+    }
+    else {
+      let idsArray = "";
+      const date = new Date();
+      const Year = date.getFullYear();
+      const Day = date.getDate();
+      const Month = date.getMonth() + 1;
+      const Hour=date.getHours();
+      const Minute=date.getMinutes()
+      const Second=date.getSeconds()
+      const TodayDate = `${Year}-${Month}-${Day} ${Hour}:${Minute}:${Second}`;
+      const formData = new FormData();
+      if (categoryId === 0) {
+        setErrors("selectedcategory");
       }
-      formData.append("requestDate", TodayDate);
-      formData.append("priorityId", priorityId);
-      formData.append("planStartDate", null);
-      formData.append("planEndDate", null);
-      formData.append("taskStatusId", "1");
-      formData.append("title", values?.Title);
-      formData.append("description", values?.TaskNote);
-      formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
-      formData.append("requestBy", GLOBAL?.UserInformation?.userId);
-      if(GLOBAL.Subtask!=='')
-        formData.append("parentTaskId", GLOBAL.Subtask);
-      else
-        formData.append("parentTaskId", null);
-      formData.append("assignedTo", null);
-      if (GLOBAL.isConnected=== false) {
-        Add_Task_Offline2(values,TodayDate);
-      }
-      if (ImageSourceviewarray.length !== 0) {
-        for (let i = 0; i < ImageSourceviewarray?.length; i++) {
-          idsArray = ImageSourceviewarray[i];
-          formData.append("attachments[]", {
-            uri: idsArray.uri,
-            type: idsArray.type,
-            name: idsArray.fileName,
-          });
+      else {
+        setShowButton(false)
+        formData.append("userId",  GLOBAL.UserInformation?.userId);
+        formData.append("categoryId", categoryId);
+        formData.append("workTypeId", WorkTypeId);
+        if(categoryId==='1'||categoryId==='2') {
+          formData.append("relatedId", relatedId);
+          formData.append("relatedName", selectedrelatedname.label);
         }
-        writePostApi("POST", Api.AddTask, formData, ImageSourceviewarray).then(json => {
-          if (json) {
-            if (json?.status === true) {
-              My_TaskList_server2();
-              getAllProjectInfo();
-              getAllProjectInfo_dyb();
+        formData.append("requestDate", TodayDate);
+        formData.append("priorityId", priorityId);
+        formData.append("planStartDate", null);
+        formData.append("planEndDate", null);
+        formData.append("taskStatusId", "1");
+        formData.append("title", values?.Title);
+        formData.append("description", values?.TaskNote);
+        formData.append("requestedBy", GLOBAL?.UserInformation?.userId);
+        formData.append("requestBy", GLOBAL?.UserInformation?.userId);
+        if(GLOBAL.Subtask!=='')
+          formData.append("parentTaskId", GLOBAL.Subtask);
+        else
+          formData.append("parentTaskId", null);
+        formData.append("assignedTo", null);
+        if (GLOBAL.isConnected=== false) {
+          Add_Task_Offline2(values,TodayDate);
+        }
+        if (ImageSourceviewarray.length !== 0) {
+          for (let i = 0; i < ImageSourceviewarray?.length; i++) {
+            idsArray = ImageSourceviewarray[i];
+            formData.append("attachments[]", {
+              uri: idsArray.uri,
+              type: idsArray.type,
+              name: idsArray.fileName,
+            });
+          }
+          writePostApi("POST", Api.AddTask, formData, ImageSourceviewarray).then(json => {
+            if (json) {
+              if (json?.status === true) {
+                My_TaskList_server2();
+                getAllProjectInfo();
+                getAllProjectInfo_dyb();
+                values.TaskNote=''
+                values.Title=''
+                setImageSourceviewarray([])
+                setMessage(json?.msg);
+                setMessage(json?.msg);
+                setShowMessage(true);
+                setShowButton(true)
+                setShowBtn(true)
+                setTimeout(function(){ setShowMessage(false)}, 4000)
+              }
+            }
+            else {
               values.TaskNote=''
               values.Title=''
-              setImageSourceviewarray([])
-              setMessage(json?.msg);
+              setMessage("Your task successfully added");
+
               setShowMessage(true);
+              setShowButton(true)
+              setShowBtn(true)
+              setImageSourceviewarray([]);
               setShowBtn(true)
               setTimeout(function(){ setShowMessage(false)}, 4000)
             }
-          }
-          else {
-            values.TaskNote=''
-            values.Title=''
-            setMessage("Your task successfully added");
-            setShowMessage(true);
-            setShowButton(true)
-            setImageSourceviewarray([]);
-            setShowBtn(true)
-            setTimeout(function(){ setShowMessage(false)}, 4000)
-          }
-        });
-      }
-      else {
-        writePostApi("POST", Api.AddTask, formData).then(json => {
-          if (json) {
-            if (json?.status === true) {
+          });
+        }
+        else {
+          writePostApi("POST", Api.AddTask, formData).then(json => {
+            if (json) {
+              if (json?.status === true) {
+                values.TaskNote=''
+                values.Title=''
+                My_TaskList_server2();
+                getAllProjectInfo();
+                getAllProjectInfo_dyb();
+                setMessage(json?.msg);
+                setShowMessage(true);
+                setShowButton(true)
+                setShowBtn(true)
+                setTimeout(function(){ setShowMessage(false)}, 4000)
+              }
+            }
+            else {
+              setMessage("Your task successfully added");
               values.TaskNote=''
               values.Title=''
-              My_TaskList_server2();
-              getAllProjectInfo();
-              getAllProjectInfo_dyb();
-              setMessage(json?.msg);
               setShowMessage(true);
               setShowButton(true)
               setShowBtn(true)
               setTimeout(function(){ setShowMessage(false)}, 4000)
             }
-          }
-          else {
-            setMessage("Your task successfully added");
-            values.TaskNote=''
-            values.Title=''
-            setShowMessage(true);
-            setShowButton(true)
-            setCategoryId(0)
-            setRelatedId(0)
-            setShowBtn(true)
-             setTimeout(function(){ setShowMessage(false)}, 4000)
-          }
-        });
-      }
-    }
-    CreateNextTask(values)
-  };
-  const CreateNextTask=async (values)=>{
-    let Category_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.Category_Last_Info));
-    let WorkType_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.WorkType_Last_Info));
-    let PriorityId_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.priorityId_Last_Info));
-    let ProjectId =JSON.parse(await AsyncStorage.getItem(GLOBAL.projectId_Last_Info));
-    let SiteId =JSON.parse(await AsyncStorage.getItem(GLOBAL.siteId_Last_Info));
-    let UnitId =JSON.parse(await AsyncStorage.getItem(GLOBAL.unitId_Last_Info));
-    let SectionId =JSON.parse(await AsyncStorage.getItem(GLOBAL.sectionId_Last_Info));
-    let FeatureId =JSON.parse(await AsyncStorage.getItem(GLOBAL.featureId_Last_Info));
-    if(ProjectId)
-      GLOBAL.ProjectId=ProjectId
-    if(SiteId)
-      GLOBAL.SiteId=SiteId
-    if(UnitId)
-      GLOBAL.UnitId=UnitId
-      if(SectionId)
-        GLOBAL.SectionId=SectionId
-        if(FeatureId)
-          GLOBAL.UpdateFeatureID=FeatureId
-    if (Category_Info==='1') {
-      setSelectedcategory({ label: "Subcontract", value: "1", _index: 0 });
-    }
-    else if (Category_Info==='2') {
-      setSelectedcategory({ label: "Snag", value: "2", _index: 1 });
-    }
-    setCategoryId(Category_Info);
-    Task_WorkTypeList(Category_Info);
-    Task_RelatedList('1');
-    if(Category_Info==='1'||Category_Info==='2') {
-       RelatedId_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.RelatedId_Last_Info));
-      let RelatedName_Info =JSON.parse(await AsyncStorage.getItem(GLOBAL.RelatedName_Last_Info));
-      setRelatedId(RelatedId_Info)
-      if(RelatedName_Info==='project') {
-        setTaskRelatedNameId("0");
-        setselectedrelatedname({label:"Project",value:"0",_index:0})
-      }
-      else if(RelatedName_Info==='Site') {
-        setTaskRelatedNameId("1");
-        setselectedrelatedname({label:"Site",value:"1",_index:1})
-      }
-      else if(RelatedName_Info==='Unit') {
-        setTaskRelatedNameId("2");
-        setselectedrelatedname({label:"Unit",value:"2",_index:2})
-      }
-      else if(RelatedName_Info==='Section') {
-        setTaskRelatedNameId("3");
-        setselectedrelatedname({label:"Section",value:"3",_index:3})
-      }
-      else if(RelatedName_Info==='Feature') {
-        setTaskRelatedNameId("4");
-        setselectedrelatedname({label:"Feature",value:"4",_index:4})
+          });
+        }
       }
     }
 
@@ -713,7 +679,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       });
     }
   };
-  const Task_RelatedList = (Id,SubCategory_List) => {
+  const Task_RelatedList = (Id,list,SubCategory_List) => {
     if (GLOBAL.isConnected === true)
     {
       readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${Id}`).then(json => {
@@ -724,8 +690,13 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
             value: obj.relatedId,
             label: obj.relatedName,
           });
+          if(list?.length!==0) {
+            list?.find((p) => p?.value === Id)?.data?.push({
+              value: obj.relatedId,
+              label: obj.relatedName,
+            });
+          }
         }
-        categoryLevellist.find((p)=>p.value===Id).data=A
         if(GLOBAL.TaskRelatedNameId!==''||RelatedId_Info!=='') {
           let seacrhId=A?.find(p =>parseInt(p.value) ===parseInt( GLOBAL.ProjectId))?.value
           const categoryId= SubCategory_List.find((p)=>p.categoryLevel==='2')?.value
@@ -749,14 +720,23 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
 
   };
   const FindCategoryId=async(item)=>{
+
     const list =RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel)
-    const NewRelatedNameList =  list.map((obj, i) => {
-      const dataList=[];
-      return {
-        ...obj,data:dataList,
-      };
-    });
-    setcategoryLevellist(NewRelatedNameList)
+    setcategoryLevellist(RelatedNameList.filter((p)=>p?.categoryLevel<=item?.categoryLevel))
+    const first = list.find((_, index) => !index);
+    Task_RelatedList(first.value,list);
+
+  }
+  const getLists=async(TaskRelatedNameId,value)=>{
+    let list=''
+    const json=await getEntityInfo(TaskRelatedNameId,value)
+    RelatedNameList.find((p)=>p.value===TaskRelatedNameId).data=[];
+    for (let item in json?.relatedList) {
+      let obj = json?.relatedList?.[item];
+
+      RelatedNameList?.find((p)=>p.value===TaskRelatedNameId)?.data?.push({  value: obj.relatedId,
+      label: obj.relatedName,})
+    }
   }
   const getSites = async (TaskRelatedNameId,value,SubCategory_List) => {
                  const json=await getEntityInfo(TaskRelatedNameId,value)
@@ -788,7 +768,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
   const getEntityInfo =async (categoryId,SearchId) => {
     return (
       readOnlineApi(Api.Task_Project+`userId=${GLOBAL.UserInformation?.userId}&categoryId=${categoryId}&relatedSearchId=${SearchId}`).then(json => {
-        console.log(json,'json')
+
        return json;
       }));
 
@@ -868,14 +848,14 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
         }
   };
   const getInfo=async ()=>{
+    setCategoryId(GLOBAL?.categoryId);
+    setSelectedcategory({label:"Subcontract",value:"1",_index:0});
     let SubCategory_List =JSON.parse(await AsyncStorage.getItem(GLOBAL.Task_SubCategory2))
     setRelatedNameList(SubCategory_List);
-    setCategoryId(GLOBAL?.categoryId);
-    Task_WorkTypeList(GLOBAL?.categoryId);
-    Task_RelatedList('1',SubCategory_List);
-    console.log(SubCategory_List,'SubCategory_List')
-    setSelectedcategory({label:"Subcontract",value:"1",_index:0});
+
     setcategoryEntityShow('y');
+    Task_WorkTypeList(GLOBAL?.categoryId);
+    Task_RelatedList('1',[],SubCategory_List);
     if(GLOBAL.TaskRelatedNameId==='0') {
       setTaskRelatedNameId("0");
       setselectedrelatedname({label:"Project",value:"0",_index:0})
@@ -923,11 +903,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       setCheked(Boolean);
       setswitchDYB2(Boolean);
     }
-
     if( GLOBAL.TaskRelatedNameId!==''){
       getInfo()
     }
-
   },[]);
   const ClearDate=()=>{
     setGeoAddressCity('')
@@ -976,6 +954,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
       </View>
     );
   };
+  const Func=()=>{
+
+  }
    const Geocoder_latlong=async (label)=>{
      Geocoder.fallbackToGoogle(GLOBAL.mapKeyValue);
      const res = await Geocoder.geocodeAddress(label)
@@ -1160,7 +1141,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       latitudeDelta: LATITUDE_DELTA,
                       longitudeDelta: LONGITUDE_DELTA,
                     }}
-                    // onPress={(e) => setmarker({ marker: e.nativeEvent.coordinate })}
+                    //onPress={(e) => setmarker({ marker: e.nativeEvent.coordinate })}
                     onPress={(e) => {
                       setmarker({ coordinate: e.nativeEvent.coordinate })
                       getLocation(e.nativeEvent.coordinate)
@@ -1202,92 +1183,30 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       multiline={true}
                       placeholderTextColor={'#fff'} />
                     <View style={Styles.InputeRow}>
-
                       <View style={Styles.InputeRowItems}>
-                        <Text
-                          style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Country</Text>
-                        <Dropdown
-                          style={[Styles.dropdownLocationAdd]}
-                          placeholderStyle={Styles.placeholderStyle}
-                          selectedTextStyle={Styles.selectedTextStyle}
-                          iconStyle={Styles.iconStyle}
-                          itemTextStyle={Styles.itemTextStyle}
-                          data={CountryList}
-                          maxHeight={150}
-                          labelField="label"
-                          valueField="value"
-                          search={true}
-                          searchPlaceholder="Search..."
-                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                          placeholder={GeoAddressCountry}
-                          value={GeoAddressCountry}
-                          containerStyle={Styles.containerStyle}
-                          renderItem={renderItem_Location}
-                          onFocus={() => setIsFocus(true)}
-                          onBlur={() => setIsFocus(false)}
-                          onChange={item => {
-                            setGeoAddressCountry(item.label);
-                            setIsFocus(false);
-                            setcountryId(item.value);
-                            getCity(item.value);
-                            ClearDate();
-                          }}
-                          renderSelectedItem={(item, unSelect) => (
-                            <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                              <View style={Styles.selectedStyle2}>
-                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                                <AntDesign color="#fff" name="delete" size={15} />
-                              </View>
-                            </TouchableOpacity>
-                          )}
+                        <DropDownItems labale={'Country'} data={CountryList}  setIsFocus={setIsFocus} name={GeoAddressCountry}
+                                      textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocationAdd}   placeholderStyle={Styles.placeholderStyle}
+                                      selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={getCity}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                      containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                      setId={setcountryId} setname={setGeoAddressCountry} Function={ClearDate} categoryEntityShow={setcategoryEntityShow}
                         />
                         {GeoAddressCountry === '' &&
                         <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
                         }
                       </View>
                       <View style={Styles.InputeRowItems}>
-                        <Text
-                          style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>City</Text>
-                        <Dropdown
-                          style={GeoAddressCity !== '' ? Styles.dropdownLocationAdd : Styles.dropdownLocationErrorAdd}
-                          placeholderStyle={Styles.placeholderStyle}
-                          selectedTextStyle={Styles.selectedTextStyle}
-                          iconStyle={Styles.iconStyle}
-                          itemTextStyle={Styles.itemTextStyle}
-                          data={CityList}
-                          maxHeight={150}
-                          labelField="label"
-                          valueField="value"
-                          search={true}
-                          searchPlaceholder="Search..."
-                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                          placeholder={GeoAddressCity}
-                          value={GeoAddressCity}
-                          containerStyle={Styles.containerStyle}
-                          renderItem={renderItem_Location}
-                          onFocus={() => setIsFocus(true)}
-                          onBlur={() => setIsFocus(false)}
-                          onChange={item => {
-                            setGeoAddressCity(item.label);
-                            setcityId(item.value)
-                            setIsFocus(false);
-                            Geocoder_latlong(item.label)
-                          }}
-                          renderSelectedItem={(item, unSelect) => (
-                            <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
-                              <View style={Styles.selectedStyle2}>
-                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                                <AntDesign color="#fff" name="delete" size={15} />
-                              </View>
-                            </TouchableOpacity>
-                          )}
+                        <DropDownItems labale={'City'} data={CityList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                       textStyle={Styles.txtLightColor22}  dropdownStyle={GeoAddressCity!==''?Styles.dropdownLocation:Styles.dropdownLocationError}   placeholderStyle={Styles.placeholderStyle}
+                                       selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                                       containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                       setId={setcityId} setname={setGeoAddressCity} Function={Geocoder_latlong} categoryEntityShow={setcategoryEntityShow}
                         />
                         {GeoAddressCity === '' &&
-                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
+                        <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
                         }
                       </View>
                       <View style={Styles.InputeRowItems}>
-                        <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>postal code</Text>
+                        <Text style={[Styles.txtLightColor, { marginTop: normalize(10), textAlign: "left" }]}>Postal code</Text>
                         <TextInput
                           value={values.GeoAddressPostalCode}
                           style={Styles.inputStyleLocationAdd2}
@@ -1429,88 +1348,32 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               </View>
               <View style={Styles.InputeRow}>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocation]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CountryList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCountry}
-                    value={GeoAddressCountry}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCountry(item.label);
-                      setIsFocus(false);
-                      setcountryId(item.value);
-                      getCity(item.value);
-                      ClearDate();
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
+                  <DropDownItems labale={'Country'} data={CountryList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                 textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                                 placeholderStyle={Styles.placeholderStyle}
+                                 selectedTextStyle={Styles.selectedTextStyle}
+                                 containerStyle={Styles.containerStyle}
+                                 inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 setId={setcountryId} setname={setGeoAddressCountry} Function={ClearDate}
+                                 searchBoolean={true} Onpres={getCity} name={GeoAddressCountry} categoryEntityShow={setcategoryEntityShow}
                   />
                   {GeoAddressCountry==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
                   }
                 </View>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                  <Dropdown
-                    style={GeoAddressCity!==''?Styles.dropdownLocation:Styles.dropdownLocationError}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CityList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCity}
-                    value={GeoAddressCity}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setcityId(item.value)
-                      setGeoAddressCity(item.label);
-                      setIsFocus(false);
-                      Geocoder_latlong(item.label)
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
+                  <DropDownItems labale={'City'} data={CityList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                 textStyle={Styles.txtLightColor22}  dropdownStyle={GeoAddressCity!==''?Styles.dropdownLocation:Styles.dropdownLocationError}   placeholderStyle={Styles.placeholderStyle}
+                                 selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                                 containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 setId={setcityId} setname={setGeoAddressCity} Function={Geocoder_latlong} name={GeoAddressCity} categoryEntityShow={setcategoryEntityShow}
                   />
                   {GeoAddressCity==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
                   }
                 </View>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Postal code</Text>
                   <TextInput
                     value={values.GeoAddressPostalCode}
                     style={Styles.inputStyleLocationAdd2}
@@ -1653,89 +1516,29 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                       placeholderTextColor={'#fff'} />
                     <View style={Styles.InputeRow}>
                       <View style={Styles.InputeRowItems}>
-                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                        <Dropdown
-                          style={[Styles.dropdownLocationAdd]}
-                          placeholderStyle={Styles.placeholderStyle}
-                          selectedTextStyle={Styles.selectedTextStyle}
-                          iconStyle={Styles.iconStyle}
-                          itemTextStyle={Styles.itemTextStyle}
-                          data={CountryList}
-                          maxHeight={150}
-                          labelField="label"
-                          valueField="value"
-                          search={true}
-                          searchPlaceholder="Search..."
-                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                          placeholder={GeoAddressCountry}
-                          value={GeoAddressCountry}
-                          containerStyle={Styles.containerStyle}
-                          renderItem={renderItem_Location}
-                          onFocus={() => setIsFocus(true)}
-                          onBlur={() => setIsFocus(false)}
-                          onChange={item => {
-                            setGeoAddressCountry(item.label);
-                            setIsFocus(false);
-                            setcountryId(item.value);
-                            getCity(item.value);
-
-                            ClearDate();
-                          }}
-                          renderSelectedItem={(item, unSelect) => (
-                            <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                              <View style={Styles.selectedStyle2}>
-                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                                <AntDesign color="#fff" name="delete" size={15} />
-                              </View>
-                            </TouchableOpacity>
-                          )}
+                        <DropDownItems labale={'Country'} data={CountryList}  setIsFocus={setIsFocus} name={GeoAddressCountry}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                       textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocationAdd}   placeholderStyle={Styles.placeholderStyle}
+                                       selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={getCity}
+                                       containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                       setId={setcountryId} setname={setGeoAddressCountry} Function={ClearDate} categoryEntityShow={setcategoryEntityShow}
                         />
                         {GeoAddressCountry==='' &&
                         <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
                         }
                       </View>
                       <View style={Styles.InputeRowItems}>
-                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                        <Dropdown
-                          style={GeoAddressCity!==''?Styles.dropdownLocationAdd:Styles.dropdownLocationErrorAdd}
-                          placeholderStyle={Styles.placeholderStyle}
-                          selectedTextStyle={Styles.selectedTextStyle}
-                          iconStyle={Styles.iconStyle}
-                          itemTextStyle={Styles.itemTextStyle}
-                          data={CityList}
-                          maxHeight={150}
-                          labelField="label"
-                          valueField="value"
-                          search={true}
-                          searchPlaceholder="Search..."
-                          inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                          placeholder={GeoAddressCity}
-                          value={GeoAddressCity}
-                          containerStyle={Styles.containerStyle}
-                          renderItem={renderItem_Location}
-                          onFocus={() => setIsFocus(true)}
-                          onBlur={() => setIsFocus(false)}
-                          onChange={item => {
-                            setGeoAddressCity(item.label);
-                            setcityId(item.value)
-                            setIsFocus(false);
-                            Geocoder_latlong(item.label)
-                          }}
-                          renderSelectedItem={(item, unSelect) => (
-                            <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                              <View style={Styles.selectedStyle2}>
-                                <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                                <AntDesign color="#fff" name="delete" size={15} />
-                              </View>
-                            </TouchableOpacity>
-                          )}
+                        <DropDownItems labale={'City'} data={CityList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                       textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocationAdd}   placeholderStyle={Styles.placeholderStyle}
+                                       selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                                       containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                       setId={setcityId} setname={setGeoAddressCity} Function={Geocoder_latlong} categoryEntityShow={setcategoryEntityShow}
                         />
                         {GeoAddressCity==='' &&
                         <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
                         }
                       </View>
                       <View style={Styles.InputeRowItems}>
-                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Postal code</Text>
                         <TextInput
                           value={values.GeoAddressPostalCode}
                           style={Styles.inputStyleLocationAdd2}
@@ -1763,12 +1566,9 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                           style={Styles.inputStyleLocationAdd2}>
                           {
                             location?.latitude !== '' && location?.longitude ?
-
-
                               <Text
                                 style={Styles.txtLightColorLocation}>{parseFloat(location?.latitude).toFixed(7)} , {parseFloat(location?.longitude).toFixed(7)}</Text>:
-                              <Text
-                                style={Styles.txtLightColorLocation}></Text>
+                              <Text style={Styles.txtLightColorLocation}/>
                           }
                         </View>
                       </TouchableOpacity>
@@ -1884,88 +1684,33 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               </View>
               <View style={Styles.InputeRow}>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocation]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CountryList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCountry}
-                    value={GeoAddressCountry}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCountry(item.label);
-                      setIsFocus(false);
-                      setcountryId(item.value);
-                      getCity(item.value);
-                      ClearDate();
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
+                  <DropDownItems labale={'Country'} data={CountryList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                 textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                                 placeholderStyle={Styles.placeholderStyle}
+                                 selectedTextStyle={Styles.selectedTextStyle}
+                                 containerStyle={Styles.containerStyle}
+                                 inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 setId={setcountryId} setname={setGeoAddressCountry} Function={ClearDate}
+                                 searchBoolean={true} Onpres={getCity} name={GeoAddressCountry} categoryEntityShow={setcategoryEntityShow}
                   />
+
                   {GeoAddressCountry==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
                   }
                 </View>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                  <Dropdown
-                    style={GeoAddressCity!==''?Styles.dropdownLocation:Styles.dropdownLocationError}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CityList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCity}
-                    value={GeoAddressCity}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setcityId(item.value)
-                      setGeoAddressCity(item.label);
-                      setIsFocus(false);
-                      Geocoder_latlong(item.label)
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
+                  <DropDownItems labale={'City'} data={CityList}  setIsFocus={setIsFocus}  setcategoryLevel={setcategoryLevel}  setRelatedNameLvalue={setRelatedNameLvalue}
+                                 textStyle={Styles.txtLightColor22}  dropdownStyle={GeoAddressCity!==''?Styles.dropdownLocation:Styles.dropdownLocationError}   placeholderStyle={Styles.placeholderStyle}
+                                 selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                                 containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 setId={setcityId} setname={setGeoAddressCity} Function={Geocoder_latlong} name={GeoAddressCity} categoryEntityShow={setcategoryEntityShow}
                   />
                   {GeoAddressCity==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
                   }
                 </View>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Postal code</Text>
                   <TextInput
                     value={values.GeoAddressPostalCode}
                     style={Styles.inputStyleLocationAdd2}
@@ -2663,7 +2408,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.email}</Text>
               }
               <Text style={[Styles.txtLightColor]}>Password</Text>
-              <View style={[, {
+              <View style={{
                 borderWidth: 1,
                 borderColor: '#fff',
                 borderRadius: normalize(6),
@@ -2675,13 +2420,13 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 justifyContent: "center",
                 flexDirection: "row",
                 alignItems: "center",
-              }]}>
+              }}>
                 <TextInput
                   value={values.password}
-                  style={[, {
+                  style={ {
                     width: width - 100,
                     paddingVertical: 3, color: '#000',
-                  }]}
+                  }}
                   onChangeText={handleChange("password")}
                   // placeholder="Password"
                   onFocus={() => setFieldTouched("password")}
@@ -2979,7 +2724,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 onChange={item=> {
-
                   setSelectedcategory(item);
                   setCategoryId(item.value);
                   Task_RelatedList(item.value)
@@ -2997,7 +2741,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               {error==='selectedcategory' && selectedcategory==='' ?
               <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null
               }
-              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>related</Text>
+              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Related</Text>
               <Dropdown
                 style={[Styles.dropdowntask]}
                 placeholderStyle={Styles.placeholderStyle}
@@ -3240,42 +2984,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 {touched.Title && errors.Title &&
                 <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.Title}</Text>
                 }
-                {/*<Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>ParentTask Id</Text>*/}
-                {/*<Dropdown*/}
-                {/*  style={[Styles.dropdowntask]}*/}
-                {/*  placeholderStyle={Styles.placeholderStyle}*/}
-                {/*  selectedTextStyle={Styles.selectedTextStyle}*/}
-                {/*  inputSearchStyle={Styles.inputSearchStyle}*/}
-                {/*  iconStyle={Styles.iconStyle}*/}
-                {/*  itemTextStyle={Styles.itemTextStyle}*/}
-                {/*  data={modules}*/}
-                {/*  maxHeight={300}*/}
-                {/*  labelField="label"*/}
-                {/*  valueField="value"*/}
-                {/*  placeholder={!isFocus ? 'Select ParentTask' : '...'}*/}
-                {/*  searchPlaceholder="Search..."*/}
-                {/*  value={SelectedParentTask}*/}
-                {/*  containerStyle={Styles.containerStyle}*/}
-                {/*  renderItem={renderItem}*/}
-                {/*  onFocus={() => setIsFocus(true)}*/}
-                {/*  onBlur={() => setIsFocus(false)}*/}
-                {/*  onChange={item=> {*/}
-                {/*    setSelectedParentTask(item);*/}
-                {/*    setParentTaskId(item.value);*/}
-                {/*  }}*/}
-                {/*  renderSelectedItem={(item, unSelect) => (*/}
-                {/*    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>*/}
-                {/*      <View style={Styles.selectedStyle2}>*/}
-                {/*        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>*/}
-                {/*        <AntDesign color="#fff" name="delete" size={15} />*/}
-                {/*      </View>*/}
-                {/*    </TouchableOpacity>*/}
-                {/*  )}*/}
-                {/*/>*/}
+                {tasktitleerro===true &&
+                <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>task Title ! Please?</Text>
+                }
 
-                {/*{error==='selectedcategory' && selectedcategory==='' ?*/}
-                {/*  <Text style={{fontSize: 12,color:"#FF0D10",marginTop:normalize(10)}}>Select category! Please?</Text>:null*/}
-                {/*}*/}
                 <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Category</Text>
 
                 <Dropdown
@@ -3382,7 +3094,6 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                     </TouchableOpacity>
                   )}
                 />
-
                 {categoryEntityShow==='y'?
                   <>
                     <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Target Entity </Text>
@@ -3409,178 +3120,169 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                         setTaskRelatedNameId(item.value);
                         setcategoryLevel(item.categoryLevel);
                         writeDataStorage(GLOBAL.RelatedName_Last_Info, item.label);
-                        Task_RelatedList(item.value);
                         setRelatedNameLvalue(item.label);
-                      }}
-                    />
-
-                    {/*{categoryLevellist?.map((value, key) => {*/}
-                    {/*  return (*/}
-                    {/*         <Taskdropdown value={value} key={key}/>*/}
-                    {/*);*/}
-                    {/*})}*/}
-
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Project Name</Text>
-                    <Dropdown
-                      style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
-                      placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
-                      selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                      iconStyle={Styles.iconStyle}
-                      itemTextStyle={Styles.itemTextStyle}
-                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
-                      data={TaskRelated}
-                      search
-                      maxHeight={300}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={!isFocusrelated ? 'Select Project Name' : '...'}
-                      searchPlaceholder="Search..."
-                      value={selectedrelated}
-                      renderItem={renderItem}
-                      onFocus={() => setIsFocusrelated(true)}
-                      onBlur={() => setIsFocusrelated(false)}
-                      onChange={item=> {
-                        writeDataStorage(GLOBAL.projectId_Last_Info,item.value)
-                        GLOBAL.ProjectId=item.value;
-                        if(RelatedNameLvalue==='project') {
-                          setSelectedrelated(item);
-                          setRelatedId(item.value);
-                          // categoryLevel, setcategoryLevel
-                          writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
-                        }
-
-                        else {
-                         const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value
-                          getSites(categoryId,item.value);
-                          setSelectedrelated(item);
-                          setTaskProjectId(item.value)
-
-                        }
                       }}
                     />
                   </>:null
                 }
-                {categoryLevellist.find((p)=>p?.label==='Site')&&
-                <>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Site</Text>
-                  <Dropdown
-                    style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
-                    placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
-                    selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
-                    data={SiteList}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!isFocusrelated ? 'Select Site' : '...'}
-                    searchPlaceholder="Search..."
-                    value={selectedTaskSiteName}
-
-                    renderItem={renderItem}
-                    onFocus={() => setIsFocusrelated(true)}
-                    onBlur={() => setIsFocusrelated(false)}
-                    onChange={item=> {
-                      GLOBAL.SiteId=item.value;
-                      writeDataStorage(GLOBAL.siteId_Last_Info,item.value)
-                      if(RelatedNameLvalue==='Site') {
-                        setselectedTaskSiteName(item);
-                        setRelatedId(item.value)
-                        writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
-                      }
-                      else {
-                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
-                        getUnits(categoryId,item.value);
-                        setselectedTaskSiteName(item);
-                        setTaskSiteId(item.value)
-                      }
-                    }}
-                  />
-                </>
-
-                }
-                {categoryLevellist.find((p)=>p?.label==='Unit')&&
-                <>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>unit</Text>
-                  <Dropdown
-                    style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
-                    placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
-                    selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!isFocusrelated ? 'Select unit' : '...'}
-                    searchPlaceholder="Search..."
-                    value={selectedunitName}
-                    data={unitList}
-                    search
-                    renderItem={renderItem}
-                    onFocus={() => setIsFocusrelated(true)}
-                    onBlur={() => setIsFocusrelated(false)}
-                    onChange={item=> {
-                      writeDataStorage(GLOBAL.unitId_Last_Info,item.value)
-                      GLOBAL.UnitId=item.value
-                      if(RelatedNameLvalue==='Unit') {
-                        setselectedunitName(item);
-                        setRelatedId(item.value)
-                        writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
-                      }
-                      else {
-                        const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='4')?.value
-                        getSection(categoryId,item.value);
-                        setselectedunitName(item);
-                        setTaskunitId(item.value)
-                      }
-                    }}
-                  />
-                </>
-                }
-                {categoryLevellist.find((p)=>p?.label==='Section')&&
+                {
+                  GLOBAL.TaskRelatedNameId!==''?
                   <>
-                    <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Section</Text>
-                    <Dropdown
-                      style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
-                      placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
-                      selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
-                      inputSearchStyle={Styles.inputSearchStyle}
-                      iconStyle={Styles.iconStyle}
-                      itemTextStyle={Styles.itemTextStyle}
-                      data={sectionList}
-                      search
-                      maxHeight={300}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={!isFocusrelated ? 'Select Section' : '...'}
-                      searchPlaceholder="Search..."
-                      value={selectedsectionName}
-                      containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
-                      renderItem={renderItem}
-                      onFocus={() => setIsFocusrelated(true)}
-                      onBlur={() => setIsFocusrelated(false)}
-                      onChange={item=> {
-                        writeDataStorage(GLOBAL.sectionId_Last_Info,item.value)
-                        GLOBAL.SectionId=item.value
-                        if(RelatedNameLvalue==='Section') {
-                          setselectedsectionName(item);
-                          setRelatedId(item.value)
-                          writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
-                        }
-                        else {
-                          const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='5')?.value
-                          getFeatures(categoryId,item.value);
-                          setselectedsectionName(item);
-                          setTasksectionId(item.value)
-                        }
-                      }}
-                    />
-                  </>
-                }
-                {categoryLevellist.find((p)=>p?.label==='Feature')&&
+                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Project</Text>
+                      <Dropdown
+                        style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                        placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                        selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
+                        iconStyle={Styles.iconStyle}
+                        itemTextStyle={Styles.itemTextStyle}
+                        containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+                        data={TaskRelated}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={!isFocusrelated ? 'Select Project ' : '...'}
+                        searchPlaceholder="Search..."
+                        value={selectedrelated}
+                        renderItem={renderItem}
+                        onFocus={() => setIsFocusrelated(true)}
+                        onBlur={() => setIsFocusrelated(false)}
+                        onChange={item=> {
+                          writeDataStorage(GLOBAL.projectId_Last_Info,item.value)
+                          GLOBAL.ProjectId=item.value;
+                          if(RelatedNameLvalue==='project') {
+                            setSelectedrelated(item);
+                            setRelatedId(item.value);
+                            writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                          }
+                          else {
+                            const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='2')?.value
+                            getSites(categoryId,item.value);
+                            setSelectedrelated(item);
+                            setTaskProjectId(item.value)
+                          }
+                        }}
+                      />
+
+                    {categoryLevellist.find((p) => p?.label === 'Site') &&
+                    <>
+                        <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Site</Text>
+                        <Dropdown
+                          style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                          placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                          selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
+                          iconStyle={Styles.iconStyle}
+                          itemTextStyle={Styles.itemTextStyle}
+                          containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+                          data={SiteList}
+                          search
+                          maxHeight={300}
+                          labelField="label"
+                          valueField="value"
+                          placeholder={!isFocusrelated ? 'Select Site' : '...'}
+                          searchPlaceholder="Search..."
+                          value={selectedTaskSiteName}
+                          renderItem={renderItem}
+                          onFocus={() => setIsFocusrelated(true)}
+                          onBlur={() => setIsFocusrelated(false)}
+                          onChange={item=> {
+                            GLOBAL.SiteId=item.value;
+                            writeDataStorage(GLOBAL.siteId_Last_Info,item.value)
+                            if(RelatedNameLvalue==='Site') {
+                              setselectedTaskSiteName(item);
+                              setRelatedId(item.value)
+                              writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                            }
+                            else {
+                              const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
+                              getUnits(categoryId,item.value);
+                              setselectedTaskSiteName(item);
+                              setTaskSiteId(item.value)
+                            }
+                          }}
+                        />
+                    </>
+                    }
+                    {categoryLevellist.find((p)=>p?.label==='Unit')&&
+                    <>
+                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Unit</Text>
+                      <Dropdown
+                        style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                        placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                        selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
+                        iconStyle={Styles.iconStyle}
+                        itemTextStyle={Styles.itemTextStyle}
+                        containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={!isFocusrelated ? 'Select unit' : '...'}
+                        searchPlaceholder="Search..."
+                        value={selectedunitName}
+                        data={unitList}
+                        search
+                        renderItem={renderItem}
+                        onFocus={() => setIsFocusrelated(true)}
+                        onBlur={() => setIsFocusrelated(false)}
+                        onChange={item=> {
+                          writeDataStorage(GLOBAL.unitId_Last_Info,item.value)
+                          GLOBAL.UnitId=item.value
+                          if(RelatedNameLvalue==='Unit') {
+                            setselectedunitName(item);
+                            setRelatedId(item.value)
+                            writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                          }
+                          else {
+                            const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='4')?.value
+                            getSection(categoryId,item.value);
+                            setselectedunitName(item);
+                            setTaskunitId(item.value)
+                          }
+                        }}
+                      />
+                    </>
+                    }
+                    {categoryLevellist.find((p)=>p?.label==='Section')&&
+                    <>
+                      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Section</Text>
+                      <Dropdown
+                        style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
+                        placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
+                        selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
+                        inputSearchStyle={Styles.inputSearchStyle}
+                        iconStyle={Styles.iconStyle}
+                        itemTextStyle={Styles.itemTextStyle}
+                        data={sectionList}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={!isFocusrelated ? 'Select Section' : '...'}
+                        searchPlaceholder="Search..."
+                        value={selectedsectionName}
+                        containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+                        renderItem={renderItem}
+                        onFocus={() => setIsFocusrelated(true)}
+                        onBlur={() => setIsFocusrelated(false)}
+                        onChange={item=> {
+                          writeDataStorage(GLOBAL.sectionId_Last_Info,item.value)
+                          GLOBAL.SectionId=item.value
+                          if(RelatedNameLvalue==='Section') {
+                            setselectedsectionName(item);
+                            setRelatedId(item.value)
+                            writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
+                          }
+                          else {
+                            const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='5')?.value
+                            getFeatures(categoryId,item.value);
+                            setselectedsectionName(item);
+                            setTasksectionId(item.value)
+                          }
+                        }}
+                      />
+                    </>
+                    }
+                    {categoryLevellist.find((p)=>p?.label==='Feature')&&
                     <>
                       <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Feature</Text>
                       <Dropdown
@@ -3617,7 +3319,25 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                         }}
                       />
                     </>
+                    }
+
+                    </>
+                        :
+                      <>
+                      {categoryLevellist?.map((value, key) => {
+                        return (
+                          <Taskdropdown value={value} key={key} getLists={getLists} SubCategory_List={categoryLevellist} setRelatedId={setRelatedId} entityIdList={entityIdList}  setEntityIdList={setEntityIdList}
+                               textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdowntask}   placeholderStyle={Styles.placeholderStyle}
+                                        selectedTextStyle={Styles.selectedTextStyle}
+                                        containerStyle={Styles.containerStyle} setRelatedName={setRelatedName}
+
+
+                                        />
+                        );
+                      })}
+                    </>
                 }
+
                 <Text style={[Styles.txtLightColor,{marginTop: normalize(15),color:GLOBAL.footertext_backgroundColor}]}>Description</Text>
                 <TextInput
                   value={values.TaskNote}
@@ -3632,6 +3352,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 {touched.TaskNote && errors.TaskNote &&
                 <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>{errors.TaskNote}</Text>
                 }
+                {tasknoteerro===true &&
+                <Text style={{ fontSize: 12, color: "#FF0D10",marginTop:normalize(10) }}>"Description ! Please?"</Text>
+                }
+
                 <View style={Styles.FlexWrap}>
                   <TouchableOpacity onPress={() => onOpen()} style={[Styles.unitDetailUploadImagebox,{borderColor:GLOBAL.footertext_backgroundColor}]}>
                     <Text style={[Styles.UploadImageText,{color:GLOBAL.footertext_backgroundColor}]}>
@@ -3728,10 +3452,10 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
               }
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Work Type</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Task Work Type</Text>
                 </View>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Labels</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Task Category Name</Text>
                 </View>
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
@@ -3742,36 +3466,17 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </View>
                 <View  style={Styles.dateBoxItem}>
                   <Text style={[Styles.txtdate2]}>
-                    {value?.taskStatusClass}
-                  </Text>
-                </View>
-              </View>
-              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
-                <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Category Name</Text>
-                </View>
-                <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Created On</Text>
-                </View>
-              </View>
-              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
-                <View  style={Styles.dateBoxItem}>
-                  <Text style={[Styles.txtdate2]}>
                     {value?.taskCategoryName}
                   </Text>
                 </View>
-                <View  style={[Styles.dateBoxItem,]}>
-                  <Text style={[Styles.txtdate2]}>
-                    {value?.taskCreatedOn}
-                  </Text>
-                </View>
               </View>
+
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Related Name</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Task Related Name</Text>
                 </View>
                 <View  style={Styles.dateBoxItem1}>
-                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>task Related NameRef</Text>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Task Related NameRef</Text>
                 </View>
               </View>
               <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
@@ -3803,6 +3508,20 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 <View  style={[Styles.dateBoxItem,]}>
                   <Text style={[Styles.txtdate,{color:'#fcd274' }]}>
                     {value?.taskPriorityName}
+                  </Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+
+                <View  style={Styles.dateBoxItem1}>
+                  <Text style={[Styles.txtLightColor2,{marginTop:normalize(8)}]}>Task Created On</Text>
+                </View>
+              </View>
+              <View style={[Styles.dateBoxitems,{marginTop:'1%'}]}>
+
+                <View  style={[Styles.dateBoxItem,]}>
+                  <Text style={[Styles.txtdate2]}>
+                    {value?.taskCreatedOn}
                   </Text>
                 </View>
               </View>
@@ -4134,30 +3853,11 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           validationSchema={validationSchema18}>
           {({values,handleChange,errors,setFieldTouched,touched,handleSubmit }) => (
             <View style={styles.formContainer}>
-              <Text style={[Styles.txtLightColor,{marginTop:normalize(15)}]}>Reason</Text>
-              <Dropdown
-                style={[Styles.dropdowntask]}
-                placeholderStyle={Styles.placeholderStyle}
-                selectedTextStyle={Styles.selectedTextStyle}
-                inputSearchStyle={Styles.inputSearchStyle}
-                iconStyle={Styles.iconStyle}
-                itemTextStyle={Styles.itemTextStyle}
-                data={reasons}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={!isFocusrelated ? 'Select Reason' : '...'}
-                searchPlaceholder="Search..."
-                value={selectedrelated}
-                containerStyle={Styles.containerStyle}
-                renderItem={renderItem}
-                onFocus={() => setIsFocusrelated(true)}
-                onBlur={()  => setIsFocusrelated(false)}
-                onChange={item=> {
-                setSelectedrelated(item);
-                setRelatedId(item.value)
-                }}
+              <DropDownItems labale={'Reason'} data={reasons}  setIsFocus={setIsFocus} name={selectedrelated}
+                             textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdowntask}   placeholderStyle={Styles.placeholderStyle}
+                             selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                             containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                             setId={setRelatedId} setname={setSelectedrelated} Function={Func}
               />
               <Text style={[Styles.txtLightColor,{marginTop: normalize(25),}]}>Reject Reason</Text>
               <TextInput
@@ -4428,35 +4128,11 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </View>
                 <View style={Styles.dateBoxitems}>
                   <View style={Styles.InputeRowItems}>
-                    <Dropdown
-                      style={[Styles.dropdownLocation]}
-                      placeholderStyle={Styles.placeholderStyle}
-                      selectedTextStyle={Styles.selectedTextStyle}
-                      iconStyle={Styles.iconStyle}
-                      itemTextStyle={Styles.itemTextStyle}
-                      data={TimeRelated}
-                      maxHeight={150}
-                      labelField="label"
-                      valueField="value"
-                      inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                      placeholder={TimeRelatedselct}
-                      value={TimeRelatedselct}
-                      containerStyle={Styles.containerStyle}
-                      renderItem={renderItem_Location}
-                      onFocus={() => setIsFocus(true)}
-                      onBlur={() => setIsFocus(false)}
-                      onChange={item => {
-                        setTimeRelatedselct(item.label);
-                        setIsFocus(false);
-                      }}
-                      renderSelectedItem={(item, unSelect) => (
-                        <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                          <View style={Styles.selectedStyle2}>
-                            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                            <AntDesign color="#fff" name="delete" size={15} />
-                          </View>
-                        </TouchableOpacity>
-                      )}
+                    <DropDownItems labale={''} data={reasons}  setIsFocus={setIsFocus} name={TimeRelatedselct}
+                                   textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}   placeholderStyle={Styles.placeholderStyle}
+                                   selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true} Onpres={Func}
+                                   containerStyle={Styles.containerStyle} inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                   setId={setRelatedId} setname={setTimeRelatedselct} Function={Func}
                     />
                     {GeoAddressCountry==='' &&
                     <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
@@ -4815,7 +4491,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 </View>
 
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>postal code</Text>
+                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Postal code</Text>
                   <TextInput
                     value={values.Location}
                     style={[inputStyleLocation,{paddingVertical:'4%'}]}
@@ -4940,81 +4616,30 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
             <Text style={{ fontSize: 12, color: "#FF0D10" }}>{errors.Email}</Text>
           }
               <View style={Styles.InputeRow}>
-
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Country</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocationCustomer]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CountryList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCountry}
-                    value={GeoAddressCountry}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGeoAddressCountry(item.label);
-                      setIsFocus(false);
-                      setcountryId(item.value);
-                      getCity(item.value);
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
+                <DropDownItems labale={'Country'} data={Parentlist}  setIsFocus={setIsFocus} name={StatusName}
+                               textStyle={Styles.txtLightColor22}
+                               dropdownStyle={Styles.dropdownLocationCustomer}
+                               placeholderStyle={Styles.inputSearchStyle_dropdownLocation}
+                               selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                               Onpres={getCity}
+                               containerStyle={Styles.containerStyle}
+                               inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                               setId={setcountryId} setname={setGeoAddressCountry} Function={Func}
+                />
                   {GeoAddressCountry==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"Country! Please?"</Text>
                   }
 
+                <DropDownItems labale={'City'} data={Parentlist}  setIsFocus={setIsFocus} name={StatusName}
+                               textStyle={Styles.txtLightColor22}  dropdownStyle={GeoAddressCity!==''?Styles.dropdownLocationCustomer:Styles.dropdownLocationError}
+                               placeholderStyle={Styles.inputSearchStyle_dropdownLocation}
+                               selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                               Onpres={Func}
+                               containerStyle={Styles.containerStyle}
+                               inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                               setId={setcityId} setname={setGeoAddressCity} Function={Func}
+                />
 
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>City</Text>
-                  <Dropdown
-                    style={GeoAddressCity!==''?Styles.dropdownLocationCustomer:Styles.dropdownLocationError}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={CityList}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    search={true}
-                    searchPlaceholder="Search..."
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={GeoAddressCity}
-                    value={GeoAddressCity}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setcityId(item.value)
-                      setGeoAddressCity(item.label);
-                      setIsFocus(false);
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
                   {GeoAddressCity==='' &&
                   <Text style={{ fontSize: 12, color: "#FF0D10" }}>"City! Please?"</Text>
                   }
@@ -5082,37 +4707,14 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
     }
   </View>
   <View style={Styles.InputeRowItems}>
-    <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Parent</Text>
-    <Dropdown
-      style={[Styles.dropdownLocation]}
-      placeholderStyle={Styles.placeholderStyle}
-      selectedTextStyle={Styles.selectedTextStyle}
-      iconStyle={Styles.iconStyle}
-      itemTextStyle={Styles.itemTextStyle}
-      data={Parentlist}
-      maxHeight={150}
-      labelField="label"
-      valueField="value"
-      inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-      placeholder={selectparentname}
-      value={selectparentname}
-      containerStyle={Styles.containerStyle}
-      renderItem={renderItem_Location}
-      onFocus={() => setIsFocus(true)}
-      onBlur={() => setIsFocus(false)}
-      onChange={item => {
-        setselectparentname(item.label);
-        setIsFocus(false);
-        setselectparentId(item.value);
-      }}
-      renderSelectedItem={(item, unSelect) => (
-        <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-          <View style={Styles.selectedStyle2}>
-            <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-            <AntDesign color="#fff" name="delete" size={15} />
-          </View>
-        </TouchableOpacity>
-      )}
+    <DropDownItems labale={'Parent'} data={Parentlist}  setIsFocus={setIsFocus} name={StatusName}
+                   textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                   placeholderStyle={Styles.inputSearchStyle_dropdownLocation}
+                   selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                   Onpres={Func}
+                   containerStyle={Styles.containerStyle}
+                   inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                   setId={setselectparentId} setname={setselectparentname} Function={Func}
     />
   </View>
 </View>
@@ -5180,37 +4782,14 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                   </View>
                 </View>
                 <View style={Styles.InputeRowItems}>
-                  <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Directory User</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocation]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={DirectoryUser}
-                    maxHeight={150}
-                    labelField="label"
-                    valueField="value"
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={DirectoryUserName}
-                    value={DirectoryUserName}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setDirectoryUserName(item.label);
-                      setIsFocus(false);
-                      setDirectoryUserId(item.value);
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
+                  <DropDownItems labale={'Directory'} data={DirectoryUser}  setIsFocus={setIsFocus} name={StatusName}
+                                 textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                                 placeholderStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                                 Onpres={Func}
+                                 containerStyle={Styles.containerStyle}
+                                 inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                                 setId={setDirectoryUserId} setname={setDirectoryUserName} Function={Func}
                   />
                 </View>
               </View>
@@ -5300,39 +4879,14 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={{width:'90%'}}>
               <View style={Styles.InputeRow}>
-
-
-                <Text style={[Styles.txtLightColor,{marginTop:normalize(10),textAlign:"left"}]}>Tags</Text>
-                <Dropdown
-                  style={[Styles.dropdownLocation]}
-                  placeholderStyle={Styles.placeholderStyle}
-                  selectedTextStyle={Styles.selectedTextStyle}
-                  iconStyle={Styles.iconStyle}
-                  itemTextStyle={Styles.itemTextStyle}
-                  data={DirectoryUser}
-                  maxHeight={150}
-                  labelField="label"
-                  valueField="value"
-                  inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                  placeholder={DirectoryUserName}
-                  value={DirectoryUserName}
-                  containerStyle={Styles.containerStyle}
-                  renderItem={renderItem_Location}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={item => {
-                    setDirectoryUserName(item.label);
-                    setIsFocus(false);
-                    setDirectoryUserId(item.value);
-                  }}
-                  renderSelectedItem={(item, unSelect) => (
-                    <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                      <View style={Styles.selectedStyle2}>
-                        <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                        <AntDesign color="#fff" name="delete" size={15} />
-                      </View>
-                    </TouchableOpacity>
-                  )}
+                <DropDownItems labale={'Tags'} data={DirectoryUser}  setIsFocus={setIsFocus} name={StatusName}
+                               textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                               placeholderStyle={Styles.inputSearchStyle_dropdownLocation}
+                               selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                               Onpres={Func}
+                               containerStyle={Styles.containerStyle}
+                               inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                               setId={setDirectoryUserId} setname={setDirectoryUserName} Function={Func}
                 />
               </View>
               <View style={[Styles.ViewItems_center]}>
@@ -5374,38 +4928,15 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
           {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
             <View style={{width:'90%'}}>
               <View style={Styles.InputeRow}>
-                  <Text style={[Styles.txtLightColor,{textAlign:"left"}]}>Status</Text>
-                  <Dropdown
-                    style={[Styles.dropdownLocation]}
-                    placeholderStyle={Styles.placeholderStyle}
-                    selectedTextStyle={Styles.selectedTextStyle}
-                    iconStyle={Styles.iconStyle}
-                    itemTextStyle={Styles.itemTextStyle}
-                    data={Status}
-                    maxHeight={125}
-                    labelField="label"
-                    valueField="value"
-                    inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
-                    placeholder={StatusName}
-                    value={StatusName}
-                    containerStyle={Styles.containerStyle}
-                    renderItem={renderItem_Location}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setStatusName(item.label);
-                      setIsFocus(false);
-                      setStatusId(item.value);
-                    }}
-                    renderSelectedItem={(item, unSelect) => (
-                      <TouchableOpacity  onPress={() => unSelect && unSelect(item)}>
-                        <View style={Styles.selectedStyle2}>
-                          <Text style={Styles.selectedTextStyle2}>{item.label}</Text>
-                          <AntDesign color="#fff" name="delete" size={15} />
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
+                <DropDownItems labale={'Status'} data={Status}  setIsFocus={setIsFocus} name={StatusName}
+                               textStyle={Styles.txtLightColor22}  dropdownStyle={Styles.dropdownLocation}
+                               placeholderStyle={Styles.placeholderStyle}
+                               selectedTextStyle={Styles.selectedTextStyle}  searchBoolean={true}
+                               Onpres={Func}
+                               containerStyle={Styles.containerStyle}
+                               inputSearchStyle={Styles.inputSearchStyle_dropdownLocation}
+                               setId={setStatusId} setname={setStatusName} Function={Func}
+                />
               </View>
               <View style={[Styles.ViewItems_center]}>
                 <ButtonI style={[Styles.btn, {
@@ -5483,7 +5014,7 @@ else  if(values?.CaseNote?.split("\n")?.length===1){
                 }}
                 placeholderTextColor={GLOBAL.OFFICIAL_BLUE_COLOR} />
 
-              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>upload File</Text>
+              <Text style={[Styles.txtLightColor,{marginTop: normalize(10),}]}>Upload File</Text>
               <TouchableOpacity onPress={()=>selectFile()}
                 style={[inputStyle, { paddingVertical: 3 }]}
               >

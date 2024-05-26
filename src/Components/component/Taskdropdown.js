@@ -5,34 +5,31 @@ import React, {useEffect,useState} from "react";
 import {Dropdown} from "react-native-element-dropdown";
 import AntDesign from "react-native-vector-icons/AntDesign";
 const GLOBAL = require("../Global");
-function Taskdropdown({value,setFilterList}) {
+function Taskdropdown({value,getLists,SubCategory_List,setRelatedId,setEntityIdList,entityIdList,textStyle,dropdownStyle,placeholderStyle,
+                        selectedTextStyle,containerStyle,setRelatedName
+                      }) {
   const [selectedTaskName,setselectedTaskName]=useState('');
   const [isFocusrelated, setIsFocusrelated] = useState(false);
   const renderItem = item => {
     return (
       <View style={Styles.item}>
         <Text style={Styles.textItem}>{item.label}</Text>
-        {item.value === value && (
-          <AntDesign
-            style={Styles.icon}
-            color="black"
-            name="Safety"
-            size={20}
-          />
-        )}
       </View>
     );
   };
   return(
     <>
-      <Text style={[Styles.txtLightColor,{marginTop:normalize(15),color:GLOBAL.footertext_backgroundColor}]}>{value.label}</Text>
+      {console.log(value,'value')}
+      <View style={Styles.ItemModalFilter}>
+      <Text style={textStyle}>{value.label}</Text>
+      </View>
       <Dropdown
-        style={[Styles.dropdowntask,{  borderColor: GLOBAL.footertext_backgroundColor,}]}
-        placeholderStyle={[Styles.placeholderStyle,{color: GLOBAL.footertext_backgroundColor,}]}
-        selectedTextStyle={[Styles.selectedTextStyle,{ color: GLOBAL.footertext_backgroundColor,}]}
+        style={dropdownStyle}
+        placeholderStyle={placeholderStyle}
+        selectedTextStyle={selectedTextStyle}
         iconStyle={Styles.iconStyle}
         itemTextStyle={Styles.itemTextStyle}
-        containerStyle={[Styles.containerStyle,{backgroundColor:GLOBAL.footer_backgroundColor}]}
+        containerStyle={containerStyle}
         data={value.data}
         search
         maxHeight={300}
@@ -41,25 +38,37 @@ function Taskdropdown({value,setFilterList}) {
         placeholder={!isFocusrelated ? 'Select item' : '...'}
         searchPlaceholder="Search..."
         value={selectedTaskName}
-
         renderItem={renderItem}
         onFocus={() => setIsFocusrelated(true)}
         onBlur={() => setIsFocusrelated(false)}
         onChange={item=> {
-          console.log(item,'item')
-          // GLOBAL.SiteId=item.value;
-          // writeDataStorage(GLOBAL.siteId_Last_Info,item.value)
-          // if(RelatedNameLvalue==='Site') {
-          //   setselectedTaskSiteName(item);
-          //   setRelatedId(item.value)
-          //   writeDataStorage(GLOBAL.RelatedId_Last_Info, item.value)
-          // }
-          // else {
-          //   const categoryId= categoryLevellist.find((p)=>p.categoryLevel==='3')?.value
-          //   getUnits(categoryId,item.value);
-          //   setselectedTaskSiteName(item);
-          //   setTaskSiteId(item.value)
-          // }
+          let List = [...entityIdList];
+          const Index=SubCategory_List.findIndex((p)=>parseInt(p.value)===parseInt(value.value))
+          const categoryId= SubCategory_List?.[Index+1]?.value;
+
+          getLists(categoryId,item.value);
+         let Exist = List?.findIndex((p) => p.categoryId ===item.value);
+          if (Exist === -1) {
+            List.push({
+              categoryName: item.label,
+              categoryId: item.value,
+              EntityName: SubCategory_List?.[Index]?.label
+            })
+          }
+          else {
+            List?.find((p) => p.categoryId ===item.value);
+            let index = List?.findIndex((p) => p.categoryId ===item.value);
+            let markers = [...List];
+            markers[index] = { ...markers[index],  categoryName: item.label,
+              categoryId: item.value };
+          }
+          setEntityIdList(List)
+          if(categoryId===undefined){
+            GLOBAL.SelectId=SubCategory_List?.[Index]?.value;
+            GLOBAL.SelectName=SubCategory_List?.[Index]?.label
+            setRelatedId(item.value)
+            setRelatedName(item.label)
+          }
         }}
       />
 
